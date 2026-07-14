@@ -14,11 +14,11 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 bg-brand-red rounded flex items-center justify-center">
-                <span className="text-white font-headline font-black text-xl">Z</span>
+                <span className="text-white font-headline font-black text-xl">B</span>
               </div>
               <div>
-                <span className="block font-headline font-black text-xl text-white">ZRENJANIN</span>
-                <span className="block text-brand-red font-bold text-xs tracking-[0.3em] uppercase -mt-1">DANAS</span>
+                <span className="block font-headline font-black text-xl text-white">BANATSKI</span>
+                <span className="block text-brand-red font-bold text-xs tracking-[0.3em] uppercase -mt-1">GLAS</span>
               </div>
             </div>
             <p className="text-sm leading-relaxed mb-4">
@@ -100,8 +100,8 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-brand-red flex-shrink-0" />
-                <a href="mailto:redakcija@zrenjanindanas.rs" className="hover:text-white transition-colors text-xs">
-                  redakcija@zrenjanindanas.rs
+                <a href="mailto:redakcija@banatskiglas.rs" className="hover:text-white transition-colors text-xs">
+                  redakcija@banatskiglas.rs
                 </a>
               </li>
             </ul>
@@ -112,7 +112,7 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-gray-800 py-4">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-gray-500">
-          <span>© 2025 Zrenjanin Danas d.o.o. Sva prava zadržana.</span>
+          <span>© 2025 Banatski Glas d.o.o. Sva prava zadržana.</span>
           <span>Odgovorno novinarstvo za bolji Zrenjanin</span>
         </div>
       </div>

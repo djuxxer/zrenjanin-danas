@@ -25,7 +25,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Pregled portala Zrenjanin Danas</p>
+          <p className="text-gray-500 text-sm mt-0.5">Pregled portala Banatski Glas</p>
         </div>
         <Link
           href="/admin/articles/new"

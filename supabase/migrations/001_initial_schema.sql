@@ -1,5 +1,5 @@
 -- =============================================
--- Zrenjanin Danas — Database Schema
+-- Banatski Glas — Database Schema
 -- Supabase PostgreSQL Migration
 -- =============================================
 

@@ -1,5 +1,5 @@
 -- =============================================
--- Zrenjanin Danas — Seed Data
+-- Banatski Glas — Seed Data
 -- Run AFTER migrations and creating an admin user
 -- =============================================
 
@@ -36,7 +36,7 @@ BEGIN
     true,
     true,
     15420,
-    'Vučić u Zrenjaninu: 200 miliona evra za infrastrukturu i razvoj Banata | Zrenjanin Danas',
+    'Vučić u Zrenjaninu: 200 miliona evra za infrastrukturu i razvoj Banata | Banatski Glas',
     'Predsednik Srbije Aleksandar Vučić najavio rekordna ulaganja u Zrenjanin — novi putevi, industrijska zona i modernizacija komunalne infrastrukture.',
     ARRAY['Vučić', 'investicije', 'infrastruktura', 'Zrenjanin', 'Vojvodina']
   ),
@@ -56,7 +56,7 @@ BEGIN
     true,
     true,
     8930,
-    'Novi most na Begeju: Završetak do kraja 2025, vredan 18 miliona evra | Zrenjanin Danas',
+    'Novi most na Begeju: Završetak do kraja 2025, vredan 18 miliona evra | Banatski Glas',
     'Zrenjanin dobija moderan most na Begeju vredan 18 miliona evra — EU fondovi, biciklističke staze i kapacitet za 20.000 vozila dnevno.',
     ARRAY['most', 'Begej', 'infrastruktura', 'EU fondovi']
   ),
@@ -76,7 +76,7 @@ BEGIN
     true,
     true,
     12100,
-    'Continental Zrenjanin: 500 novih radnih mesta i 45 miliona evra investicija | Zrenjanin Danas',
+    'Continental Zrenjanin: 500 novih radnih mesta i 45 miliona evra investicija | Banatski Glas',
     'Nemačka kompanija Continental širi pogone u Zrenjaninu — 500 novih radnih mesta i 45 miliona evra ulaganja do 2026.',
     ARRAY['Continental', 'investicije', 'radna mesta', 'ekonomija']
   );

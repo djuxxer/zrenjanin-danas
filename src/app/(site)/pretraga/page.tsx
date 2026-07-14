@@ -8,8 +8,8 @@ interface Props {
 }
 
 export const metadata: Metadata = {
-  title: 'Pretraga — Zrenjanin Danas',
-  description: 'Pretražite sve vesti na portalu Zrenjanin Danas.',
+  title: 'Pretraga — Banatski Glas',
+  description: 'Pretražite sve vesti na portalu Banatski Glas.',
 }
 
 export default async function SearchPage({ searchParams }: Props) {

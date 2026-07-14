@@ -11,8 +11,8 @@ function getArticles(): Article[] {
     author_id: 'demo-author',
     author: {
       id: 'demo-author',
-      email: 'redakcija@zrenjanindanas.rs',
-      full_name: 'Redakcija Zrenjanin Danas',
+      email: 'redakcija@banatskiglas.rs',
+      full_name: 'Redakcija Banatski Glas',
       role: 'novinar' as const,
       created_at: new Date().toISOString(),
     },
