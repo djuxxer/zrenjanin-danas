@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2 } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
@@ -47,9 +47,29 @@ export default function NewArticlePage() {
   const [saved, setSaved] = useState<'published' | 'draft' | null>(null)
   const [saving, setSaving] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
+  const contentRef = useRef<HTMLTextAreaElement>(null)
 
   const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }))
+
+  function insertImageIntoContent(url: string) {
+    const imgTag = `\n<img src="${url}" alt="" style="width:100%;border-radius:0.75rem;margin:1.5rem 0;" />\n`
+    const textarea = contentRef.current
+    if (!textarea) {
+      set('content', form.content + imgTag)
+      return
+    }
+    const start = textarea.selectionStart ?? form.content.length
+    const end = textarea.selectionEnd ?? form.content.length
+    const newContent = form.content.slice(0, start) + imgTag + form.content.slice(end)
+    set('content', newContent)
+    // Vrati fokus i kursor odmah posle ubačene slike
+    setTimeout(() => {
+      textarea.focus()
+      const cursorPos = start + imgTag.length
+      textarea.setSelectionRange(cursorPos, cursorPos)
+    }, 0)
+  }
 
   const seo = useMemo(() => calculateSeoScore(form), [form])
 
@@ -229,17 +249,23 @@ export default function NewArticlePage() {
               {activeTab === 'content' && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
-                      Sadržaj vesti *
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-bold uppercase tracking-wide text-gray-500">
+                        Sadržaj vesti *
+                      </label>
+                      <div className="w-56">
+                        <ImageUploadButton onUploaded={insertImageIntoContent} />
+                      </div>
+                    </div>
                     <textarea
+                      ref={contentRef}
                       value={form.content}
                       onChange={(e) => set('content', e.target.value)}
                       placeholder="Unesite tekst vesti... (podržan HTML format)"
                       rows={16}
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red resize-y font-mono"
                     />
-                    <p className="text-xs text-gray-400 mt-1">Podržan HTML format: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;, &lt;blockquote&gt;</p>
+                    <p className="text-xs text-gray-400 mt-1">Podržan HTML format: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;, &lt;blockquote&gt;. Klikni u tekst gde želiš sliku, pa "Otpremi sliku" — ubacuje se tačno na tom mestu.</p>
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
