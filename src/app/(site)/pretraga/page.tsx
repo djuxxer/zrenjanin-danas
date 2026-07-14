@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: 'Pretražite sve vesti na portalu Zrenjanin Danas.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams
   const query = q?.trim() || ''

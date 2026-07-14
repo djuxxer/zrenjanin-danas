@@ -1,6 +1,8 @@
 import { getLatestArticles } from '@/lib/articles'
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const articles = await getLatestArticles(20)
 

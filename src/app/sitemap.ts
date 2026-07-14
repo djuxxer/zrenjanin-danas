@@ -3,6 +3,8 @@ import { getAllArticles } from '@/lib/articles'
 import { CATEGORY_LABELS } from '@/types'
 import { SITE_URL } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await getAllArticles()
   const categories = Object.keys(CATEGORY_LABELS)

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
-import { getArticleBySlug, getRelatedArticles, getAllArticles } from '@/lib/articles'
+import { getArticleBySlug, getRelatedArticles } from '@/lib/articles'
 import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
@@ -13,10 +13,9 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  const articles = await getAllArticles()
-  return articles.map((a) => ({ slug: a.slug }))
-}
+// Vesti se renderuju dinamički po zahtevu (sadržaj se stalno menja preko Supabase-a),
+// pa ne generišemo statičke putanje unapred pri build-u.
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

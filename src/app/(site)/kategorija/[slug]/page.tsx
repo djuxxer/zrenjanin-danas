@@ -9,6 +9,9 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+// Sadržaj kategorija čita se uživo iz Supabase-a pri svakom zahtevu.
+export const dynamic = 'force-dynamic'
+
 export async function generateStaticParams() {
   return Object.keys(CATEGORY_LABELS).map((slug) => ({ slug }))
 }

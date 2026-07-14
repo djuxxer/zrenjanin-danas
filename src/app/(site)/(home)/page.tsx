@@ -12,6 +12,8 @@ import {
 } from '@/lib/articles'
 import { SITE_NAME, SITE_DESCRIPTION } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: `${SITE_NAME} — Vesti iz Zrenjanina, Vojvodine i Srbije`,
   description: SITE_DESCRIPTION,
