@@ -14,13 +14,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const articles = getAllArticles()
+  const articles = await getAllArticles()
   return articles.map((a) => ({ slug: a.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const article = getArticleBySlug(slug)
+  const article = await getArticleBySlug(slug)
   if (!article) return { title: 'Nije pronađeno' }
 
   const title = article.seo_title || article.title
@@ -52,10 +52,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
-  const article = getArticleBySlug(slug)
+  const article = await getArticleBySlug(slug)
   if (!article) notFound()
 
-  const related = getRelatedArticles(article)
+  const related = await getRelatedArticles(article)
   const categoryLabel = CATEGORY_LABELS[article.category]
   const categoryColor = CATEGORY_COLORS[article.category]
   const articleUrl = `${SITE_URL}/vest/${slug}`

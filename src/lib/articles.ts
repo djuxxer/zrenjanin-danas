@@ -1,91 +1,217 @@
-import { DEMO_ARTICLES } from '@/lib/demo-data'
-import type { Article, Category } from '@/types'
+import { createClient } from '@/lib/supabase/server'
+import type { Article, Category, User } from '@/types'
 
-let articleCache: Article[] | null = null
-
-function getArticles(): Article[] {
-  if (articleCache) return articleCache
-  articleCache = DEMO_ARTICLES.map((a, i) => ({
-    ...a,
-    id: `demo-${i + 1}`,
-    author_id: 'demo-author',
-    author: {
-      id: 'demo-author',
-      email: 'redakcija@zrenjanindanas.rs',
-      full_name: 'Redakcija Zrenjanin Danas',
-      role: 'novinar' as const,
-      created_at: new Date().toISOString(),
-    },
-    created_at: a.published_at || new Date().toISOString(),
-    updated_at: a.published_at || new Date().toISOString(),
-  }))
-  return articleCache
+type ArticleRow = {
+  id: string
+  slug: string
+  title: string
+  subtitle: string | null
+  content: string
+  excerpt: string
+  category: Category
+  image_url: string
+  image_alt: string
+  author_id: string | null
+  published: boolean
+  published_at: string | null
+  scheduled_at: string | null
+  breaking: boolean
+  featured: boolean
+  trending: boolean
+  views: number
+  seo_title: string | null
+  seo_description: string | null
+  og_image: string | null
+  tags: string[] | null
+  related_ids: string[] | null
+  created_at: string
+  updated_at: string
+  author: {
+    id: string
+    full_name: string
+    avatar_url: string | null
+    role: User['role']
+  } | null
 }
 
-export function getAllArticles(): Article[] {
-  return getArticles().filter((a) => a.published)
+function mapArticle(row: ArticleRow): Article {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    subtitle: row.subtitle ?? undefined,
+    content: row.content,
+    excerpt: row.excerpt,
+    category: row.category,
+    image_url: row.image_url,
+    image_alt: row.image_alt,
+    author_id: row.author_id ?? '',
+    author: row.author
+      ? {
+          id: row.author.id,
+          email: '',
+          full_name: row.author.full_name,
+          role: row.author.role,
+          avatar_url: row.author.avatar_url ?? undefined,
+          created_at: row.created_at,
+        }
+      : undefined,
+    published: row.published,
+    published_at: row.published_at ?? undefined,
+    scheduled_at: row.scheduled_at ?? undefined,
+    breaking: row.breaking,
+    featured: row.featured,
+    trending: row.trending,
+    views: row.views,
+    seo_title: row.seo_title ?? undefined,
+    seo_description: row.seo_description ?? undefined,
+    og_image: row.og_image ?? undefined,
+    tags: row.tags ?? [],
+    related_ids: row.related_ids ?? [],
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }
 }
 
-export function getFeaturedArticles(): Article[] {
-  return getArticles().filter((a) => a.published && a.featured).slice(0, 5)
+const ARTICLE_SELECT = `
+  id, slug, title, subtitle, content, excerpt, category, image_url, image_alt,
+  author_id, published, published_at, scheduled_at, breaking, featured, trending,
+  views, seo_title, seo_description, og_image, tags, related_ids, created_at, updated_at,
+  author:profiles ( id, full_name, avatar_url, role )
+`
+
+export async function getAllArticles(): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .order('published_at', { ascending: false })
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function getBreakingArticles(): Article[] {
-  return getArticles().filter((a) => a.published && a.breaking)
+export async function getFeaturedArticles(): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('featured', true)
+    .order('published_at', { ascending: false })
+    .limit(5)
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function getTrendingArticles(limit = 6): Article[] {
-  return getArticles()
-    .filter((a) => a.published && a.trending)
-    .sort((a, b) => b.views - a.views)
-    .slice(0, limit)
+export async function getBreakingArticles(): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('breaking', true)
+    .order('published_at', { ascending: false })
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function getMostReadArticles(limit = 5): Article[] {
-  return getArticles()
-    .filter((a) => a.published)
-    .sort((a, b) => b.views - a.views)
-    .slice(0, limit)
+export async function getTrendingArticles(limit = 6): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('trending', true)
+    .order('views', { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function getArticleBySlug(slug: string): Article | undefined {
-  return getArticles().find((a) => a.slug === slug && a.published)
+export async function getMostReadArticles(limit = 5): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .order('views', { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function getArticlesByCategory(category: Category, limit?: number): Article[] {
-  const filtered = getArticles()
-    .filter((a) => a.published && a.category === category)
-    .sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime())
-  return limit ? filtered.slice(0, limit) : filtered
+export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('slug', slug)
+    .eq('published', true)
+    .maybeSingle()
+
+  if (error || !data) return undefined
+  return mapArticle(data as unknown as ArticleRow)
 }
 
-export function getRelatedArticles(article: Article, limit = 3): Article[] {
-  return getArticles()
-    .filter(
-      (a) =>
-        a.published &&
-        a.id !== article.id &&
-        (a.category === article.category ||
-          a.tags.some((t) => article.tags.includes(t)))
-    )
-    .sort((a, b) => b.views - a.views)
-    .slice(0, limit)
+export async function getArticlesByCategory(category: Category, limit?: number): Promise<Article[]> {
+  const supabase = await createClient()
+  let query = supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('category', category)
+    .order('published_at', { ascending: false })
+
+  if (limit) query = query.limit(limit)
+
+  const { data, error } = await query
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function searchArticles(query: string): Article[] {
-  const q = query.toLowerCase()
-  return getArticles().filter(
-    (a) =>
-      a.published &&
-      (a.title.toLowerCase().includes(q) ||
-        a.excerpt.toLowerCase().includes(q) ||
-        a.tags.some((t) => t.toLowerCase().includes(q)))
-  )
+export async function getRelatedArticles(article: Article, limit = 3): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('category', article.category)
+    .neq('id', article.id)
+    .order('views', { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export function getLatestArticles(limit = 10): Article[] {
-  return getArticles()
-    .filter((a) => a.published)
-    .sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime())
-    .slice(0, limit)
+export async function searchArticles(query: string): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`)
+    .order('published_at', { ascending: false })
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
+}
+
+export async function getLatestArticles(limit = 10): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .order('published_at', { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
 }

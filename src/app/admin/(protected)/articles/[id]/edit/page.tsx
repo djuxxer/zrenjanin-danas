@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2 } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
-import { cn, createSlug } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 import { createClient } from '@/lib/supabase/client'
 
@@ -23,7 +23,6 @@ const EMPTY_FORM = {
   breaking: false,
   featured: false,
   trending: false,
-  published: false,
   scheduled_at: '',
 }
 
@@ -39,13 +38,53 @@ const REQUIRED_FOR_PUBLISH: { key: keyof typeof EMPTY_FORM; label: string; tab: 
   { key: 'seo_description', label: 'Meta description', tab: 'seo' },
 ]
 
-export default function NewArticlePage() {
+interface Props {
+  params: Promise<{ id: string }>
+}
+
+export default function EditArticlePage({ params }: Props) {
+  const { id } = use(params)
   const router = useRouter()
   const [form, setForm] = useState(EMPTY_FORM)
   const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'settings'>('content')
   const [saved, setSaved] = useState<'published' | 'draft' | null>(null)
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient()
+      const { data, error } = await supabase.from('articles').select('*').eq('id', id).maybeSingle()
+
+      if (error || !data) {
+        setNotFound(true)
+        setLoading(false)
+        return
+      }
+
+      setForm({
+        title: data.title ?? '',
+        subtitle: data.subtitle ?? '',
+        content: data.content ?? '',
+        excerpt: data.excerpt ?? '',
+        category: data.category,
+        image_url: data.image_url ?? '',
+        image_alt: data.image_alt ?? '',
+        focus_keyphrase: data.focus_keyphrase ?? '',
+        seo_title: data.seo_title ?? '',
+        seo_description: data.seo_description ?? '',
+        tags: (data.tags ?? []).join(', '),
+        breaking: data.breaking ?? false,
+        featured: data.featured ?? false,
+        trending: data.trending ?? false,
+        scheduled_at: data.scheduled_at ?? '',
+      })
+      setLoading(false)
+    }
+    load()
+  }, [id])
 
   const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -81,52 +120,37 @@ export default function NewArticlePage() {
     setSaving(true)
 
     const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      setSaving(false)
-      setPublishError('Sesija je istekla — uloguj se ponovo.')
-      return
-    }
-
-    const slug = createSlug(form.title)
     const tagsArray = form.tags
       .split(',')
       .map((t) => t.trim())
       .filter(Boolean)
 
-    const { error } = await supabase.from('articles').insert({
-      slug,
-      title: form.title,
-      subtitle: form.subtitle || null,
-      content: form.content,
-      excerpt: form.excerpt,
-      category: form.category,
-      image_url: form.image_url,
-      image_alt: form.image_alt,
-      author_id: user.id,
-      published: publish,
-      published_at: publish ? new Date().toISOString() : null,
-      scheduled_at: form.scheduled_at || null,
-      breaking: form.breaking,
-      featured: form.featured,
-      trending: form.trending,
-      seo_title: form.seo_title || null,
-      seo_description: form.seo_description || null,
-      focus_keyphrase: form.focus_keyphrase || null,
-      tags: tagsArray,
-    })
+    const { error } = await supabase
+      .from('articles')
+      .update({
+        title: form.title,
+        subtitle: form.subtitle || null,
+        content: form.content,
+        excerpt: form.excerpt,
+        category: form.category,
+        image_url: form.image_url,
+        image_alt: form.image_alt,
+        published: publish,
+        scheduled_at: form.scheduled_at || null,
+        breaking: form.breaking,
+        featured: form.featured,
+        trending: form.trending,
+        seo_title: form.seo_title || null,
+        seo_description: form.seo_description || null,
+        focus_keyphrase: form.focus_keyphrase || null,
+        tags: tagsArray,
+      })
+      .eq('id', id)
 
     setSaving(false)
 
     if (error) {
-      setPublishError(
-        error.code === '23505'
-          ? 'Vest sa ovim naslovom (istim URL-om) već postoji. Izmeni naslov malo pa probaj ponovo.'
-          : `Greška prilikom čuvanja: ${error.message}`
-      )
+      setPublishError(`Greška prilikom čuvanja: ${error.message}`)
       return
     }
 
@@ -139,13 +163,32 @@ export default function NewArticlePage() {
   const seoTitleLen = (form.seo_title || form.title).length
   const seoDescLen = form.seo_description.length
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32 text-gray-400">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (notFound) {
+    return (
+      <div className="text-center py-32 text-gray-500">
+        <p className="text-xl mb-2">Vest nije pronađena.</p>
+        <button onClick={() => router.push('/admin/articles')} className="text-brand-red hover:underline text-sm">
+          ← Nazad na sve vesti
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-5 max-w-6xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Nova vest</h1>
-          <p className="text-gray-500 text-sm">Kreirajte i objavite novu vest</p>
+          <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Izmena vesti</h1>
+          <p className="text-gray-500 text-sm">Uredi postojeću vest</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -154,7 +197,7 @@ export default function NewArticlePage() {
             className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Sačuvaj nacrt
+            Sačuvaj kao nacrt
           </button>
           <button
             onClick={() => handleSave(true)}
@@ -162,7 +205,7 @@ export default function NewArticlePage() {
             className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
-            Objavi
+            Sačuvaj i objavi
           </button>
         </div>
       </div>
@@ -176,7 +219,7 @@ export default function NewArticlePage() {
 
       {saved && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-green-700 dark:text-green-400 text-sm font-semibold flex items-center gap-2">
-          ✓ Vest je uspešno {saved === 'published' ? 'objavljena' : 'sačuvana kao nacrt'}!
+          ✓ Vest je uspešno sačuvana{saved === 'published' ? ' i objavljena' : ' kao nacrt'}!
         </div>
       )}
 
@@ -415,7 +458,7 @@ export default function NewArticlePage() {
                   </div>
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex gap-2 text-sm text-amber-700 dark:text-amber-400">
                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <span>Zakazana objava je aktivna samo u produkciji sa Supabase backend-om.</span>
+                    <span>Napomena: menjanje naslova ne menja URL (slug) vesti — postojeći linkovi ostaju validni.</span>
                   </div>
                 </div>
               )}
@@ -464,7 +507,7 @@ export default function NewArticlePage() {
             </button>
           </div>
 
-          {/* Publish controls */}
+          {/* Oznake */}
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Oznake</h3>
             <div className="space-y-2">
@@ -570,7 +613,7 @@ export default function NewArticlePage() {
               className="w-full flex items-center justify-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white py-3 rounded-lg font-bold text-sm transition-colors disabled:opacity-60"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
-              Objavi vest
+              Sačuvaj i objavi
             </button>
             <button
               onClick={() => handleSave(false)}

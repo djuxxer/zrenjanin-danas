@@ -28,7 +28,7 @@ export default async function CategoryPage({ params }: Props) {
   if (!(slug in CATEGORY_LABELS)) notFound()
 
   const category = slug as Category
-  const articles = getArticlesByCategory(category)
+  const articles = await getArticlesByCategory(category)
   const label = CATEGORY_LABELS[category]
   const color = CATEGORY_COLORS[category]
 

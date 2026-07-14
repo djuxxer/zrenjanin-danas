@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams
   const query = q?.trim() || ''
-  const results = query ? searchArticles(query) : []
+  const results = query ? await searchArticles(query) : []
 
   return (
     <div className="container mx-auto px-4 py-8">

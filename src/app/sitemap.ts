@@ -3,8 +3,8 @@ import { getAllArticles } from '@/lib/articles'
 import { CATEGORY_LABELS } from '@/types'
 import { SITE_URL } from '@/lib/utils'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const articles = getAllArticles()
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const articles = await getAllArticles()
   const categories = Object.keys(CATEGORY_LABELS)
 
   const articleUrls: MetadataRoute.Sitemap = articles.map((article) => ({

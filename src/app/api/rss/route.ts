@@ -2,7 +2,7 @@ import { getLatestArticles } from '@/lib/articles'
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from '@/lib/utils'
 
 export async function GET() {
-  const articles = getLatestArticles(20)
+  const articles = await getLatestArticles(20)
 
   const rssItems = articles
     .map(

@@ -17,14 +17,16 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
 }
 
-export default function HomePage() {
-  const featured = getFeaturedArticles()
-  const trending = getTrendingArticles(6)
-  const mostRead = getMostReadArticles(5)
-  const latest = getLatestArticles(12)
-  const zrenjanin = getArticlesByCategory('zrenjanin', 5)
-  const sport = getArticlesByCategory('sport', 5)
-  const ekonomija = getArticlesByCategory('ekonomija', 5)
+export default async function HomePage() {
+  const [featured, trending, mostRead, latest, zrenjanin, sport, ekonomija] = await Promise.all([
+    getFeaturedArticles(),
+    getTrendingArticles(6),
+    getMostReadArticles(5),
+    getLatestArticles(12),
+    getArticlesByCategory('zrenjanin', 5),
+    getArticlesByCategory('sport', 5),
+    getArticlesByCategory('ekonomija', 5),
+  ])
 
   return (
     <div>
