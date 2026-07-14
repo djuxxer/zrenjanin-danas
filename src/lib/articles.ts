@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
+import { createHash } from 'crypto'
 import type { Article, Category, User } from '@/types'
 
 type ArticleRow = {
@@ -214,4 +216,28 @@ export async function getLatestArticles(limit = 10): Promise<Article[]> {
 
   if (error || !data) return []
   return (data as unknown as ArticleRow[]).map(mapArticle)
+}
+
+/**
+ * Beleži pregled vesti (uveća views + upisuje red u article_views za analitiku).
+ * IP adresa se hešuje pre snimanja — ne čuvamo je u čitljivom obliku.
+ * Radi preko RPC funkcije (increment_article_views) koja bezbedno zaobilazi RLS
+ * samo za ovu jednu, kontrolisanu operaciju.
+ */
+export async function recordArticleView(articleId: string): Promise<void> {
+  try {
+    const supabase = await createClient()
+    const headersList = await headers()
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    const userAgent = headersList.get('user-agent') || 'unknown'
+    const ipHash = createHash('sha256').update(ip).digest('hex')
+
+    await supabase.rpc('increment_article_views', {
+      p_article_id: articleId,
+      p_ip_hash: ipHash,
+      p_user_agent: userAgent,
+    })
+  } catch {
+    // Brojanje pregleda ne sme da obori prikaz vesti ako nešto pođe po zlu
+  }
 }

@@ -1,0 +1,91 @@
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live6/src/app/(site)/vest/[slug]/page.tsx repo/src/app/(site)/vest/[slug]/page.tsx
+--- a/src/app/(site)/vest/[slug]/page.tsx	2026-07-14 20:31:49.000000000 +0000
++++ b/src/app/(site)/vest/[slug]/page.tsx	2026-07-14 20:35:01.575109350 +0000
+@@ -3,7 +3,7 @@
+ import Image from 'next/image'
+ import Link from 'next/link'
+ import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
+-import { getArticleBySlug, getRelatedArticles } from '@/lib/articles'
++import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
+ import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
+ import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
+ import { ArticleCard } from '@/components/article/article-card'
+@@ -54,6 +54,10 @@
+   const article = await getArticleBySlug(slug)
+   if (!article) notFound()
+ 
++  // Beleži pregled pre prikaza (brz upis, ne oslanjamo se na "fire and forget")
++  await recordArticleView(article.id)
++  article.views += 1
++
+   const related = await getRelatedArticles(article)
+   const categoryLabel = CATEGORY_LABELS[article.category]
+   const categoryColor = CATEGORY_COLORS[article.category]
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live6/src/lib/articles.ts repo/src/lib/articles.ts
+--- a/src/lib/articles.ts	2026-07-14 20:31:49.000000000 +0000
++++ b/src/lib/articles.ts	2026-07-14 20:34:23.786164630 +0000
+@@ -1,4 +1,6 @@
+ import { createClient } from '@/lib/supabase/server'
++import { headers } from 'next/headers'
++import { createHash } from 'crypto'
+ import type { Article, Category, User } from '@/types'
+ 
+ type ArticleRow = {
+@@ -215,3 +217,27 @@
+   if (error || !data) return []
+   return (data as unknown as ArticleRow[]).map(mapArticle)
+ }
++
++/**
++ * Beleži pregled vesti (uveća views + upisuje red u article_views za analitiku).
++ * IP adresa se hešuje pre snimanja — ne čuvamo je u čitljivom obliku.
++ * Radi preko RPC funkcije (increment_article_views) koja bezbedno zaobilazi RLS
++ * samo za ovu jednu, kontrolisanu operaciju.
++ */
++export async function recordArticleView(articleId: string): Promise<void> {
++  try {
++    const supabase = await createClient()
++    const headersList = await headers()
++    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
++    const userAgent = headersList.get('user-agent') || 'unknown'
++    const ipHash = createHash('sha256').update(ip).digest('hex')
++
++    await supabase.rpc('increment_article_views', {
++      p_article_id: articleId,
++      p_ip_hash: ipHash,
++      p_user_agent: userAgent,
++    })
++  } catch {
++    // Brojanje pregleda ne sme da obori prikaz vesti ako nešto pođe po zlu
++  }
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live6/supabase/migrations/004_view_counter.sql repo/supabase/migrations/004_view_counter.sql
+--- a/supabase/migrations/004_view_counter.sql	1970-01-01 00:00:00.000000000 +0000
++++ b/supabase/migrations/004_view_counter.sql	2026-07-14 20:34:02.210121588 +0000
+@@ -0,0 +1,26 @@
++-- =============================================
++-- Brojanje pregleda vesti
++-- SECURITY DEFINER funkcija zaobilazi RLS na kontrolisan način:
++-- samo uvećava views i beleži red u article_views, ništa drugo.
++-- Pokreni ovo u Supabase SQL Editoru NAKON prethodnih migracija.
++-- =============================================
++
++CREATE OR REPLACE FUNCTION public.increment_article_views(
++  p_article_id UUID,
++  p_ip_hash TEXT DEFAULT NULL,
++  p_user_agent TEXT DEFAULT NULL
++)
++RETURNS void AS $$
++BEGIN
++  UPDATE public.articles
++  SET views = views + 1
++  WHERE id = p_article_id AND published = true;
++
++  INSERT INTO public.article_views (article_id, ip_hash, user_agent)
++  VALUES (p_article_id, p_ip_hash, p_user_agent);
++END;
++$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
++
++-- Anonimni posetioci i ulogovani korisnici smeju da pozovu OVU funkciju
++-- (ali i dalje ne mogu direktno da menjaju articles.views zahvaljujući RLS)
++GRANT EXECUTE ON FUNCTION public.increment_article_views(UUID, TEXT, TEXT) TO anon, authenticated;

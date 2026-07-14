@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
-import { getArticleBySlug, getRelatedArticles } from '@/lib/articles'
+import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
 import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
@@ -53,6 +53,10 @@ export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
   const article = await getArticleBySlug(slug)
   if (!article) notFound()
+
+  // Beleži pregled pre prikaza (brz upis, ne oslanjamo se na "fire and forget")
+  await recordArticleView(article.id)
+  article.views += 1
 
   const related = await getRelatedArticles(article)
   const categoryLabel = CATEGORY_LABELS[article.category]
