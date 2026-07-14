@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getArticlesByCategory } from '@/lib/articles'
 import { CATEGORY_LABELS, CATEGORY_COLORS, type Category } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
 
 interface Props {
@@ -32,8 +32,21 @@ export default async function CategoryPage({ params }: Props) {
   const label = CATEGORY_LABELS[category]
   const color = CATEGORY_COLORS[category]
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Početna', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: label, item: `${SITE_URL}/kategorija/${category}` },
+    ],
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Category header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">

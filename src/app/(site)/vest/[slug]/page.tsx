@@ -79,11 +79,31 @@ export default async function ArticlePage({ params }: Props) {
     mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
   }
 
+  // BreadcrumbList schema
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Početna', item: SITE_URL },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: categoryLabel,
+        item: `${SITE_URL}/kategorija/${article.category}`,
+      },
+      { '@type': 'ListItem', position: 3, name: article.title, item: articleUrl },
+    ],
+  }
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <article className="container mx-auto px-4 py-8 max-w-5xl">

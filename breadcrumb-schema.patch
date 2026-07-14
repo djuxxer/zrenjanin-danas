@@ -1,0 +1,68 @@
+--- before_bc/src/app/(site)/vest/[slug]/page.tsx	2026-07-14 10:31:58.788548235 +0000
++++ repo/src/app/(site)/vest/[slug]/page.tsx	2026-07-14 10:28:17.925592352 +0000
+@@ -79,12 +79,32 @@
+     mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+   }
+ 
++  // BreadcrumbList schema
++  const breadcrumbLd = {
++    '@context': 'https://schema.org',
++    '@type': 'BreadcrumbList',
++    itemListElement: [
++      { '@type': 'ListItem', position: 1, name: 'Početna', item: SITE_URL },
++      {
++        '@type': 'ListItem',
++        position: 2,
++        name: categoryLabel,
++        item: `${SITE_URL}/kategorija/${article.category}`,
++      },
++      { '@type': 'ListItem', position: 3, name: article.title, item: articleUrl },
++    ],
++  }
++
+   return (
+     <>
+       <script
+         type="application/ld+json"
+         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+       />
++      <script
++        type="application/ld+json"
++        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
++      />
+ 
+       <article className="container mx-auto px-4 py-8 max-w-5xl">
+         {/* Breadcrumbs */}
+--- before_bc/src/app/(site)/kategorija/[slug]/page.tsx	2026-07-14 10:32:08.394298096 +0000
++++ repo/src/app/(site)/kategorija/[slug]/page.tsx	2026-07-14 10:28:36.968037105 +0000
+@@ -2,7 +2,7 @@
+ import type { Metadata } from 'next'
+ import { getArticlesByCategory } from '@/lib/articles'
+ import { CATEGORY_LABELS, CATEGORY_COLORS, type Category } from '@/types'
+-import { cn } from '@/lib/utils'
++import { cn, SITE_URL } from '@/lib/utils'
+ import { ArticleCard } from '@/components/article/article-card'
+ 
+ interface Props {
+@@ -32,8 +32,21 @@
+   const label = CATEGORY_LABELS[category]
+   const color = CATEGORY_COLORS[category]
+ 
++  const breadcrumbLd = {
++    '@context': 'https://schema.org',
++    '@type': 'BreadcrumbList',
++    itemListElement: [
++      { '@type': 'ListItem', position: 1, name: 'Početna', item: SITE_URL },
++      { '@type': 'ListItem', position: 2, name: label, item: `${SITE_URL}/kategorija/${category}` },
++    ],
++  }
++
+   return (
+     <div className="container mx-auto px-4 py-8">
++      <script
++        type="application/ld+json"
++        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
++      />
+       {/* Category header */}
+       <div className="mb-8">
+         <div className="flex items-center gap-3 mb-2">
