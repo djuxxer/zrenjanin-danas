@@ -1,0 +1,164 @@
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live5/src/app/(site)/pregled-demo/page.tsx repo/src/app/(site)/pregled-demo/page.tsx
+--- a/src/app/(site)/pregled-demo/page.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b/src/app/(site)/pregled-demo/page.tsx	2026-07-14 20:30:42.954109744 +0000
+@@ -0,0 +1,101 @@
++import type { Metadata } from 'next'
++import { HeroSection } from '@/components/home/hero-section'
++import { TrendingSection, MostReadSection, CategoryGrid } from '@/components/home/trending-section'
++import { WeatherWidget, NewsletterSection, AdBanner } from '@/components/home/widgets'
++import { ArticleCard } from '@/components/article/article-card'
++import { demoFeatured, demoTrending, demoMostRead, demoLatest, demoByCategory } from '@/lib/demo-articles'
++
++export const metadata: Metadata = {
++  title: 'Pregled izgleda (demo) — Zrenjanin Danas',
++  robots: { index: false, follow: false },
++}
++
++export default function DemoPreviewPage() {
++  const featured = demoFeatured()
++  const trending = demoTrending(6)
++  const mostRead = demoMostRead(5)
++  const latest = demoLatest(12)
++  const zrenjanin = demoByCategory('zrenjanin', 5)
++  const sport = demoByCategory('sport', 5)
++  const ekonomija = demoByCategory('ekonomija', 5)
++
++  return (
++    <div>
++      <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-center text-sm font-semibold py-2">
++        Ovo je demo pregled izgleda sajta sa primerom sadržaja — nije povezan sa pravom bazom.
++      </div>
++
++      {/* Hero */}
++      <HeroSection featured={featured} latest={latest} />
++
++      {/* Ad banner */}
++      <div className="container mx-auto px-4 mb-2">
++        <AdBanner size="medium" />
++      </div>
++
++      {/* Main content + Sidebar */}
++      <div className="container mx-auto px-4 py-6">
++        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
++          {/* Main column */}
++          <div className="lg:col-span-2 space-y-8">
++            {/* Zrenjanin section */}
++            <section>
++              <div className="flex items-center gap-3 mb-4">
++                <div className="w-1 h-6 bg-brand-red rounded-full" />
++                <h2 className="font-headline font-bold text-xl">Zrenjanin</h2>
++                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
++              </div>
++              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
++                {zrenjanin.slice(0, 4).map((a) => (
++                  <ArticleCard key={a.id} article={a} />
++                ))}
++              </div>
++            </section>
++
++            {/* Economy section */}
++            <section>
++              <div className="flex items-center gap-3 mb-4">
++                <div className="w-1 h-6 bg-yellow-500 rounded-full" />
++                <h2 className="font-headline font-bold text-xl">Ekonomija</h2>
++                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
++              </div>
++              <div className="space-y-3">
++                {ekonomija.map((a) => (
++                  <ArticleCard key={a.id} article={a} variant="horizontal" />
++                ))}
++              </div>
++            </section>
++          </div>
++
++          {/* Sidebar */}
++          <aside className="space-y-5">
++            <WeatherWidget />
++            <TrendingSection articles={trending} />
++            <AdBanner size="large" />
++            <MostReadSection articles={mostRead} />
++            <NewsletterSection />
++          </aside>
++        </div>
++      </div>
++
++      {/* Sport section */}
++      <div className="bg-gray-100 dark:bg-gray-900 py-2">
++        <CategoryGrid title="Sport" articles={sport} />
++      </div>
++
++      {/* Latest articles */}
++      <section className="container mx-auto px-4 py-8">
++        <div className="flex items-center gap-3 mb-6">
++          <div className="w-1 h-6 bg-brand-red rounded-full" />
++          <h2 className="font-headline font-bold text-xl">Najnovije vesti</h2>
++          <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
++        </div>
++        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
++          {latest.slice(0, 8).map((a) => (
++            <ArticleCard key={a.id} article={a} />
++          ))}
++        </div>
++      </section>
++    </div>
++  )
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live5/src/lib/demo-articles.ts repo/src/lib/demo-articles.ts
+--- a/src/lib/demo-articles.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/src/lib/demo-articles.ts	2026-07-14 20:30:25.458108704 +0000
+@@ -0,0 +1,55 @@
++import { DEMO_ARTICLES } from '@/lib/demo-data'
++import type { Article, Category } from '@/types'
++
++let cache: Article[] | null = null
++
++function getDemoArticlesFull(): Article[] {
++  if (cache) return cache
++  cache = DEMO_ARTICLES.map((a, i) => ({
++    ...a,
++    id: `demo-${i + 1}`,
++    author_id: 'demo-author',
++    author: {
++      id: 'demo-author',
++      email: 'redakcija@zrenjanindanas.rs',
++      full_name: 'Redakcija Zrenjanin Danas',
++      role: 'novinar' as const,
++      created_at: new Date().toISOString(),
++    },
++    created_at: a.published_at || new Date().toISOString(),
++    updated_at: a.published_at || new Date().toISOString(),
++  }))
++  return cache
++}
++
++export function demoFeatured(): Article[] {
++  return getDemoArticlesFull().filter((a) => a.published && a.featured).slice(0, 5)
++}
++
++export function demoTrending(limit = 6): Article[] {
++  return getDemoArticlesFull()
++    .filter((a) => a.published && a.trending)
++    .sort((a, b) => b.views - a.views)
++    .slice(0, limit)
++}
++
++export function demoMostRead(limit = 5): Article[] {
++  return getDemoArticlesFull()
++    .filter((a) => a.published)
++    .sort((a, b) => b.views - a.views)
++    .slice(0, limit)
++}
++
++export function demoLatest(limit = 12): Article[] {
++  return getDemoArticlesFull()
++    .filter((a) => a.published)
++    .sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime())
++    .slice(0, limit)
++}
++
++export function demoByCategory(category: Category, limit?: number): Article[] {
++  const filtered = getDemoArticlesFull()
++    .filter((a) => a.published && a.category === category)
++    .sort((a, b) => new Date(b.published_at!).getTime() - new Date(a.published_at!).getTime())
++  return limit ? filtered.slice(0, limit) : filtered
++}
