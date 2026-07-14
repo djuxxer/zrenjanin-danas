@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   FileText,
@@ -16,6 +16,7 @@ import {
   Bell,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -28,7 +29,23 @@ const NAV_ITEMS = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null)
+    })
+  }, [])
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/admin/login')
+    router.refresh()
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
@@ -90,14 +107,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">Admin</p>
-                <p className="text-xs text-gray-400 truncate">admin@zrenjanindanas.rs</p>
+                <p className="text-xs text-gray-400 truncate">{userEmail ?? '...'}</p>
               </div>
-              <button className="p-1 hover:text-brand-red transition-colors">
+              <button
+                onClick={handleLogout}
+                className="p-1 hover:text-brand-red transition-colors"
+                title="Odjavi se"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <button className="p-1.5 hover:text-brand-red transition-colors mx-auto block">
+            <button
+              onClick={handleLogout}
+              className="p-1.5 hover:text-brand-red transition-colors mx-auto block"
+              title="Odjavi se"
+            >
               <LogOut className="w-5 h-5" />
             </button>
           )}
