@@ -1,22 +1,112 @@
 'use client'
 
-import { useState } from 'react'
-import { Save, Globe, Bell, Palette, Database, Shield } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Save, Globe, Palette, Database, Shield, Loader2, Mail } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function AdminSettingsPage() {
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [siteName, setSiteName] = useState('Zrenjanin Danas')
-  const [siteUrl, setSiteUrl] = useState('https://zrenjanindanas.rs')
-  const [contactEmail, setContactEmail] = useState('redakcija@zrenjanindanas.rs')
-  const [analyticsId, setAnalyticsId] = useState('G-XXXXXXXXXX')
+  const [error, setError] = useState<string | null>(null)
+
+  const [siteName, setSiteName] = useState('')
+  const [siteUrl, setSiteUrl] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [tagline, setTagline] = useState('')
+  const [analyticsId, setAnalyticsId] = useState('')
   const [fbPixel, setFbPixel] = useState('')
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [commentsEnabled, setCommentsEnabled] = useState(true)
   const [newsletterEnabled, setNewsletterEnabled] = useState(true)
 
-  const handleSave = () => {
+  const [subscriberCount, setSubscriberCount] = useState<number | null>(null)
+
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient()
+      const [{ data: settings }, { count }] = await Promise.all([
+        supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),
+        supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }),
+      ])
+
+      if (settings) {
+        setSiteName(settings.site_name ?? '')
+        setSiteUrl(settings.site_url ?? '')
+        setContactEmail(settings.contact_email ?? '')
+        setTagline(settings.tagline ?? '')
+        setAnalyticsId(settings.analytics_id ?? '')
+        setFbPixel(settings.fb_pixel ?? '')
+        setMaintenanceMode(settings.maintenance_mode ?? false)
+        setCommentsEnabled(settings.comments_enabled ?? true)
+        setNewsletterEnabled(settings.newsletter_enabled ?? true)
+      }
+      setSubscriberCount(count ?? null)
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  async function handleSave() {
+    setSaving(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { error: saveError } = await supabase
+      .from('site_settings')
+      .update({
+        site_name: siteName,
+        site_url: siteUrl,
+        contact_email: contactEmail,
+        tagline,
+        analytics_id: analyticsId,
+        fb_pixel: fbPixel,
+        maintenance_mode: maintenanceMode,
+        comments_enabled: commentsEnabled,
+        newsletter_enabled: newsletterEnabled,
+      })
+      .eq('id', 1)
+
+    setSaving(false)
+
+    if (saveError) {
+      setError(
+        saveError.message.includes('policy')
+          ? 'Samo Admin nalozi mogu da menjaju podešavanja.'
+          : `Greška: ${saveError.message}`
+      )
+      return
+    }
+
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
+  }
+
+  async function handlePasswordChange() {
+    if (newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: 'Lozinka mora imati bar 6 karaktera.' })
+      return
+    }
+
+    setPasswordSaving(true)
+    setPasswordMessage(null)
+
+    const supabase = createClient()
+    const { error: pwError } = await supabase.auth.updateUser({ password: newPassword })
+
+    setPasswordSaving(false)
+
+    if (pwError) {
+      setPasswordMessage({ type: 'error', text: pwError.message })
+      return
+    }
+
+    setNewPassword('')
+    setPasswordMessage({ type: 'success', text: 'Lozinka je uspešno promenjena.' })
   }
 
   const Section = ({ title, icon: Icon, children }: { title: string; icon: typeof Globe; children: React.ReactNode }) => (
@@ -50,6 +140,14 @@ export default function AdminSettingsPage() {
     </div>
   )
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32 text-gray-400">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-5 max-w-3xl">
       <div className="flex items-center justify-between">
@@ -59,12 +157,19 @@ export default function AdminSettingsPage() {
         </div>
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+          disabled={saving}
+          className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60"
         >
-          <Save className="w-4 h-4" />
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Sačuvaj sve
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 text-red-700 dark:text-red-400 text-sm font-semibold">
+          {error}
+        </div>
+      )}
 
       {saved && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-green-700 dark:text-green-400 text-sm font-semibold">
@@ -83,7 +188,7 @@ export default function AdminSettingsPage() {
           <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className={inputClass} />
         </Field>
         <Field label="Tagline / Moto">
-          <input type="text" defaultValue="Najnovije vesti iz Zrenjanina, Vojvodine i Srbije" className={inputClass} />
+          <input type="text" value={tagline} onChange={e => setTagline(e.target.value)} placeholder="Najnovije vesti iz Zrenjanina, Vojvodine i Srbije" className={inputClass} />
         </Field>
       </Section>
 
@@ -104,27 +209,57 @@ export default function AdminSettingsPage() {
         </div>
         {maintenanceMode && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-sm text-amber-700 dark:text-amber-400">
-            ⚠️ Maintenance mode je aktivan — sajt nije dostupan korisnicima!
+            ⚠️ Napomena: ovaj prekidač trenutno samo čuva vrednost u bazi — sajt još uvek ne proverava ovo polje da bi stvarno blokirao pristup. Javi ako želiš da to i stvarno zaživi.
           </div>
         )}
       </Section>
 
+      <Section title="Newsletter pretplatnici" icon={Mail}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600 dark:text-gray-300">Aktivnih pretplatnika</span>
+          <span className="font-headline font-black text-2xl">{subscriberCount ?? '—'}</span>
+        </div>
+        <p className="text-xs text-gray-400">
+          Puna lista i izvoz pretplatnika mogu se dodati kasnije ako zatreba slanje newsletter kampanja.
+        </p>
+      </Section>
+
       <Section title="Supabase baza podataka" icon={Database}>
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2 text-sm font-mono">
-          <p className="text-gray-500 text-xs uppercase tracking-wide font-sans font-bold mb-2">Environment varijable</p>
-          <p><span className="text-brand-red">NEXT_PUBLIC_SUPABASE_URL</span>=<span className="text-green-600">https://xxx.supabase.co</span></p>
-          <p><span className="text-brand-red">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>=<span className="text-green-600">eyJ...</span></p>
-          <p><span className="text-brand-red">SUPABASE_SERVICE_ROLE_KEY</span>=<span className="text-green-600">eyJ...</span></p>
+          <p className="text-gray-500 text-xs uppercase tracking-wide font-sans font-bold mb-2">Environment varijable (samo za referencu, ne menjaju se ovde)</p>
+          <p><span className="text-brand-red">NEXT_PUBLIC_SUPABASE_URL</span>=<span className="text-green-600">{process.env.NEXT_PUBLIC_SUPABASE_URL ? '••• podešeno •••' : 'nije podešeno'}</span></p>
         </div>
-        <p className="text-xs text-gray-500">Podešavanja baze se vrše kroz .env.local fajl ili Vercel dashboard.</p>
+        <p className="text-xs text-gray-500">Podešavanja konekcije sa bazom se menjaju kroz Environment tab na Render-u, ne ovde.</p>
       </Section>
 
       <Section title="Bezbednost" icon={Shield}>
-        <Field label="Lozinka za admin panel">
-          <input type="password" placeholder="••••••••••••" className={inputClass} />
+        {passwordMessage && (
+          <div
+            className={`text-sm rounded-lg px-3 py-2 ${
+              passwordMessage.type === 'success'
+                ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+            }`}
+          >
+            {passwordMessage.text}
+          </div>
+        )}
+        <Field label="Nova lozinka (za tvoj nalog)">
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="••••••••••••"
+            className={inputClass}
+          />
         </Field>
-        <button className="text-sm text-brand-red hover:underline font-semibold">
-          Promena lozinke →
+        <button
+          onClick={handlePasswordChange}
+          disabled={passwordSaving || !newPassword}
+          className="flex items-center gap-2 text-sm text-brand-red hover:underline font-semibold disabled:opacity-60"
+        >
+          {passwordSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+          Promeni lozinku →
         </button>
       </Section>
     </div>

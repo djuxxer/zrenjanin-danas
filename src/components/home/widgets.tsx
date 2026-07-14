@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Cloud, Sun, Droplets, Wind, Bell } from 'lucide-react'
+import { Cloud, Sun, Droplets, Wind, Bell, Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export function WeatherWidget() {
   return (
@@ -33,13 +34,34 @@ export function WeatherWidget() {
 export function NewsletterSection() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) {
-      setSubmitted(true)
-      setEmail('')
+    if (!email.trim()) return
+
+    setSubmitting(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { error: insertError } = await supabase
+      .from('newsletter_subscribers')
+      .insert({ email: email.trim() })
+
+    setSubmitting(false)
+
+    if (insertError) {
+      setError(
+        insertError.code === '23505'
+          ? 'Ova email adresa je već prijavljena.'
+          : 'Greška prilikom prijave. Pokušajte ponovo.'
+      )
+      return
     }
+
+    setSubmitted(true)
+    setEmail('')
   }
 
   return (
@@ -57,6 +79,9 @@ export function NewsletterSection() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2">
+          {error && (
+            <div className="bg-white/20 rounded-lg p-2 text-xs font-semibold">{error}</div>
+          )}
           <input
             type="email"
             value={email}
@@ -67,8 +92,10 @@ export function NewsletterSection() {
           />
           <button
             type="submit"
-            className="w-full bg-white text-brand-red font-bold py-2.5 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+            disabled={submitting}
+            className="w-full flex items-center justify-center gap-2 bg-white text-brand-red font-bold py-2.5 rounded-lg text-sm hover:bg-gray-100 transition-colors disabled:opacity-70"
           >
+            {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
             Prijavi se besplatno
           </button>
         </form>
