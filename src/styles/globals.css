@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-red: 200 16 46;
+    --brand-red-dark: 155 12 35;
+    --brand-red-light: 232 33 63;
+    color-scheme: light dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  }
+
+  * {
+    @apply border-gray-200 dark:border-gray-800;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline;
+  }
+
+  ::selection {
+    @apply bg-brand-red text-white;
+  }
+}
+
+@layer components {
+  .article-content {
+    @apply max-w-none text-gray-700 dark:text-gray-300 leading-relaxed;
+  }
+  .article-content p {
+    @apply mb-4 leading-relaxed text-gray-700 dark:text-gray-300;
+  }
+  .article-content h2 {
+    @apply font-headline font-bold text-2xl text-gray-900 dark:text-gray-100 mt-8 mb-4;
+  }
+  .article-content h3 {
+    @apply font-headline font-bold text-xl text-gray-900 dark:text-gray-100 mt-6 mb-3;
+  }
+  .article-content a {
+    @apply text-brand-red hover:underline;
+  }
+  .article-content img {
+    @apply rounded-xl my-6 w-full;
+  }
+  .article-content blockquote {
+    @apply border-l-4 border-brand-red bg-red-50 dark:bg-red-950/20 py-3 px-5 my-6 italic;
+  }
+  .article-content ul {
+    @apply list-disc list-inside mb-4 space-y-1;
+  }
+  .article-content ol {
+    @apply list-decimal list-inside mb-4 space-y-1;
+  }
+  .article-content strong {
+    @apply font-bold text-gray-900 dark:text-gray-100;
+  }
+
+  .category-badge {
+    @apply inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded text-white;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+  }
+
+  .glass {
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-md;
+  }
+
+  .btn-primary {
+    @apply bg-brand-red hover:bg-brand-red-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200;
+  }
+
+  .breaking-badge {
+    @apply bg-brand-red text-white text-xs font-extrabold uppercase tracking-widest px-3 py-1 animate-pulse;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Breaking news ticker */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-block;
+  animation: ticker 40s linear infinite;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Lazy loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.dark .shimmer {
+  background: linear-gradient(90deg, #1f2937 25%, #111827 50%, #1f2937 75%);
+  background-size: 200% 100%;
+}

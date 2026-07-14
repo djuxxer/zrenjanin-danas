@@ -1,0 +1,366 @@
+'use client'
+
+import { useState } from 'react'
+import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle } from 'lucide-react'
+import { CATEGORY_LABELS, type Category } from '@/types'
+import { cn } from '@/lib/utils'
+
+const EMPTY_FORM = {
+  title: '',
+  subtitle: '',
+  content: '',
+  excerpt: '',
+  category: 'zrenjanin' as Category,
+  image_url: '',
+  image_alt: '',
+  seo_title: '',
+  seo_description: '',
+  tags: '',
+  breaking: false,
+  featured: false,
+  trending: false,
+  published: false,
+  scheduled_at: '',
+}
+
+export default function NewArticlePage() {
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'settings'>('content')
+  const [saved, setSaved] = useState(false)
+
+  const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
+    setForm((prev) => ({ ...prev, [key]: value }))
+
+  const handleSave = (publish: boolean) => {
+    set('published', publish)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+    // In production: POST to /api/articles
+  }
+
+  const seoTitleLen = (form.seo_title || form.title).length
+  const seoDescLen = form.seo_description.length
+
+  return (
+    <div className="space-y-5 max-w-6xl">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Nova vest</h1>
+          <p className="text-gray-500 text-sm">Kreirajte i objavite novu vest</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleSave(false)}
+            className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+          >
+            <Save className="w-4 h-4" />
+            Sačuvaj nacrt
+          </button>
+          <button
+            onClick={() => handleSave(true)}
+            className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            Objavi
+          </button>
+        </div>
+      </div>
+
+      {saved && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-green-700 dark:text-green-400 text-sm font-semibold flex items-center gap-2">
+          ✓ Vest je uspešno {form.published ? 'objavljena' : 'sačuvana kao nacrt'}!
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Main editor */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Title */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+            <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Naslov *</label>
+            <textarea
+              value={form.title}
+              onChange={(e) => set('title', e.target.value)}
+              placeholder="Unesite naslov vesti..."
+              rows={2}
+              className="w-full font-headline font-bold text-xl border-0 focus:outline-none resize-none bg-transparent placeholder-gray-300 dark:placeholder-gray-600 leading-snug"
+            />
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-3 mt-3">
+              <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Podnaslov</label>
+              <input
+                type="text"
+                value={form.subtitle}
+                onChange={(e) => set('subtitle', e.target.value)}
+                placeholder="Opcionalni podnaslov..."
+                className="w-full border-0 focus:outline-none bg-transparent text-gray-600 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="flex border-b border-gray-100 dark:border-gray-800">
+              {(['content', 'seo', 'settings'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    'px-5 py-3 text-sm font-semibold transition-colors capitalize',
+                    activeTab === tab
+                      ? 'text-brand-red border-b-2 border-brand-red bg-red-50/50 dark:bg-red-950/10'
+                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  )}
+                >
+                  {tab === 'content' ? 'Sadržaj' : tab === 'seo' ? 'SEO' : 'Podešavanja'}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-5">
+              {activeTab === 'content' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Sadržaj vesti *
+                    </label>
+                    <textarea
+                      value={form.content}
+                      onChange={(e) => set('content', e.target.value)}
+                      placeholder="Unesite tekst vesti... (podržan HTML format)"
+                      rows={16}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red resize-y font-mono"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Podržan HTML format: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;, &lt;blockquote&gt;</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Kratak opis (excerpt) *
+                    </label>
+                    <textarea
+                      value={form.excerpt}
+                      onChange={(e) => set('excerpt', e.target.value)}
+                      placeholder="Kratki opis vesti koji se prikazuje na listingima..."
+                      rows={3}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red resize-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'seo' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      SEO Naslov
+                    </label>
+                    <input
+                      type="text"
+                      value={form.seo_title}
+                      onChange={(e) => set('seo_title', e.target.value)}
+                      placeholder={form.title || 'SEO naslov (preporuka: 50-60 karaktera)'}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                    />
+                    <div className="flex justify-between mt-1">
+                      <p className="text-xs text-gray-400">Preporuka: 50-60 karaktera za Google</p>
+                      <span className={cn('text-xs font-mono', seoTitleLen > 60 ? 'text-red-500' : seoTitleLen > 50 ? 'text-green-600' : 'text-gray-400')}>
+                        {seoTitleLen}/60
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Meta Description
+                    </label>
+                    <textarea
+                      value={form.seo_description}
+                      onChange={(e) => set('seo_description', e.target.value)}
+                      placeholder="Opis koji se prikazuje u Google rezultatima (preporuka: 150-160 karaktera)..."
+                      rows={3}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red resize-none"
+                    />
+                    <div className="flex justify-between mt-1">
+                      <p className="text-xs text-gray-400">Preporuka: 150-160 karaktera</p>
+                      <span className={cn('text-xs font-mono', seoDescLen > 160 ? 'text-red-500' : seoDescLen > 140 ? 'text-green-600' : 'text-gray-400')}>
+                        {seoDescLen}/160
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* SERP preview */}
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Google pregled</p>
+                    <div className="space-y-1">
+                      <p className="text-xs text-green-700 dark:text-green-500">zrenjanindanas.rs › vest › {form.title ? form.title.toLowerCase().replace(/\s+/g, '-').slice(0, 30) : 'naslov-vesti'}</p>
+                      <p className="text-blue-700 dark:text-blue-400 font-medium text-base line-clamp-1">
+                        {form.seo_title || form.title || 'SEO naslov vesti | Zrenjanin Danas'}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
+                        {form.seo_description || form.excerpt || 'Meta opis će se prikazati ovde u Google rezultatima pretrage.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'settings' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Tagovi</label>
+                    <div className="relative">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={form.tags}
+                        onChange={(e) => set('tags', e.target.value)}
+                        placeholder="Zrenjanin, Vojvodina, infrastruktura (razdvojite zarezom)"
+                        className="w-full pl-9 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Zakazana objava</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="datetime-local"
+                        value={form.scheduled_at}
+                        onChange={(e) => set('scheduled_at', e.target.value)}
+                        className="w-full pl-9 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                      />
+                    </div>
+                  </div>
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex gap-2 text-sm text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>Zakazana objava je aktivna samo u produkciji sa Supabase backend-om.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-4">
+          {/* Publish controls */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+            <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Objava</h3>
+            <div className="space-y-2">
+              {[
+                { key: 'published', label: 'Objavljeno', color: 'text-green-600' },
+                { key: 'breaking', label: 'Breaking News', color: 'text-red-600' },
+                { key: 'featured', label: 'Istaknuta vest', color: 'text-yellow-600' },
+                { key: 'trending', label: 'Trending', color: 'text-orange-600' },
+              ].map(({ key, label, color }) => (
+                <label key={key} className="flex items-center justify-between cursor-pointer group">
+                  <span className={cn('text-sm font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors', form[key as keyof typeof form] ? color : 'text-gray-500')}>
+                    {label}
+                  </span>
+                  <div
+                    onClick={() => set(key as keyof typeof EMPTY_FORM, !form[key as keyof typeof form])}
+                    className={cn(
+                      'relative w-10 h-5 rounded-full transition-colors cursor-pointer',
+                      form[key as keyof typeof form] ? 'bg-brand-red' : 'bg-gray-200 dark:bg-gray-700'
+                    )}
+                  >
+                    <div className={cn(
+                      'absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform',
+                      form[key as keyof typeof form] ? 'translate-x-5' : 'translate-x-0.5'
+                    )} />
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Category */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+            <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Kategorija *</h3>
+            <div className="relative">
+              <select
+                value={form.category}
+                onChange={(e) => set('category', e.target.value)}
+                className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red appearance-none pr-8"
+              >
+                {Object.entries(CATEGORY_LABELS).map(([slug, label]) => (
+                  <option key={slug} value={slug}>{label}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Image */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+            <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              Naslovna slika
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">URL slike</label>
+                <input
+                  type="url"
+                  value={form.image_url}
+                  onChange={(e) => set('image_url', e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO)</label>
+                <input
+                  type="text"
+                  value={form.image_alt}
+                  onChange={(e) => set('image_alt', e.target.value)}
+                  placeholder="Opis slike za pretraživače..."
+                  className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                />
+              </div>
+              {form.image_url && (
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={form.image_url} alt={form.image_alt} className="w-full h-full object-cover" />
+                </div>
+              )}
+              {!form.image_url && (
+                <div className="aspect-video rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <div className="text-center text-gray-400">
+                    <ImageIcon className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                    <p className="text-xs">Pregled slike</p>
+                  </div>
+                </div>
+              )}
+              <p className="text-xs text-gray-400">
+                Preporučene slike:{' '}
+                <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-brand-red hover:underline">
+                  Unsplash
+                </a>
+                {' '}· Format 1200×628px
+              </p>
+            </div>
+          </div>
+
+          {/* Save buttons */}
+          <div className="space-y-2">
+            <button
+              onClick={() => handleSave(true)}
+              className="w-full flex items-center justify-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white py-3 rounded-lg font-bold text-sm transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+              Objavi vest
+            </button>
+            <button
+              onClick={() => handleSave(false)}
+              className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-bold text-sm transition-colors"
+            >
+              <Save className="w-4 h-4" />
+              Sačuvaj kao nacrt
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
