@@ -63,14 +63,14 @@ export function Navbar() {
         <div className="container mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-brand-red rounded flex items-center justify-center">
-              <span className="text-white font-headline font-black text-xl leading-none">B</span>
+              <span className="text-white font-headline font-black text-xl leading-none">Z</span>
             </div>
             <div className="leading-tight">
               <span className="block font-headline font-black text-2xl text-gray-900 dark:text-white tracking-tight">
-                BANATSKI
+                ZRENJANIN
               </span>
               <span className="block text-brand-red font-bold text-sm tracking-[0.3em] uppercase -mt-1">
-                GLAS
+                DANAS
               </span>
             </div>
           </Link>

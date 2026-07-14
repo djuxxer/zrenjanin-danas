@@ -1,4 +1,4 @@
-# Banatski Glas — Lokalni News Portal
+# Zrenjanin Danas — Lokalni News Portal
 
 Profesionalni news portal za lokalne vesti iz Zrenjanina, Vojvodine i Srbije. Izgrađen sa Next.js 15, Tailwind CSS, TypeScript i Supabase.
 
@@ -17,7 +17,7 @@ Profesionalni news portal za lokalne vesti iz Zrenjanina, Vojvodine i Srbije. Iz
 ## 📁 Struktura projekta
 
 ```
-banatski-glas/
+zrenjanin-danas/
 ├── src/
 │   ├── app/
 │   │   ├── (site)/                    # Javni deo sajta
@@ -59,8 +59,8 @@ banatski-glas/
 ### 1. Kloniranje i instalacija
 
 ```bash
-git clone https://github.com/your-username/banatski-glas.git
-cd banatski-glas
+git clone https://github.com/your-username/zrenjanin-danas.git
+cd zrenjanin-danas
 npm install
 ```
 
@@ -110,13 +110,13 @@ U Supabase Dashboard → Storage:
 ### 4. Kreiranje admin korisnika
 
 U Supabase Dashboard → Authentication → Users → Invite user:
-- Email: `admin@banatskiglas.rs`
+- Email: `admin@zrenjanindanas.rs`
 - Password: (generišite sigurnu lozinku)
 
 Zatim u SQL Editor:
 ```sql
 INSERT INTO public.profiles (id, full_name, role)
-VALUES ('USER_ID_FROM_AUTH', 'Admin Banatski Glas', 'admin');
+VALUES ('USER_ID_FROM_AUTH', 'Admin Zrenjanin Danas', 'admin');
 ```
 
 ### 5. Seed demo vesti (opcionalno)
@@ -145,7 +145,7 @@ npx vercel --prod
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
-NEXT_PUBLIC_SITE_URL  (npr. https://banatskiglas.rs)
+NEXT_PUBLIC_SITE_URL  (npr. https://zrenjanindanas.rs)
 ```
 
 ## 🔒 Admin Panel
@@ -215,8 +215,8 @@ Dostupan na: `https://vasa-domena.rs/admin`
 ## 🌐 Prilagođavanje domene
 
 U Vercel Dashboard → Domains dodajte:
-- `banatskiglas.rs`
-- `www.banatskiglas.rs`
+- `zrenjanindanas.rs`
+- `www.zrenjanindanas.rs`
 
 Update `NEXT_PUBLIC_SITE_URL` na produkcijsku domenu.
 
@@ -230,5 +230,5 @@ Update `NEXT_PUBLIC_SITE_URL` na produkcijsku domenu.
 
 ---
 
-**Kontakt redakcija**: redakcija@banatskiglas.rs  
-**Tehnička podrška**: dev@banatskiglas.rs
+**Kontakt redakcija**: redakcija@zrenjanindanas.rs  
+**Tehnička podrška**: dev@zrenjanindanas.rs

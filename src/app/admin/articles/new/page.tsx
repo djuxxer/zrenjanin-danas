@@ -192,9 +192,9 @@ export default function NewArticlePage() {
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Google pregled</p>
                     <div className="space-y-1">
-                      <p className="text-xs text-green-700 dark:text-green-500">banatskiglas.rs › vest › {form.title ? form.title.toLowerCase().replace(/\s+/g, '-').slice(0, 30) : 'naslov-vesti'}</p>
+                      <p className="text-xs text-green-700 dark:text-green-500">zrenjanindanas.rs › vest › {form.title ? form.title.toLowerCase().replace(/\s+/g, '-').slice(0, 30) : 'naslov-vesti'}</p>
                       <p className="text-blue-700 dark:text-blue-400 font-medium text-base line-clamp-1">
-                        {form.seo_title || form.title || 'SEO naslov vesti | Banatski Glas'}
+                        {form.seo_title || form.title || 'SEO naslov vesti | Zrenjanin Danas'}
                       </p>
                       <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
                         {form.seo_description || form.excerpt || 'Meta opis će se prikazati ovde u Google rezultatima pretrage.'}

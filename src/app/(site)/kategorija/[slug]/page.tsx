@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!(slug in CATEGORY_LABELS)) return { title: 'Kategorija nije pronađena' }
   const label = CATEGORY_LABELS[slug as Category]
   return {
-    title: `${label} — Banatski Glas`,
-    description: `Sve vesti iz kategorije ${label} na portalu Banatski Glas.`,
+    title: `${label} — Zrenjanin Danas`,
+    description: `Sve vesti iz kategorije ${label} na portalu Zrenjanin Danas.`,
   }
 }
 

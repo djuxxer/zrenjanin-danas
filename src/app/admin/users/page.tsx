@@ -12,11 +12,11 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: typeof
 }
 
 const DEMO_USERS = [
-  { id: '1', full_name: 'Nikola Jovanović', email: 'nikola@banatskiglas.rs', role: 'admin' as UserRole, articles: 45, lastActive: 'Aktivno' },
-  { id: '2', full_name: 'Milica Petrović', email: 'milica@banatskiglas.rs', role: 'urednik' as UserRole, articles: 128, lastActive: 'pre 2h' },
-  { id: '3', full_name: 'Stefan Nikolić', email: 'stefan@banatskiglas.rs', role: 'novinar' as UserRole, articles: 67, lastActive: 'pre 1 dan' },
-  { id: '4', full_name: 'Ana Marković', email: 'ana@banatskiglas.rs', role: 'novinar' as UserRole, articles: 34, lastActive: 'pre 3 dana' },
-  { id: '5', full_name: 'Dragan Ilić', email: 'dragan@banatskiglas.rs', role: 'novinar' as UserRole, articles: 19, lastActive: 'pre 1 nedelja' },
+  { id: '1', full_name: 'Nikola Jovanović', email: 'nikola@zrenjanindanas.rs', role: 'admin' as UserRole, articles: 45, lastActive: 'Aktivno' },
+  { id: '2', full_name: 'Milica Petrović', email: 'milica@zrenjanindanas.rs', role: 'urednik' as UserRole, articles: 128, lastActive: 'pre 2h' },
+  { id: '3', full_name: 'Stefan Nikolić', email: 'stefan@zrenjanindanas.rs', role: 'novinar' as UserRole, articles: 67, lastActive: 'pre 1 dan' },
+  { id: '4', full_name: 'Ana Marković', email: 'ana@zrenjanindanas.rs', role: 'novinar' as UserRole, articles: 34, lastActive: 'pre 3 dana' },
+  { id: '5', full_name: 'Dragan Ilić', email: 'dragan@zrenjanindanas.rs', role: 'novinar' as UserRole, articles: 19, lastActive: 'pre 1 nedelja' },
 ]
 
 export default function AdminUsersPage() {
@@ -52,7 +52,7 @@ export default function AdminUsersPage() {
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="ime@banatskiglas.rs"
+                placeholder="ime@zrenjanindanas.rs"
                 className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
               />
             </div>

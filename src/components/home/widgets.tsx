@@ -90,7 +90,7 @@ export function AdBanner({ size = 'medium' }: { size?: 'small' | 'medium' | 'lar
     >
       <div className="text-center">
         <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Reklama</p>
-        <p className="text-xs text-gray-400 mt-0.5">Oglasite se na Banatski Glas</p>
+        <p className="text-xs text-gray-400 mt-0.5">Oglasite se na Zrenjanin Danas</p>
       </div>
     </div>
   )

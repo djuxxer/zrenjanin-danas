@@ -39,7 +39,7 @@ export function readingTime(content: string): number {
   return Math.ceil(words / 200)
 }
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://banatskiglas.rs'
-export const SITE_NAME = 'Banatski Glas'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://zrenjanindanas.rs'
+export const SITE_NAME = 'Zrenjanin Danas'
 export const SITE_DESCRIPTION =
   'Najnovije vesti iz Zrenjanina, Vojvodine i Srbije — politika, ekonomija, sport, kultura i hronika.'

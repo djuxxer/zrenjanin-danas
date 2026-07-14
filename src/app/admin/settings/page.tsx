@@ -5,9 +5,9 @@ import { Save, Globe, Bell, Palette, Database, Shield } from 'lucide-react'
 
 export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false)
-  const [siteName, setSiteName] = useState('Banatski Glas')
-  const [siteUrl, setSiteUrl] = useState('https://banatskiglas.rs')
-  const [contactEmail, setContactEmail] = useState('redakcija@banatskiglas.rs')
+  const [siteName, setSiteName] = useState('Zrenjanin Danas')
+  const [siteUrl, setSiteUrl] = useState('https://zrenjanindanas.rs')
+  const [contactEmail, setContactEmail] = useState('redakcija@zrenjanindanas.rs')
   const [analyticsId, setAnalyticsId] = useState('G-XXXXXXXXXX')
   const [fbPixel, setFbPixel] = useState('')
   const [maintenanceMode, setMaintenanceMode] = useState(false)
