@@ -1,0 +1,385 @@
+--- a/src/app/admin/(protected)/articles/new/page.tsx
++++ b/src/app/admin/(protected)/articles/new/page.tsx
+@@ -1,9 +1,10 @@
+ 'use client'
+ 
+-import { useState } from 'react'
+-import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle } from 'lucide-react'
++import { useState, useMemo } from 'react'
++import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle } from 'lucide-react'
+ import { CATEGORY_LABELS, type Category } from '@/types'
+ import { cn } from '@/lib/utils'
++import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
+ 
+ const EMPTY_FORM = {
+   title: '',
+@@ -13,6 +14,7 @@
+   category: 'zrenjanin' as Category,
+   image_url: '',
+   image_alt: '',
++  focus_keyphrase: '',
+   seo_title: '',
+   seo_description: '',
+   tags: '',
+@@ -23,15 +25,51 @@
+   scheduled_at: '',
+ }
+ 
++// Polja koja MORAJU biti popunjena pre nego što se vest može objaviti
++const REQUIRED_FOR_PUBLISH: { key: keyof typeof EMPTY_FORM; label: string; tab: 'content' | 'seo' | 'settings' }[] = [
++  { key: 'title', label: 'Naslov', tab: 'content' },
++  { key: 'content', label: 'Sadržaj vesti', tab: 'content' },
++  { key: 'excerpt', label: 'Kratak opis (excerpt)', tab: 'content' },
++  { key: 'image_url', label: 'URL naslovne slike', tab: 'content' },
++  { key: 'image_alt', label: 'Alt tekst slike', tab: 'content' },
++  { key: 'focus_keyphrase', label: 'Ključna fraza (focus keyphrase)', tab: 'seo' },
++  { key: 'seo_title', label: 'SEO naslov', tab: 'seo' },
++  { key: 'seo_description', label: 'Meta description', tab: 'seo' },
++]
++
+ export default function NewArticlePage() {
+   const [form, setForm] = useState(EMPTY_FORM)
+   const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'settings'>('content')
+   const [saved, setSaved] = useState(false)
++  const [publishError, setPublishError] = useState<string | null>(null)
+ 
+   const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
+     setForm((prev) => ({ ...prev, [key]: value }))
+ 
++  const seo = useMemo(() => calculateSeoScore(form), [form])
++
+   const handleSave = (publish: boolean) => {
++    if (publish) {
++      const missing = REQUIRED_FOR_PUBLISH.filter((f) => !String(form[f.key]).trim())
++
++      if (missing.length > 0) {
++        setPublishError(
++          `Za objavu vesti moraš popuniti: ${missing.map((f) => f.label).join(', ')}.`
++        )
++        setActiveTab(missing[0].tab)
++        return
++      }
++
++      if (seo.score < SEO_PUBLISH_THRESHOLD) {
++        setPublishError(
++          `SEO ocena je ${seo.score}% — potrebno je najmanje ${SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi. Proveri SEO tab i popravi označene stavke.`
++        )
++        setActiveTab('seo')
++        return
++      }
++    }
++
++    setPublishError(null)
+     set('published', publish)
+     setSaved(true)
+     setTimeout(() => setSaved(false), 3000)
+@@ -67,6 +105,13 @@
+         </div>
+       </div>
+ 
++      {publishError && (
++        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 text-red-700 dark:text-red-400 text-sm font-semibold flex items-start gap-2">
++          <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
++          <span>{publishError}</span>
++        </div>
++      )}
++
+       {saved && (
+         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-green-700 dark:text-green-400 text-sm font-semibold flex items-center gap-2">
+           ✓ Vest je uspešno {form.published ? 'objavljena' : 'sačuvana kao nacrt'}!
+@@ -150,9 +195,61 @@
+ 
+               {activeTab === 'seo' && (
+                 <div className="space-y-4">
++                  {/* SEO score summary */}
++                  <div
++                    className={cn(
++                      'rounded-xl p-4 border flex items-center gap-4',
++                      seo.color === 'green' && 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
++                      seo.color === 'orange' && 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
++                      seo.color === 'red' && 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
++                    )}
++                  >
++                    <div
++                      className={cn(
++                        'w-14 h-14 rounded-full flex items-center justify-center font-black text-lg flex-shrink-0',
++                        seo.color === 'green' && 'bg-green-600 text-white',
++                        seo.color === 'orange' && 'bg-amber-500 text-white',
++                        seo.color === 'red' && 'bg-red-600 text-white'
++                      )}
++                    >
++                      {seo.score}%
++                    </div>
++                    <div>
++                      <p
++                        className={cn(
++                          'font-bold text-sm',
++                          seo.color === 'green' && 'text-green-700 dark:text-green-400',
++                          seo.color === 'orange' && 'text-amber-700 dark:text-amber-400',
++                          seo.color === 'red' && 'text-red-700 dark:text-red-400'
++                        )}
++                      >
++                        SEO ocena: {seo.label}
++                      </p>
++                      <p className="text-xs text-gray-500 mt-0.5">
++                        Potrebno je najmanje {SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi.
++                      </p>
++                    </div>
++                  </div>
++
+                   <div>
+                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+-                      SEO Naslov
++                      Ključna fraza (focus keyphrase) *
++                    </label>
++                    <input
++                      type="text"
++                      value={form.focus_keyphrase}
++                      onChange={(e) => set('focus_keyphrase', e.target.value)}
++                      placeholder="npr. Zrenjanin infrastruktura"
++                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
++                    />
++                    <p className="text-xs text-gray-400 mt-1">
++                      Glavna fraza po kojoj želiš da se ova vest nalazi na Google-u. Koristi je u naslovu, opisu i tekstu.
++                    </p>
++                  </div>
++
++                  <div>
++                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
++                      SEO Naslov *
+                     </label>
+                     <input
+                       type="text"
+@@ -171,7 +268,7 @@
+ 
+                   <div>
+                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+-                      Meta Description
++                      Meta Description *
+                     </label>
+                     <textarea
+                       value={form.seo_description}
+@@ -201,6 +298,29 @@
+                       </p>
+                     </div>
+                   </div>
++
++                  {/* SEO checklist */}
++                  <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4">
++                    <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">SEO analiza</p>
++                    <ul className="space-y-2">
++                      {seo.checks.map((check) => (
++                        <li key={check.id} className="flex items-start gap-2 text-sm">
++                          {check.status === 'good' && <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />}
++                          {check.status === 'ok' && <MinusCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />}
++                          {check.status === 'bad' && <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />}
++                          <span
++                            className={cn(
++                              check.status === 'good' && 'text-gray-600 dark:text-gray-300',
++                              check.status === 'ok' && 'text-amber-700 dark:text-amber-400',
++                              check.status === 'bad' && 'text-red-600 dark:text-red-400'
++                            )}
++                          >
++                            {check.label}
++                          </span>
++                        </li>
++                      ))}
++                    </ul>
++                  </div>
+                 </div>
+               )}
+ 
+@@ -243,6 +363,45 @@
+ 
+         {/* Sidebar */}
+         <div className="space-y-4">
++          {/* SEO score — always visible */}
++          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
++            <div className="flex items-center justify-between mb-2">
++              <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500">SEO ocena</h3>
++              <SearchIcon className="w-4 h-4 text-gray-400" />
++            </div>
++            <div className="flex items-center gap-3">
++              <div
++                className={cn(
++                  'w-12 h-12 rounded-full flex items-center justify-center font-black text-sm text-white flex-shrink-0',
++                  seo.color === 'green' && 'bg-green-600',
++                  seo.color === 'orange' && 'bg-amber-500',
++                  seo.color === 'red' && 'bg-red-600'
++                )}
++              >
++                {seo.score}%
++              </div>
++              <div className="min-w-0">
++                <p
++                  className={cn(
++                    'text-sm font-bold truncate',
++                    seo.color === 'green' && 'text-green-700 dark:text-green-400',
++                    seo.color === 'orange' && 'text-amber-700 dark:text-amber-400',
++                    seo.color === 'red' && 'text-red-700 dark:text-red-400'
++                  )}
++                >
++                  {seo.label}
++                </p>
++                <p className="text-xs text-gray-400">Prag za objavu: {SEO_PUBLISH_THRESHOLD}%</p>
++              </div>
++            </div>
++            <button
++              onClick={() => setActiveTab('seo')}
++              className="w-full mt-3 text-xs font-semibold text-brand-red hover:underline text-left"
++            >
++              Pogledaj SEO analizu →
++            </button>
++          </div>
++
+           {/* Publish controls */}
+           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Objava</h3>
+@@ -299,7 +458,7 @@
+             </h3>
+             <div className="space-y-3">
+               <div>
+-                <label className="text-xs text-gray-500 mb-1 block">URL slike</label>
++                <label className="text-xs text-gray-500 mb-1 block">URL slike *</label>
+                 <input
+                   type="url"
+                   value={form.image_url}
+@@ -309,7 +468,7 @@
+                 />
+               </div>
+               <div>
+-                <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO)</label>
++                <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO) *</label>
+                 <input
+                   type="text"
+                   value={form.image_alt}
+--- /dev/null
++++ b/src/lib/seo-score.ts
+@@ -0,0 +1,127 @@
++export type SeoCheckStatus = 'good' | 'ok' | 'bad'
++
++export interface SeoCheck {
++  id: string
++  label: string
++  status: SeoCheckStatus
++}
++
++export interface SeoScoreInput {
++  focus_keyphrase: string
++  title: string
++  seo_title: string
++  seo_description: string
++  content: string
++  excerpt: string
++  image_alt: string
++}
++
++export interface SeoScoreResult {
++  score: number
++  checks: SeoCheck[]
++  color: 'red' | 'orange' | 'green'
++  label: string
++}
++
++const STRIP_HTML = /<[^>]+>/g
++
++/**
++ * Yoast-stil SEO provera. Vraća ocenu 0-100 i listu pojedinačnih provera.
++ * Ocena 80+ = zeleno (spremno za objavu), 50-79 = narandžasto, <50 = crveno.
++ */
++export function calculateSeoScore(input: SeoScoreInput): SeoScoreResult {
++  const kp = input.focus_keyphrase.trim().toLowerCase()
++  const checks: SeoCheck[] = []
++
++  const seoTitle = (input.seo_title || input.title).toLowerCase()
++  const seoDesc = input.seo_description.toLowerCase()
++  const plainContent = input.content.replace(STRIP_HTML, ' ').replace(/\s+/g, ' ').trim().toLowerCase()
++  const wordCount = plainContent.length > 0 ? plainContent.split(' ').filter(Boolean).length : 0
++
++  if (!kp) {
++    checks.push({ id: 'keyphrase', label: 'Unesite ključnu frazu (focus keyphrase)', status: 'bad' })
++    return { score: 0, checks, color: 'red', label: 'Nedovoljno' }
++  }
++
++  checks.push({ id: 'keyphrase', label: 'Ključna fraza je uneta', status: 'good' })
++
++  checks.push({
++    id: 'title',
++    label: 'Ključna fraza se nalazi u SEO naslovu',
++    status: seoTitle.includes(kp) ? 'good' : 'bad',
++  })
++
++  checks.push({
++    id: 'description',
++    label: 'Ključna fraza se nalazi u meta opisu',
++    status: seoDesc.includes(kp) ? 'good' : 'bad',
++  })
++
++  checks.push({
++    id: 'content',
++    label: 'Ključna fraza se pojavljuje u tekstu vesti',
++    status: plainContent.includes(kp) ? 'good' : 'bad',
++  })
++
++  const intro = plainContent.slice(0, 300)
++  checks.push({
++    id: 'intro',
++    label: 'Ključna fraza se pojavljuje na početku teksta',
++    status: intro.includes(kp) ? 'good' : 'ok',
++  })
++
++  let density = 0
++  if (kp && wordCount > 0) {
++    const kpWordCount = kp.split(' ').filter(Boolean).length
++    const occurrences = plainContent.split(kp).length - 1
++    density = (occurrences * kpWordCount * 100) / wordCount
++  }
++  checks.push({
++    id: 'density',
++    label: `Gustina ključne fraze u tekstu (${density.toFixed(1)}%, preporuka 0.5–3%)`,
++    status: density >= 0.5 && density <= 3 ? 'good' : density > 0 ? 'ok' : 'bad',
++  })
++
++  checks.push({
++    id: 'title-length',
++    label: 'Dužina SEO naslova (preporuka 50-60 karaktera)',
++    status: seoTitle.length >= 40 && seoTitle.length <= 60 ? 'good' : seoTitle.length > 0 ? 'ok' : 'bad',
++  })
++
++  checks.push({
++    id: 'desc-length',
++    label: 'Dužina meta opisa (preporuka 120-160 karaktera)',
++    status: seoDesc.length >= 120 && seoDesc.length <= 160 ? 'good' : seoDesc.length > 0 ? 'ok' : 'bad',
++  })
++
++  checks.push({
++    id: 'content-length',
++    label: `Dužina teksta vesti (${wordCount} reči, preporuka 300+)`,
++    status: wordCount >= 300 ? 'good' : wordCount >= 150 ? 'ok' : 'bad',
++  })
++
++  checks.push({
++    id: 'alt',
++    label: 'Ključna fraza se nalazi u alt tekstu slike',
++    status: input.image_alt.toLowerCase().includes(kp) ? 'good' : 'bad',
++  })
++
++  checks.push({
++    id: 'excerpt',
++    label: 'Kratak opis (excerpt) je unet',
++    status: input.excerpt.trim().length > 0 ? 'good' : 'bad',
++  })
++
++  const points = checks.reduce(
++    (sum, c) => sum + (c.status === 'good' ? 1 : c.status === 'ok' ? 0.5 : 0),
++    0
++  )
++  const score = Math.round((points / checks.length) * 100)
++
++  const color = score >= 80 ? 'green' : score >= 50 ? 'orange' : 'red'
++  const label = score >= 80 ? 'Odlično' : score >= 50 ? 'Može bolje' : 'Nedovoljno'
++
++  return { score, checks, color, label }
++}
++
++export const SEO_PUBLISH_THRESHOLD = 80

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn } from '@/lib/utils'
+import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 
 const EMPTY_FORM = {
   title: '',
@@ -13,6 +14,7 @@ const EMPTY_FORM = {
   category: 'zrenjanin' as Category,
   image_url: '',
   image_alt: '',
+  focus_keyphrase: '',
   seo_title: '',
   seo_description: '',
   tags: '',
@@ -23,15 +25,51 @@ const EMPTY_FORM = {
   scheduled_at: '',
 }
 
+// Polja koja MORAJU biti popunjena pre nego što se vest može objaviti
+const REQUIRED_FOR_PUBLISH: { key: keyof typeof EMPTY_FORM; label: string; tab: 'content' | 'seo' | 'settings' }[] = [
+  { key: 'title', label: 'Naslov', tab: 'content' },
+  { key: 'content', label: 'Sadržaj vesti', tab: 'content' },
+  { key: 'excerpt', label: 'Kratak opis (excerpt)', tab: 'content' },
+  { key: 'image_url', label: 'URL naslovne slike', tab: 'content' },
+  { key: 'image_alt', label: 'Alt tekst slike', tab: 'content' },
+  { key: 'focus_keyphrase', label: 'Ključna fraza (focus keyphrase)', tab: 'seo' },
+  { key: 'seo_title', label: 'SEO naslov', tab: 'seo' },
+  { key: 'seo_description', label: 'Meta description', tab: 'seo' },
+]
+
 export default function NewArticlePage() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'settings'>('content')
   const [saved, setSaved] = useState(false)
+  const [publishError, setPublishError] = useState<string | null>(null)
 
   const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
+  const seo = useMemo(() => calculateSeoScore(form), [form])
+
   const handleSave = (publish: boolean) => {
+    if (publish) {
+      const missing = REQUIRED_FOR_PUBLISH.filter((f) => !String(form[f.key]).trim())
+
+      if (missing.length > 0) {
+        setPublishError(
+          `Za objavu vesti moraš popuniti: ${missing.map((f) => f.label).join(', ')}.`
+        )
+        setActiveTab(missing[0].tab)
+        return
+      }
+
+      if (seo.score < SEO_PUBLISH_THRESHOLD) {
+        setPublishError(
+          `SEO ocena je ${seo.score}% — potrebno je najmanje ${SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi. Proveri SEO tab i popravi označene stavke.`
+        )
+        setActiveTab('seo')
+        return
+      }
+    }
+
+    setPublishError(null)
     set('published', publish)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
@@ -66,6 +104,13 @@ export default function NewArticlePage() {
           </button>
         </div>
       </div>
+
+      {publishError && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 text-red-700 dark:text-red-400 text-sm font-semibold flex items-start gap-2">
+          <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <span>{publishError}</span>
+        </div>
+      )}
 
       {saved && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-green-700 dark:text-green-400 text-sm font-semibold flex items-center gap-2">
@@ -150,9 +195,61 @@ export default function NewArticlePage() {
 
               {activeTab === 'seo' && (
                 <div className="space-y-4">
+                  {/* SEO score summary */}
+                  <div
+                    className={cn(
+                      'rounded-xl p-4 border flex items-center gap-4',
+                      seo.color === 'green' && 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+                      seo.color === 'orange' && 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+                      seo.color === 'red' && 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'w-14 h-14 rounded-full flex items-center justify-center font-black text-lg flex-shrink-0',
+                        seo.color === 'green' && 'bg-green-600 text-white',
+                        seo.color === 'orange' && 'bg-amber-500 text-white',
+                        seo.color === 'red' && 'bg-red-600 text-white'
+                      )}
+                    >
+                      {seo.score}%
+                    </div>
+                    <div>
+                      <p
+                        className={cn(
+                          'font-bold text-sm',
+                          seo.color === 'green' && 'text-green-700 dark:text-green-400',
+                          seo.color === 'orange' && 'text-amber-700 dark:text-amber-400',
+                          seo.color === 'red' && 'text-red-700 dark:text-red-400'
+                        )}
+                      >
+                        SEO ocena: {seo.label}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Potrebno je najmanje {SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi.
+                      </p>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
-                      SEO Naslov
+                      Ključna fraza (focus keyphrase) *
+                    </label>
+                    <input
+                      type="text"
+                      value={form.focus_keyphrase}
+                      onChange={(e) => set('focus_keyphrase', e.target.value)}
+                      placeholder="npr. Zrenjanin infrastruktura"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Glavna fraza po kojoj želiš da se ova vest nalazi na Google-u. Koristi je u naslovu, opisu i tekstu.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      SEO Naslov *
                     </label>
                     <input
                       type="text"
@@ -171,7 +268,7 @@ export default function NewArticlePage() {
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
-                      Meta Description
+                      Meta Description *
                     </label>
                     <textarea
                       value={form.seo_description}
@@ -200,6 +297,29 @@ export default function NewArticlePage() {
                         {form.seo_description || form.excerpt || 'Meta opis će se prikazati ovde u Google rezultatima pretrage.'}
                       </p>
                     </div>
+                  </div>
+
+                  {/* SEO checklist */}
+                  <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">SEO analiza</p>
+                    <ul className="space-y-2">
+                      {seo.checks.map((check) => (
+                        <li key={check.id} className="flex items-start gap-2 text-sm">
+                          {check.status === 'good' && <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />}
+                          {check.status === 'ok' && <MinusCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />}
+                          {check.status === 'bad' && <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />}
+                          <span
+                            className={cn(
+                              check.status === 'good' && 'text-gray-600 dark:text-gray-300',
+                              check.status === 'ok' && 'text-amber-700 dark:text-amber-400',
+                              check.status === 'bad' && 'text-red-600 dark:text-red-400'
+                            )}
+                          >
+                            {check.label}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
@@ -243,6 +363,45 @@ export default function NewArticlePage() {
 
         {/* Sidebar */}
         <div className="space-y-4">
+          {/* SEO score — always visible */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500">SEO ocena</h3>
+              <SearchIcon className="w-4 h-4 text-gray-400" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'w-12 h-12 rounded-full flex items-center justify-center font-black text-sm text-white flex-shrink-0',
+                  seo.color === 'green' && 'bg-green-600',
+                  seo.color === 'orange' && 'bg-amber-500',
+                  seo.color === 'red' && 'bg-red-600'
+                )}
+              >
+                {seo.score}%
+              </div>
+              <div className="min-w-0">
+                <p
+                  className={cn(
+                    'text-sm font-bold truncate',
+                    seo.color === 'green' && 'text-green-700 dark:text-green-400',
+                    seo.color === 'orange' && 'text-amber-700 dark:text-amber-400',
+                    seo.color === 'red' && 'text-red-700 dark:text-red-400'
+                  )}
+                >
+                  {seo.label}
+                </p>
+                <p className="text-xs text-gray-400">Prag za objavu: {SEO_PUBLISH_THRESHOLD}%</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('seo')}
+              className="w-full mt-3 text-xs font-semibold text-brand-red hover:underline text-left"
+            >
+              Pogledaj SEO analizu →
+            </button>
+          </div>
+
           {/* Publish controls */}
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Objava</h3>
@@ -299,7 +458,7 @@ export default function NewArticlePage() {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">URL slike</label>
+                <label className="text-xs text-gray-500 mb-1 block">URL slike *</label>
                 <input
                   type="url"
                   value={form.image_url}
@@ -309,7 +468,7 @@ export default function NewArticlePage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO)</label>
+                <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO) *</label>
                 <input
                   type="text"
                   value={form.image_alt}
