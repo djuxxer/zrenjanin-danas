@@ -7,6 +7,7 @@ import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn, createSlug } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 import { createClient } from '@/lib/supabase/client'
+import { ImageUploadButton } from '@/components/admin/image-upload-button'
 
 const EMPTY_FORM = {
   title: '',
@@ -528,6 +529,7 @@ export default function NewArticlePage() {
                   className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
                 />
               </div>
+              <ImageUploadButton onUploaded={(url) => set('image_url', url)} />
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO) *</label>
                 <input

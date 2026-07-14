@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
 import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
 import { getApprovedComments } from '@/lib/comments'
+import { embedRichContent } from '@/lib/embed-content'
 import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
@@ -181,7 +182,7 @@ export default async function ArticlePage({ params }: Props) {
             {/* Article body */}
             <div
               className="article-content mb-8"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: embedRichContent(article.content) }}
             />
 
             {/* Tags */}

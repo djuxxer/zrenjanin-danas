@@ -1,0 +1,244 @@
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live10/src/app/(site)/vest/[slug]/page.tsx repo/src/app/(site)/vest/[slug]/page.tsx
+--- a/src/app/(site)/vest/[slug]/page.tsx	2026-07-14 20:56:42.000000000 +0000
++++ b/src/app/(site)/vest/[slug]/page.tsx	2026-07-14 21:00:40.530246448 +0000
+@@ -5,6 +5,7 @@
+ import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
+ import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
+ import { getApprovedComments } from '@/lib/comments'
++import { embedRichContent } from '@/lib/embed-content'
+ import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
+ import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
+ import { ArticleCard } from '@/components/article/article-card'
+@@ -181,7 +182,7 @@
+             {/* Article body */}
+             <div
+               className="article-content mb-8"
+-              dangerouslySetInnerHTML={{ __html: article.content }}
++              dangerouslySetInnerHTML={{ __html: embedRichContent(article.content) }}
+             />
+ 
+             {/* Tags */}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live10/src/app/admin/(protected)/articles/[id]/edit/page.tsx repo/src/app/admin/(protected)/articles/[id]/edit/page.tsx
+--- a/src/app/admin/(protected)/articles/[id]/edit/page.tsx	2026-07-14 20:56:42.000000000 +0000
++++ b/src/app/admin/(protected)/articles/[id]/edit/page.tsx	2026-07-14 20:59:59.129233436 +0000
+@@ -7,6 +7,7 @@
+ import { cn } from '@/lib/utils'
+ import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
+ import { createClient } from '@/lib/supabase/client'
++import { ImageUploadButton } from '@/components/admin/image-upload-button'
+ 
+ const EMPTY_FORM = {
+   title: '',
+@@ -571,6 +572,7 @@
+                   className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                 />
+               </div>
++              <ImageUploadButton onUploaded={(url) => set('image_url', url)} />
+               <div>
+                 <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO) *</label>
+                 <input
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live10/src/app/admin/(protected)/articles/new/page.tsx repo/src/app/admin/(protected)/articles/new/page.tsx
+--- a/src/app/admin/(protected)/articles/new/page.tsx	2026-07-14 20:56:42.000000000 +0000
++++ b/src/app/admin/(protected)/articles/new/page.tsx	2026-07-14 20:59:40.625337635 +0000
+@@ -7,6 +7,7 @@
+ import { cn, createSlug } from '@/lib/utils'
+ import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
+ import { createClient } from '@/lib/supabase/client'
++import { ImageUploadButton } from '@/components/admin/image-upload-button'
+ 
+ const EMPTY_FORM = {
+   title: '',
+@@ -528,6 +529,7 @@
+                   className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                 />
+               </div>
++              <ImageUploadButton onUploaded={(url) => set('image_url', url)} />
+               <div>
+                 <label className="text-xs text-gray-500 mb-1 block">Alt tekst (SEO) *</label>
+                 <input
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live10/src/components/admin/image-upload-button.tsx repo/src/components/admin/image-upload-button.tsx
+--- a/src/components/admin/image-upload-button.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b/src/components/admin/image-upload-button.tsx	2026-07-14 20:59:28.179832127 +0000
+@@ -0,0 +1,82 @@
++'use client'
++
++import { useRef, useState } from 'react'
++import { Upload, Loader2 } from 'lucide-react'
++import { createClient } from '@/lib/supabase/client'
++
++interface Props {
++  onUploaded: (url: string) => void
++}
++
++export function ImageUploadButton({ onUploaded }: Props) {
++  const inputRef = useRef<HTMLInputElement>(null)
++  const [uploading, setUploading] = useState(false)
++  const [error, setError] = useState<string | null>(null)
++
++  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
++    const file = e.target.files?.[0]
++    if (!file) return
++
++    setError(null)
++
++    if (file.size > 5 * 1024 * 1024) {
++      setError('Slika je prevelika (max 5MB).')
++      return
++    }
++
++    setUploading(true)
++
++    const supabase = createClient()
++    const {
++      data: { user },
++    } = await supabase.auth.getUser()
++
++    if (!user) {
++      setUploading(false)
++      setError('Sesija je istekla — uloguj se ponovo.')
++      return
++    }
++
++    const ext = file.name.split('.').pop()
++    const path = `${user.id}/${Date.now()}.${ext}`
++
++    const { error: uploadError } = await supabase.storage
++      .from('article-images')
++      .upload(path, file, { cacheControl: '3600', upsert: false })
++
++    setUploading(false)
++
++    if (uploadError) {
++      setError('Greška prilikom otpremanja: ' + uploadError.message)
++      return
++    }
++
++    const { data: publicUrlData } = supabase.storage.from('article-images').getPublicUrl(path)
++    onUploaded(publicUrlData.publicUrl)
++
++    if (inputRef.current) inputRef.current.value = ''
++  }
++
++  return (
++    <div>
++      <input
++        ref={inputRef}
++        type="file"
++        accept="image/jpeg,image/png,image/webp,image/gif"
++        onChange={handleFileChange}
++        className="hidden"
++        id="image-upload-input"
++      />
++      <button
++        type="button"
++        onClick={() => inputRef.current?.click()}
++        disabled={uploading}
++        className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 dark:border-gray-600 hover:border-brand-red text-gray-600 dark:text-gray-300 rounded-lg px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-60"
++      >
++        {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
++        {uploading ? 'Otpremanje...' : 'Otpremi sliku sa računara'}
++      </button>
++      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
++    </div>
++  )
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live10/src/lib/embed-content.ts repo/src/lib/embed-content.ts
+--- a/src/lib/embed-content.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/src/lib/embed-content.ts	2026-07-14 21:00:30.599833224 +0000
+@@ -0,0 +1,60 @@
++/**
++ * Pretvara YouTube i Instagram linkove u sadržaju vesti (kad su na svom redu,
++ * bilo kao goli link bilo kao <a> tag) u prave embed plejere.
++ *
++ * Preporuka za novinare: link nalepiti u svoj pasus/red, ne usred rečenice,
++ * da bi automatski prepoznavanje radilo pouzdano.
++ */
++
++const YOUTUBE_ID = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
++const INSTAGRAM_ID = /instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/
++
++function youtubeEmbedHtml(id: string): string {
++  return `<div class="video-embed" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1.5rem 0;border-radius:0.75rem;background:#000;"><iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" title="YouTube video"></iframe></div>`
++}
++
++function instagramEmbedHtml(id: string): string {
++  return `<div class="instagram-embed" style="margin:1.5rem 0;display:flex;justify-content:center;"><iframe src="https://www.instagram.com/p/${id}/embed" width="400" height="480" style="border:none;border-radius:0.75rem;max-width:100%;" scrolling="no" loading="lazy" title="Instagram objava"></iframe></div>`
++}
++
++export function embedRichContent(html: string): string {
++  let result = html
++
++  // 1) <p> koji sadrži SAMO <a href="...youtube...">...</a>
++  result = result.replace(
++    /<p>\s*<a[^>]*href="([^"]*(?:youtube\.com\/watch\?v=|youtu\.be\/)[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi,
++    (match, href) => {
++      const idMatch = href.match(YOUTUBE_ID)
++      return idMatch ? youtubeEmbedHtml(idMatch[1]) : match
++    }
++  )
++
++  // 2) <p> koji sadrži SAMO goli YouTube link (bez <a> taga)
++  result = result.replace(
++    /<p>\s*(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s<]+)\s*<\/p>/gi,
++    (match, url) => {
++      const idMatch = url.match(YOUTUBE_ID)
++      return idMatch ? youtubeEmbedHtml(idMatch[1]) : match
++    }
++  )
++
++  // 3) <p> koji sadrži SAMO <a href="...instagram.com/p ili /reel...">...</a>
++  result = result.replace(
++    /<p>\s*<a[^>]*href="([^"]*instagram\.com\/(?:p|reel)\/[^"]*)"[^>]*>[\s\S]*?<\/a>\s*<\/p>/gi,
++    (match, href) => {
++      const idMatch = href.match(INSTAGRAM_ID)
++      return idMatch ? instagramEmbedHtml(idMatch[1]) : match
++    }
++  )
++
++  // 4) <p> koji sadrži SAMO goli Instagram link (bez <a> taga)
++  result = result.replace(
++    /<p>\s*(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel)\/[^\s<]+)\s*<\/p>/gi,
++    (match, url) => {
++      const idMatch = url.match(INSTAGRAM_ID)
++      return idMatch ? instagramEmbedHtml(idMatch[1]) : match
++    }
++  )
++
++  return result
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live10/supabase/migrations/006_storage_bucket.sql repo/supabase/migrations/006_storage_bucket.sql
+--- a/supabase/migrations/006_storage_bucket.sql	1970-01-01 00:00:00.000000000 +0000
++++ b/supabase/migrations/006_storage_bucket.sql	2026-07-14 20:59:01.969501983 +0000
+@@ -0,0 +1,32 @@
++-- =============================================
++-- Storage bucket za upload slika uz vesti
++-- Pokreni ovo u Supabase SQL Editoru NAKON prethodnih migracija.
++-- =============================================
++
++-- Kreira javni bucket "article-images" (slike su javno dostupne preko URL-a, upload samo za ulogovane)
++INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
++VALUES (
++  'article-images',
++  'article-images',
++  true,
++  5242880, -- 5MB limit po slici
++  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
++)
++ON CONFLICT (id) DO NOTHING;
++
++-- Svako može da PROČITA sliku (javne slike na sajtu)
++CREATE POLICY "Article images are publicly readable"
++  ON storage.objects FOR SELECT
++  USING (bucket_id = 'article-images');
++
++-- Samo ulogovani korisnici (novinari/urednici/admin) mogu da otpreme sliku
++CREATE POLICY "Authenticated users can upload article images"
++  ON storage.objects FOR INSERT
++  TO authenticated
++  WITH CHECK (bucket_id = 'article-images');
++
++-- Ulogovani korisnici mogu da obrišu slike koje su sami otpremili
++CREATE POLICY "Users can delete their own uploaded images"
++  ON storage.objects FOR DELETE
++  TO authenticated
++  USING (bucket_id = 'article-images' AND owner = auth.uid());
