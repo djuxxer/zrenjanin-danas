@@ -14,6 +14,7 @@ import {
   BarChart2,
   PlusCircle,
   Bell,
+  MessageSquare,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -23,7 +24,8 @@ const NAV_ITEMS = [
   { label: 'Sve vesti', href: '/admin/articles', icon: FileText },
   { label: 'Nova vest', href: '/admin/articles/new', icon: PlusCircle },
   { label: 'Korisnici', href: '/admin/users', icon: Users },
-  { label: 'Statistika', href: '/admin/dashboard#stats', icon: BarChart2 },
+  { label: 'Komentari', href: '/admin/comments', icon: MessageSquare },
+  { label: 'Statistika', href: '/admin/stats', icon: BarChart2 },
   { label: 'Podešavanja', href: '/admin/settings', icon: Settings },
 ]
 

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
 import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
+import { getApprovedComments } from '@/lib/comments'
 import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
@@ -59,6 +60,7 @@ export default async function ArticlePage({ params }: Props) {
   article.views += 1
 
   const related = await getRelatedArticles(article)
+  const comments = await getApprovedComments(article.id)
   const categoryLabel = CATEGORY_LABELS[article.category]
   const categoryColor = CATEGORY_COLORS[article.category]
   const articleUrl = `${SITE_URL}/vest/${slug}`
@@ -222,7 +224,7 @@ export default async function ArticlePage({ params }: Props) {
             </div>
 
             {/* Comments */}
-            <CommentsSection articleId={article.id} />
+            <CommentsSection articleId={article.id} initialComments={comments} />
           </div>
 
           {/* Sidebar */}

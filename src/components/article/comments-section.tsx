@@ -1,44 +1,52 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, ThumbsUp, User } from 'lucide-react'
+import { MessageSquare, User, Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { timeAgo } from '@/lib/utils'
+import type { CommentData } from '@/lib/comments'
 
-interface Comment {
-  id: string
-  author: string
-  text: string
-  time: string
-  likes: number
+interface Props {
+  articleId: string
+  initialComments: CommentData[]
 }
 
-const DEMO_COMMENTS: Comment[] = [
-  { id: '1', author: 'Marko P.', text: 'Odlična vest! Konačno nešto pozitivno za naš grad.', time: 'pre 2 sata', likes: 12 },
-  { id: '2', author: 'Jovana M.', text: 'Nadam se da će ovo stvarno biti realizovano ovaj put.', time: 'pre 4 sata', likes: 8 },
-  { id: '3', author: 'Dragan V.', text: 'Zrenjanin zaslužuje više ovakvih ulaganja. Bravo!', time: 'pre 6 sati', likes: 5 },
-]
-
-export function CommentsSection({ articleId }: { articleId: string }) {
-  const [comments, setComments] = useState<Comment[]>(DEMO_COMMENTS)
+export function CommentsSection({ articleId, initialComments }: Props) {
+  const [comments] = useState<CommentData[]>(initialComments)
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [text, setText] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (name.trim() && text.trim()) {
-      const newComment: Comment = {
-        id: Date.now().toString(),
-        author: name.trim(),
-        text: text.trim(),
-        time: 'upravo sada',
-        likes: 0,
-      }
-      setComments((prev) => [newComment, ...prev])
-      setName('')
-      setText('')
-      setSubmitted(true)
-      setTimeout(() => setSubmitted(false), 3000)
+    if (!name.trim() || !email.trim() || !text.trim()) return
+
+    setSubmitting(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { error: insertError } = await supabase.from('comments').insert({
+      article_id: articleId,
+      author_name: name.trim(),
+      author_email: email.trim(),
+      content: text.trim(),
+    })
+
+    setSubmitting(false)
+
+    if (insertError) {
+      setError('Došlo je do greške. Pokušajte ponovo.')
+      return
     }
+
+    setName('')
+    setEmail('')
+    setText('')
+    setSubmitted(true)
+    setTimeout(() => setSubmitted(false), 4000)
   }
 
   return (
@@ -52,14 +60,24 @@ export function CommentsSection({ articleId }: { articleId: string }) {
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 mb-6">
         <h4 className="font-semibold text-sm mb-3">Ostavite komentar</h4>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Vaše ime"
-            required
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:border-brand-red"
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Vaše ime"
+              required
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Vaš email (neće biti objavljen)"
+              required
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+            />
+          </div>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -70,10 +88,16 @@ export function CommentsSection({ articleId }: { articleId: string }) {
           />
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500">Komentari se objavljuju nakon moderacije.</p>
-            <button type="submit" className="btn-primary text-sm py-2 px-4">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex items-center gap-2 btn-primary text-sm py-2 px-4 disabled:opacity-60"
+            >
+              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               Pošalji komentar
             </button>
           </div>
+          {error && <p className="text-red-600 text-sm font-semibold">{error}</p>}
           {submitted && (
             <p className="text-green-600 text-sm font-semibold">✓ Komentar je primljen, čeka moderaciju.</p>
           )}
@@ -89,17 +113,16 @@ export function CommentsSection({ articleId }: { articleId: string }) {
             </div>
             <div className="flex-1 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-sm">{comment.author}</span>
-                <span className="text-xs text-gray-500">{comment.time}</span>
+                <span className="font-semibold text-sm">{comment.author_name}</span>
+                <span className="text-xs text-gray-500">{timeAgo(comment.created_at)}</span>
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{comment.text}</p>
-              <button className="flex items-center gap-1 mt-2 text-xs text-gray-500 hover:text-brand-red transition-colors">
-                <ThumbsUp className="w-3 h-3" />
-                {comment.likes}
-              </button>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{comment.content}</p>
             </div>
           </div>
         ))}
+        {comments.length === 0 && (
+          <p className="text-sm text-gray-500 text-center py-4">Budi prvi koji će ostaviti komentar.</p>
+        )}
       </div>
     </section>
   )
