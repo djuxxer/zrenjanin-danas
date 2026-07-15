@@ -1,0 +1,362 @@
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live14/src/app/(site)/autor/[id]/page.tsx repo/src/app/(site)/autor/[id]/page.tsx
+--- a/src/app/(site)/autor/[id]/page.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b/src/app/(site)/autor/[id]/page.tsx	2026-07-15 19:06:59.658509385 +0000
+@@ -0,0 +1,78 @@
++import type { Metadata } from 'next'
++import { notFound } from 'next/navigation'
++import { User, FileText } from 'lucide-react'
++import Image from 'next/image'
++import { getAuthorById } from '@/lib/authors'
++import { getArticlesByAuthor } from '@/lib/articles'
++import { ArticleCard } from '@/components/article/article-card'
++import { SITE_NAME, SITE_URL } from '@/lib/utils'
++
++interface Props {
++  params: Promise<{ id: string }>
++}
++
++const ROLE_LABELS = {
++  admin: 'Glavni i odgovorni urednik',
++  urednik: 'Urednik',
++  novinar: 'Novinar',
++}
++
++export async function generateMetadata({ params }: Props): Promise<Metadata> {
++  const { id } = await params
++  const author = await getAuthorById(id)
++  if (!author) return { title: 'Autor nije pronađen' }
++
++  return {
++    title: author.full_name,
++    description: author.bio || `Vesti i tekstovi autora ${author.full_name} na portalu ${SITE_NAME}.`,
++    alternates: { canonical: `${SITE_URL}/autor/${id}` },
++  }
++}
++
++export default async function AuthorPage({ params }: Props) {
++  const { id } = await params
++  const author = await getAuthorById(id)
++  if (!author) notFound()
++
++  const articles = await getArticlesByAuthor(id)
++
++  return (
++    <div className="container mx-auto px-4 py-10 max-w-4xl">
++      {/* Author header */}
++      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-10 pb-8 border-b border-gray-200 dark:border-gray-800">
++        {author.avatar_url ? (
++          <div className="relative w-24 h-24 rounded-full overflow-hidden flex-shrink-0 border-4 border-white dark:border-gray-800 shadow">
++            <Image src={author.avatar_url} alt={author.full_name} fill sizes="96px" className="object-cover" />
++          </div>
++        ) : (
++          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 border-4 border-white dark:border-gray-800 shadow">
++            <User className="w-10 h-10 text-gray-400" />
++          </div>
++        )}
++        <div className="text-center sm:text-left">
++          <h1 className="font-headline font-black text-3xl text-gray-900 dark:text-white">{author.full_name}</h1>
++          <p className="text-brand-red font-semibold text-sm mt-1">{ROLE_LABELS[author.role]}</p>
++          {author.bio && (
++            <p className="text-gray-600 dark:text-gray-300 text-sm mt-3 leading-relaxed max-w-xl">{author.bio}</p>
++          )}
++          <p className="text-xs text-gray-400 mt-3 flex items-center justify-center sm:justify-start gap-1">
++            <FileText className="w-3.5 h-3.5" />
++            {articles.length} {articles.length === 1 ? 'objavljena tekst' : 'objavljenih tekstova'}
++          </p>
++        </div>
++      </div>
++
++      {/* Articles by this author */}
++      <h2 className="font-headline font-bold text-xl mb-4">Tekstovi autora</h2>
++      {articles.length > 0 ? (
++        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
++          {articles.map((article) => (
++            <ArticleCard key={article.id} article={article} />
++          ))}
++        </div>
++      ) : (
++        <p className="text-gray-500 text-sm py-8 text-center">Još uvek nema objavljenih tekstova.</p>
++      )}
++    </div>
++  )
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live14/src/app/(site)/vest/[slug]/page.tsx repo/src/app/(site)/vest/[slug]/page.tsx
+--- a/src/app/(site)/vest/[slug]/page.tsx	2026-07-15 19:06:15.000000000 +0000
++++ b/src/app/(site)/vest/[slug]/page.tsx	2026-07-15 19:07:12.552945149 +0000
+@@ -75,7 +75,11 @@
+     image: article.image_url,
+     datePublished: article.published_at,
+     dateModified: article.updated_at,
+-    author: { '@type': 'Person', name: article.author?.full_name || 'Redakcija' },
++    author: {
++      '@type': 'Person',
++      name: article.author?.full_name || 'Redakcija',
++      ...(article.author_id ? { url: `${SITE_URL}/autor/${article.author_id}` } : {}),
++    },
+     publisher: {
+       '@type': 'Organization',
+       name: SITE_NAME,
+@@ -147,9 +151,16 @@
+               )}
+ 
+               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pb-4 border-b border-gray-200 dark:border-gray-800">
+-                <span className="font-semibold text-gray-700 dark:text-gray-200">
+-                  {article.author?.full_name || 'Redakcija'}
+-                </span>
++                {article.author_id ? (
++                  <Link
++                    href={`/autor/${article.author_id}`}
++                    className="font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-red transition-colors"
++                  >
++                    {article.author?.full_name || 'Redakcija'}
++                  </Link>
++                ) : (
++                  <span className="font-semibold text-gray-700 dark:text-gray-200">Redakcija</span>
++                )}
+                 <span className="flex items-center gap-1">
+                   <Clock className="w-4 h-4" />
+                   {formatDateTime(article.published_at!)}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live14/src/app/admin/(protected)/layout.tsx repo/src/app/admin/(protected)/layout.tsx
+--- a/src/app/admin/(protected)/layout.tsx	2026-07-15 19:06:15.000000000 +0000
++++ b/src/app/admin/(protected)/layout.tsx	2026-07-15 19:07:51.459672556 +0000
+@@ -15,6 +15,7 @@
+   PlusCircle,
+   Bell,
+   MessageSquare,
++  UserCircle,
+ } from 'lucide-react'
+ import { cn } from '@/lib/utils'
+ import { createClient } from '@/lib/supabase/client'
+@@ -27,6 +28,7 @@
+   { label: 'Komentari', href: '/admin/comments', icon: MessageSquare },
+   { label: 'Statistika', href: '/admin/stats', icon: BarChart2 },
+   { label: 'Podešavanja', href: '/admin/settings', icon: Settings },
++  { label: 'Moj profil', href: '/admin/profile', icon: UserCircle },
+ ]
+ 
+ export default function AdminLayout({ children }: { children: React.ReactNode }) {
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live14/src/app/admin/(protected)/profile/page.tsx repo/src/app/admin/(protected)/profile/page.tsx
+--- a/src/app/admin/(protected)/profile/page.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b/src/app/admin/(protected)/profile/page.tsx	2026-07-15 19:07:40.810511831 +0000
+@@ -0,0 +1,173 @@
++'use client'
++
++import { useEffect, useState } from 'react'
++import { Save, Loader2, User } from 'lucide-react'
++import { createClient } from '@/lib/supabase/client'
++import { ImageUploadButton } from '@/components/admin/image-upload-button'
++
++const ROLE_LABELS: Record<string, string> = {
++  admin: 'Admin',
++  urednik: 'Urednik',
++  novinar: 'Novinar',
++}
++
++export default function MyProfilePage() {
++  const [loading, setLoading] = useState(true)
++  const [saving, setSaving] = useState(false)
++  const [saved, setSaved] = useState(false)
++  const [error, setError] = useState<string | null>(null)
++
++  const [userId, setUserId] = useState<string | null>(null)
++  const [email, setEmail] = useState('')
++  const [role, setRole] = useState('novinar')
++  const [fullName, setFullName] = useState('')
++  const [bio, setBio] = useState('')
++  const [avatarUrl, setAvatarUrl] = useState('')
++
++  useEffect(() => {
++    async function load() {
++      const supabase = createClient()
++      const {
++        data: { user },
++      } = await supabase.auth.getUser()
++
++      if (!user) {
++        setLoading(false)
++        return
++      }
++
++      setUserId(user.id)
++      setEmail(user.email ?? '')
++
++      const { data: profile } = await supabase
++        .from('profiles')
++        .select('full_name, bio, avatar_url, role')
++        .eq('id', user.id)
++        .maybeSingle()
++
++      if (profile) {
++        setFullName(profile.full_name ?? '')
++        setBio(profile.bio ?? '')
++        setAvatarUrl(profile.avatar_url ?? '')
++        setRole(profile.role ?? 'novinar')
++      }
++      setLoading(false)
++    }
++    load()
++  }, [])
++
++  async function handleSave() {
++    if (!userId) return
++    setSaving(true)
++    setError(null)
++
++    const supabase = createClient()
++    const { error: saveError } = await supabase
++      .from('profiles')
++      .update({ full_name: fullName, bio, avatar_url: avatarUrl || null })
++      .eq('id', userId)
++
++    setSaving(false)
++
++    if (saveError) {
++      setError('Greška: ' + saveError.message)
++      return
++    }
++
++    setSaved(true)
++    setTimeout(() => setSaved(false), 3000)
++  }
++
++  if (loading) {
++    return (
++      <div className="flex items-center justify-center py-32 text-gray-400">
++        <Loader2 className="w-8 h-8 animate-spin" />
++      </div>
++    )
++  }
++
++  return (
++    <div className="space-y-5 max-w-2xl">
++      <div>
++        <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Moj profil</h1>
++        <p className="text-gray-500 text-sm">Ovi podaci se prikazuju javno na tvojoj autor stranici i uz svaku tvoju vest.</p>
++      </div>
++
++      {error && (
++        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 text-red-700 dark:text-red-400 text-sm font-semibold">
++          {error}
++        </div>
++      )}
++      {saved && (
++        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-green-700 dark:text-green-400 text-sm font-semibold">
++          ✓ Profil je uspešno sačuvan!
++        </div>
++      )}
++
++      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
++        <div className="flex items-center gap-4">
++          {avatarUrl ? (
++            // eslint-disable-next-line @next/next/no-img-element
++            <img src={avatarUrl} alt={fullName} className="w-16 h-16 rounded-full object-cover border-2 border-gray-100 dark:border-gray-800" />
++          ) : (
++            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
++              <User className="w-7 h-7 text-gray-400" />
++            </div>
++          )}
++          <div>
++            <p className="font-semibold text-sm">{email}</p>
++            <span className="text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded-full font-bold uppercase">
++              {ROLE_LABELS[role] ?? role}
++            </span>
++          </div>
++        </div>
++
++        <div>
++          <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Ime i prezime</label>
++          <input
++            type="text"
++            value={fullName}
++            onChange={(e) => setFullName(e.target.value)}
++            className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
++          />
++        </div>
++
++        <div>
++          <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Kratka biografija</label>
++          <textarea
++            value={bio}
++            onChange={(e) => setBio(e.target.value)}
++            rows={4}
++            placeholder="Par rečenica o sebi — obrazovanje, iskustvo, oblast interesovanja..."
++            className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red resize-none"
++          />
++        </div>
++
++        <div>
++          <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Profilna slika</label>
++          <div className="flex items-center gap-3">
++            <input
++              type="url"
++              value={avatarUrl}
++              onChange={(e) => setAvatarUrl(e.target.value)}
++              placeholder="URL slike..."
++              className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
++            />
++          </div>
++          <div className="mt-2 max-w-xs">
++            <ImageUploadButton onUploaded={setAvatarUrl} />
++          </div>
++        </div>
++
++        <button
++          onClick={handleSave}
++          disabled={saving}
++          className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60"
++        >
++          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
++          Sačuvaj profil
++        </button>
++      </div>
++    </div>
++  )
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live14/src/lib/articles.ts repo/src/lib/articles.ts
+--- a/src/lib/articles.ts	2026-07-15 19:06:15.000000000 +0000
++++ b/src/lib/articles.ts	2026-07-15 19:06:30.868855054 +0000
+@@ -218,6 +218,19 @@
+   return (data as unknown as ArticleRow[]).map(mapArticle)
+ }
+ 
++export async function getArticlesByAuthor(authorId: string): Promise<Article[]> {
++  const supabase = await createClient()
++  const { data, error } = await supabase
++    .from('articles')
++    .select(ARTICLE_SELECT)
++    .eq('published', true)
++    .eq('author_id', authorId)
++    .order('published_at', { ascending: false })
++
++  if (error || !data) return []
++  return (data as unknown as ArticleRow[]).map(mapArticle)
++}
++
+ /**
+  * Beleži pregled vesti (uveća views + upisuje red u article_views za analitiku).
+  * IP adresa se hešuje pre snimanja — ne čuvamo je u čitljivom obliku.
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live14/src/lib/authors.ts repo/src/lib/authors.ts
+--- a/src/lib/authors.ts	1970-01-01 00:00:00.000000000 +0000
++++ b/src/lib/authors.ts	2026-07-15 19:06:40.394508240 +0000
+@@ -0,0 +1,21 @@
++import { createClient } from '@/lib/supabase/server'
++
++export interface AuthorProfile {
++  id: string
++  full_name: string
++  bio: string | null
++  avatar_url: string | null
++  role: 'admin' | 'urednik' | 'novinar'
++}
++
++export async function getAuthorById(id: string): Promise<AuthorProfile | undefined> {
++  const supabase = await createClient()
++  const { data, error } = await supabase
++    .from('profiles')
++    .select('id, full_name, bio, avatar_url, role')
++    .eq('id', id)
++    .maybeSingle()
++
++  if (error || !data) return undefined
++  return data
++}

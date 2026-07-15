@@ -75,7 +75,11 @@ export default async function ArticlePage({ params }: Props) {
     image: article.image_url,
     datePublished: article.published_at,
     dateModified: article.updated_at,
-    author: { '@type': 'Person', name: article.author?.full_name || 'Redakcija' },
+    author: {
+      '@type': 'Person',
+      name: article.author?.full_name || 'Redakcija',
+      ...(article.author_id ? { url: `${SITE_URL}/autor/${article.author_id}` } : {}),
+    },
     publisher: {
       '@type': 'Organization',
       name: SITE_NAME,
@@ -147,9 +151,16 @@ export default async function ArticlePage({ params }: Props) {
               )}
 
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pb-4 border-b border-gray-200 dark:border-gray-800">
-                <span className="font-semibold text-gray-700 dark:text-gray-200">
-                  {article.author?.full_name || 'Redakcija'}
-                </span>
+                {article.author_id ? (
+                  <Link
+                    href={`/autor/${article.author_id}`}
+                    className="font-semibold text-gray-700 dark:text-gray-200 hover:text-brand-red transition-colors"
+                  >
+                    {article.author?.full_name || 'Redakcija'}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">Redakcija</span>
+                )}
                 <span className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
                   {formatDateTime(article.published_at!)}

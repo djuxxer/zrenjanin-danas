@@ -218,6 +218,19 @@ export async function getLatestArticles(limit = 10): Promise<Article[]> {
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
+export async function getArticlesByAuthor(authorId: string): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('author_id', authorId)
+    .order('published_at', { ascending: false })
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
+}
+
 /**
  * Beleži pregled vesti (uveća views + upisuje red u article_views za analitiku).
  * IP adresa se hešuje pre snimanja — ne čuvamo je u čitljivom obliku.

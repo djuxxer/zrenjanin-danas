@@ -15,6 +15,7 @@ import {
   PlusCircle,
   Bell,
   MessageSquare,
+  UserCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { label: 'Komentari', href: '/admin/comments', icon: MessageSquare },
   { label: 'Statistika', href: '/admin/stats', icon: BarChart2 },
   { label: 'Podešavanja', href: '/admin/settings', icon: Settings },
+  { label: 'Moj profil', href: '/admin/profile', icon: UserCircle },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
