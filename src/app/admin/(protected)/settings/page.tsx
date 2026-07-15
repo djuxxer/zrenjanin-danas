@@ -16,6 +16,9 @@ export default function AdminSettingsPage() {
   const [tagline, setTagline] = useState('')
   const [analyticsId, setAnalyticsId] = useState('')
   const [fbPixel, setFbPixel] = useState('')
+  const [facebookUrl, setFacebookUrl] = useState('')
+  const [instagramUrl, setInstagramUrl] = useState('')
+  const [twitterUrl, setTwitterUrl] = useState('')
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [commentsEnabled, setCommentsEnabled] = useState(true)
   const [newsletterEnabled, setNewsletterEnabled] = useState(true)
@@ -41,6 +44,9 @@ export default function AdminSettingsPage() {
         setTagline(settings.tagline ?? '')
         setAnalyticsId(settings.analytics_id ?? '')
         setFbPixel(settings.fb_pixel ?? '')
+        setFacebookUrl(settings.facebook_url ?? '')
+        setInstagramUrl(settings.instagram_url ?? '')
+        setTwitterUrl(settings.twitter_url ?? '')
         setMaintenanceMode(settings.maintenance_mode ?? false)
         setCommentsEnabled(settings.comments_enabled ?? true)
         setNewsletterEnabled(settings.newsletter_enabled ?? true)
@@ -65,6 +71,9 @@ export default function AdminSettingsPage() {
         tagline,
         analytics_id: analyticsId,
         fb_pixel: fbPixel,
+        facebook_url: facebookUrl,
+        instagram_url: instagramUrl,
+        twitter_url: twitterUrl,
         maintenance_mode: maintenanceMode,
         comments_enabled: commentsEnabled,
         newsletter_enabled: newsletterEnabled,
@@ -198,6 +207,21 @@ export default function AdminSettingsPage() {
         </Field>
         <Field label="Facebook Pixel ID">
           <input type="text" value={fbPixel} onChange={e => setFbPixel(e.target.value)} placeholder="123456789012345" className={inputClass} />
+        </Field>
+      </Section>
+
+      <Section title="Društvene mreže" icon={Globe}>
+        <p className="text-xs text-gray-400 -mt-2">
+          Ovi linkovi se koriste u schema markup-u (sameAs) kako bi Google povezao portal kao prepoznatljiv entitet — poboljšava E-E-A-T signale.
+        </p>
+        <Field label="Facebook stranica">
+          <input type="url" value={facebookUrl} onChange={e => setFacebookUrl(e.target.value)} placeholder="https://facebook.com/zrenjanindanas" className={inputClass} />
+        </Field>
+        <Field label="Instagram profil">
+          <input type="url" value={instagramUrl} onChange={e => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/zrenjanindanas" className={inputClass} />
+        </Field>
+        <Field label="Twitter/X profil">
+          <input type="url" value={twitterUrl} onChange={e => setTwitterUrl(e.target.value)} placeholder="https://x.com/zrenjanindanas" className={inputClass} />
         </Field>
       </Section>
 

@@ -25,6 +25,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: 'always', priority: 1 },
+    { url: `${SITE_URL}/o-nama`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE_URL}/kontakt`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
+    { url: `${SITE_URL}/oglasavanje`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/privatnost`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/uslovi`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     ...categoryUrls,

@@ -10,6 +10,7 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
 import { CommentsSection } from '@/components/article/comments-section'
+import { createClient } from '@/lib/supabase/server'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -62,6 +63,17 @@ export default async function ArticlePage({ params }: Props) {
 
   const related = await getRelatedArticles(article)
   const comments = await getApprovedComments(article.id)
+
+  const supabaseForSettings = await createClient()
+  const { data: siteSettings } = await supabaseForSettings
+    .from('site_settings')
+    .select('facebook_url, instagram_url, twitter_url')
+    .eq('id', 1)
+    .maybeSingle()
+
+  const sameAs = [siteSettings?.facebook_url, siteSettings?.instagram_url, siteSettings?.twitter_url].filter(
+    (url): url is string => Boolean(url)
+  )
   const categoryLabel = CATEGORY_LABELS[article.category]
   const categoryColor = CATEGORY_COLORS[article.category]
   const articleUrl = `${SITE_URL}/vest/${slug}`
@@ -84,6 +96,7 @@ export default async function ArticlePage({ params }: Props) {
       '@type': 'Organization',
       name: SITE_NAME,
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+      ...(sameAs.length > 0 ? { sameAs } : {}),
     },
     url: articleUrl,
     mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
