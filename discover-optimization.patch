@@ -1,0 +1,46 @@
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live13/src/app/admin/(protected)/articles/[id]/edit/page.tsx repo/src/app/admin/(protected)/articles/[id]/edit/page.tsx
+--- a/src/app/admin/(protected)/articles/[id]/edit/page.tsx	2026-07-15 18:50:09.000000000 +0000
++++ b/src/app/admin/(protected)/articles/[id]/edit/page.tsx	2026-07-15 19:02:08.466470242 +0000
+@@ -602,7 +602,7 @@
+                 <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-brand-red hover:underline">
+                   Unsplash
+                 </a>
+-                {' '}· Format 1200×628px
++                {' '}· Za Google Discover: min. 1200px širina, format 16:9 (npr. 1200×675px)
+               </p>
+             </div>
+           </div>
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live13/src/app/admin/(protected)/articles/new/page.tsx repo/src/app/admin/(protected)/articles/new/page.tsx
+--- a/src/app/admin/(protected)/articles/new/page.tsx	2026-07-15 18:50:09.000000000 +0000
++++ b/src/app/admin/(protected)/articles/new/page.tsx	2026-07-15 19:02:00.591336433 +0000
+@@ -559,7 +559,7 @@
+                 <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-brand-red hover:underline">
+                   Unsplash
+                 </a>
+-                {' '}· Format 1200×628px
++                {' '}· Za Google Discover: min. 1200px širina, format 16:9 (npr. 1200×675px)
+               </p>
+             </div>
+           </div>
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live13/src/app/layout.tsx repo/src/app/layout.tsx
+--- a/src/app/layout.tsx	2026-07-15 18:50:09.000000000 +0000
++++ b/src/app/layout.tsx	2026-07-15 19:01:47.454063216 +0000
+@@ -42,7 +42,17 @@
+     description: SITE_DESCRIPTION,
+     creator: '@ZrenjaninDanas',
+   },
+-  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
++  robots: {
++    index: true,
++    follow: true,
++    googleBot: {
++      index: true,
++      follow: true,
++      'max-image-preview': 'large',
++      'max-snippet': -1,
++      'max-video-preview': -1,
++    },
++  },
+   alternates: { canonical: SITE_URL },
+ }
+ 

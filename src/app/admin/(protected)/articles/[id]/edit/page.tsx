@@ -602,7 +602,7 @@ export default function EditArticlePage({ params }: Props) {
                 <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-brand-red hover:underline">
                   Unsplash
                 </a>
-                {' '}· Format 1200×628px
+                {' '}· Za Google Discover: min. 1200px širina, format 16:9 (npr. 1200×675px)
               </p>
             </div>
           </div>
