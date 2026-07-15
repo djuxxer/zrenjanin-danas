@@ -16,6 +16,7 @@ export function CommentsSection({ articleId, initialComments }: Props) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [text, setText] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,6 +24,16 @@ export function CommentsSection({ articleId, initialComments }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !email.trim() || !text.trim()) return
+
+    // Honeypot — botovi popune ovo skriveno polje, pravi ljudi ne vide da postoji
+    if (honeypot.trim()) {
+      setSubmitted(true)
+      setName('')
+      setEmail('')
+      setText('')
+      setTimeout(() => setSubmitted(false), 4000)
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -60,6 +71,16 @@ export function CommentsSection({ articleId, initialComments }: Props) {
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 mb-6">
         <h4 className="font-semibold text-sm mb-3">Ostavite komentar</h4>
         <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Honeypot polje — sakriveno od ljudi, vidljivo botovima */}
+          <input
+            type="text"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               type="text"

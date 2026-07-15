@@ -109,6 +109,7 @@ export function WeatherWidget() {
 
 export function NewsletterSection() {
   const [email, setEmail] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -116,6 +117,13 @@ export function NewsletterSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim()) return
+
+    // Honeypot — botovi popune ovo skriveno polje, pravi ljudi ne vide da postoji
+    if (honeypot.trim()) {
+      setSubmitted(true)
+      setEmail('')
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -155,6 +163,15 @@ export function NewsletterSection() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2">
+          <input
+            type="text"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+          />
           {error && (
             <div className="bg-white/20 rounded-lg p-2 text-xs font-semibold">{error}</div>
           )}
