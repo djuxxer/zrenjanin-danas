@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { UserPlus, Edit, Trash2, Shield, Feather, Loader2, X } from 'lucide-react'
+import { UserPlus, Edit, Trash2, Shield, Feather, Loader2, X, KeyRound } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import type { UserRole } from '@/types'
 
@@ -119,6 +119,27 @@ export default function AdminUsersPage() {
     } catch {
       setUsers(prev)
       alert('Greška prilikom izmene uloge.')
+    }
+  }
+
+  async function handleResetPassword(id: string, name: string) {
+    const newPassword = prompt(`Unesi novu lozinku za "${name}" (bar 6 karaktera):`)
+    if (!newPassword) return
+
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Greška prilikom resetovanja lozinke.')
+      alert(`Lozinka je promenjena. Prosledi je ručno korisniku "${name}".`)
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Greška prilikom resetovanja lozinke.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -299,6 +320,14 @@ export default function AdminUsersPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleResetPassword(user.id, user.full_name)}
+                      disabled={deletingId === user.id}
+                      className="p-1.5 hover:text-brand-red transition-colors rounded hover:bg-red-50 dark:hover:bg-red-950/20 disabled:opacity-50"
+                      title="Resetuj lozinku"
+                    >
+                      <KeyRound className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => handleDelete(user.id, user.full_name)}
                       disabled={deletingId === user.id}
