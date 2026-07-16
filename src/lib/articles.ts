@@ -194,11 +194,18 @@ export async function getRelatedArticles(article: Article, limit = 3): Promise<A
 
 export async function searchArticles(query: string): Promise<Article[]> {
   const supabase = await createClient()
+
+  // Bezbednosna mera: karakteri koji imaju posebno značenje u PostgREST filter
+  // sintaksi (,()."*) se uklanjaju iz korisničkog unosa pre ubacivanja u .or() filter,
+  // da niko ne bi mogao da ubaci dodatne/izmenjene filter uslove kroz pretragu.
+  const safeQuery = query.replace(/[,()."'*]/g, '').trim()
+  if (!safeQuery) return []
+
   const { data, error } = await supabase
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
-    .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`)
+    .or(`title.ilike.%${safeQuery}%,excerpt.ilike.%${safeQuery}%`)
     .order('published_at', { ascending: false })
 
   if (error || !data) return []

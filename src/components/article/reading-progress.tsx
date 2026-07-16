@@ -44,7 +44,7 @@ export function ReadingProgress({ targetId }: Props) {
   }, [targetId])
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-40 h-1 bg-gray-200/50 dark:bg-gray-800/50">
+    <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gray-200/50 dark:bg-gray-800/50">
       <div
         className="h-full bg-brand-red transition-[width] duration-150 ease-out"
         style={{ width: `${progress}%` }}
