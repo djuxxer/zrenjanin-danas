@@ -470,9 +470,9 @@ export default function NewArticlePage() {
             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Oznake</h3>
             <div className="space-y-2">
               {[
-                { key: 'breaking', label: 'Breaking News', color: 'text-red-600' },
+                { key: 'breaking', label: 'Hitna vest', color: 'text-red-600' },
                 { key: 'featured', label: 'Istaknuta vest', color: 'text-yellow-600' },
-                { key: 'trending', label: 'Trending', color: 'text-orange-600' },
+                { key: 'trending', label: 'Popularno', color: 'text-orange-600' },
               ].map(({ key, label, color }) => (
                 <label key={key} className="flex items-center justify-between cursor-pointer group">
                   <span className={cn('text-sm font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors', form[key as keyof typeof form] ? color : 'text-gray-500')}>

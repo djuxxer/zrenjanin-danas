@@ -10,6 +10,7 @@ import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
 import { CommentsSection } from '@/components/article/comments-section'
+import { ReadingProgress } from '@/components/article/reading-progress'
 import { createClient } from '@/lib/supabase/server'
 
 interface Props {
@@ -129,6 +130,8 @@ export default async function ArticlePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
+      <ReadingProgress targetId="article-body" />
+
       <article className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-gray-500 mb-6">
@@ -148,7 +151,7 @@ export default async function ArticlePage({ params }: Props) {
             <header className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 {article.breaking && (
-                  <span className="breaking-badge">BREAKING</span>
+                  <span className="breaking-badge">HITNO</span>
                 )}
                 <span className={cn('category-badge', categoryColor)}>{categoryLabel}</span>
               </div>
@@ -205,6 +208,7 @@ export default async function ArticlePage({ params }: Props) {
 
             {/* Article body */}
             <div
+              id="article-body"
               className="article-content mb-8"
               dangerouslySetInnerHTML={{ __html: embedRichContent(article.content) }}
             />

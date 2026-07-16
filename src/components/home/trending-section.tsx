@@ -15,7 +15,7 @@ export function TrendingSection({ articles }: TrendingSectionProps) {
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
       <div className="bg-brand-red px-4 py-3 flex items-center gap-2">
         <TrendingUp className="w-4 h-4 text-white" />
-        <h2 className="text-white font-bold text-sm uppercase tracking-widest">Trending</h2>
+        <h2 className="text-white font-bold text-sm uppercase tracking-widest">Popularno</h2>
       </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {articles.slice(0, 6).map((article, i) => (

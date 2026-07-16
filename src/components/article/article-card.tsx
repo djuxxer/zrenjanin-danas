@@ -32,7 +32,7 @@ export function ArticleCard({ article, variant = 'default', className, priority 
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
           {article.breaking && (
-            <div className="breaking-badge inline-block mb-3">BREAKING</div>
+            <div className="breaking-badge inline-block mb-3">HITNO</div>
           )}
           <span className={cn('category-badge mb-3 inline-block', categoryColor)}>
             {categoryLabel}
@@ -106,7 +106,7 @@ export function ArticleCard({ article, variant = 'default', className, priority 
           priority={priority}
         />
         {article.breaking && (
-          <div className="absolute top-2 left-2 breaking-badge text-xs">BREAKING</div>
+          <div className="absolute top-2 left-2 breaking-badge text-xs">HITNO</div>
         )}
         <span className={cn('absolute bottom-2 left-2 category-badge', categoryColor)}>
           {categoryLabel}

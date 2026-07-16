@@ -8,7 +8,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const supabase = await createClient()
   const { data: settings } = await supabase
     .from('site_settings')
-    .select('analytics_id, fb_pixel')
+    .select('analytics_id, fb_pixel, facebook_url, instagram_url, twitter_url')
     .eq('id', 1)
     .maybeSingle()
 
@@ -17,7 +17,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <BreakingTicker />
       <Navbar />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-950">{children}</main>
-      <Footer />
+      <Footer
+        facebookUrl={settings?.facebook_url ?? null}
+        instagramUrl={settings?.instagram_url ?? null}
+        twitterUrl={settings?.twitter_url ?? null}
+      />
       <CookieConsentAndAnalytics
         analyticsId={settings?.analytics_id ?? null}
         fbPixel={settings?.fb_pixel ?? null}

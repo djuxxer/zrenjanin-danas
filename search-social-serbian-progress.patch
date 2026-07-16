@@ -1,0 +1,285 @@
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/app/(site)/layout.tsx repo/src/app/(site)/layout.tsx
+--- a/src/app/(site)/layout.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/app/(site)/layout.tsx	2026-07-16 19:45:52.390806406 +0000
+@@ -8,7 +8,7 @@
+   const supabase = await createClient()
+   const { data: settings } = await supabase
+     .from('site_settings')
+-    .select('analytics_id, fb_pixel')
++    .select('analytics_id, fb_pixel, facebook_url, instagram_url, twitter_url')
+     .eq('id', 1)
+     .maybeSingle()
+ 
+@@ -17,7 +17,11 @@
+       <BreakingTicker />
+       <Navbar />
+       <main className="min-h-screen bg-gray-50 dark:bg-gray-950">{children}</main>
+-      <Footer />
++      <Footer
++        facebookUrl={settings?.facebook_url ?? null}
++        instagramUrl={settings?.instagram_url ?? null}
++        twitterUrl={settings?.twitter_url ?? null}
++      />
+       <CookieConsentAndAnalytics
+         analyticsId={settings?.analytics_id ?? null}
+         fbPixel={settings?.fb_pixel ?? null}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/app/(site)/vest/[slug]/page.tsx repo/src/app/(site)/vest/[slug]/page.tsx
+--- a/src/app/(site)/vest/[slug]/page.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/app/(site)/vest/[slug]/page.tsx	2026-07-16 19:47:21.997820541 +0000
+@@ -10,6 +10,7 @@
+ import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
+ import { ArticleCard } from '@/components/article/article-card'
+ import { CommentsSection } from '@/components/article/comments-section'
++import { ReadingProgress } from '@/components/article/reading-progress'
+ import { createClient } from '@/lib/supabase/server'
+ 
+ interface Props {
+@@ -129,6 +130,8 @@
+         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+       />
+ 
++      <ReadingProgress targetId="article-body" />
++
+       <article className="container mx-auto px-4 py-8 max-w-5xl">
+         {/* Breadcrumbs */}
+         <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-gray-500 mb-6">
+@@ -148,7 +151,7 @@
+             <header className="mb-6">
+               <div className="flex items-center gap-2 mb-3">
+                 {article.breaking && (
+-                  <span className="breaking-badge">BREAKING</span>
++                  <span className="breaking-badge">HITNO</span>
+                 )}
+                 <span className={cn('category-badge', categoryColor)}>{categoryLabel}</span>
+               </div>
+@@ -205,6 +208,7 @@
+ 
+             {/* Article body */}
+             <div
++              id="article-body"
+               className="article-content mb-8"
+               dangerouslySetInnerHTML={{ __html: embedRichContent(article.content) }}
+             />
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/app/uprava-x7k2/(protected)/articles/[id]/edit/page.tsx repo/src/app/uprava-x7k2/(protected)/articles/[id]/edit/page.tsx
+--- a/src/app/uprava-x7k2/(protected)/articles/[id]/edit/page.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/app/uprava-x7k2/(protected)/articles/[id]/edit/page.tsx	2026-07-16 19:46:26.084963806 +0000
+@@ -513,9 +513,9 @@
+             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Oznake</h3>
+             <div className="space-y-2">
+               {[
+-                { key: 'breaking', label: 'Breaking News', color: 'text-red-600' },
++                { key: 'breaking', label: 'Hitna vest', color: 'text-red-600' },
+                 { key: 'featured', label: 'Istaknuta vest', color: 'text-yellow-600' },
+-                { key: 'trending', label: 'Trending', color: 'text-orange-600' },
++                { key: 'trending', label: 'Popularno', color: 'text-orange-600' },
+               ].map(({ key, label, color }) => (
+                 <label key={key} className="flex items-center justify-between cursor-pointer group">
+                   <span className={cn('text-sm font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors', form[key as keyof typeof form] ? color : 'text-gray-500')}>
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/app/uprava-x7k2/(protected)/articles/new/page.tsx repo/src/app/uprava-x7k2/(protected)/articles/new/page.tsx
+--- a/src/app/uprava-x7k2/(protected)/articles/new/page.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/app/uprava-x7k2/(protected)/articles/new/page.tsx	2026-07-16 19:46:26.083331683 +0000
+@@ -470,9 +470,9 @@
+             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Oznake</h3>
+             <div className="space-y-2">
+               {[
+-                { key: 'breaking', label: 'Breaking News', color: 'text-red-600' },
++                { key: 'breaking', label: 'Hitna vest', color: 'text-red-600' },
+                 { key: 'featured', label: 'Istaknuta vest', color: 'text-yellow-600' },
+-                { key: 'trending', label: 'Trending', color: 'text-orange-600' },
++                { key: 'trending', label: 'Popularno', color: 'text-orange-600' },
+               ].map(({ key, label, color }) => (
+                 <label key={key} className="flex items-center justify-between cursor-pointer group">
+                   <span className={cn('text-sm font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors', form[key as keyof typeof form] ? color : 'text-gray-500')}>
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/app/uprava-x7k2/(protected)/articles/page.tsx repo/src/app/uprava-x7k2/(protected)/articles/page.tsx
+--- a/src/app/uprava-x7k2/(protected)/articles/page.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/app/uprava-x7k2/(protected)/articles/page.tsx	2026-07-16 19:46:26.091471201 +0000
+@@ -133,10 +133,10 @@
+                     <td className="px-4 py-3">
+                       <div className="flex items-center gap-2">
+                         {article.breaking && (
+-                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold uppercase">Breaking</span>
++                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold uppercase">Hitno</span>
+                         )}
+                         {article.featured && (
+-                          <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold uppercase">Featured</span>
++                          <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold uppercase">Istaknuto</span>
+                         )}
+                         <span className="font-medium text-gray-900 dark:text-white line-clamp-1 max-w-xs">{article.title}</span>
+                       </div>
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/app/uprava-x7k2/(protected)/dashboard/page.tsx repo/src/app/uprava-x7k2/(protected)/dashboard/page.tsx
+--- a/src/app/uprava-x7k2/(protected)/dashboard/page.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/app/uprava-x7k2/(protected)/dashboard/page.tsx	2026-07-16 19:46:39.517234317 +0000
+@@ -113,7 +113,7 @@
+               <AlertCircle className="w-5 h-5 text-brand-red flex-shrink-0" />
+               <div className="min-w-0">
+                 <p className="font-semibold text-sm text-red-800 dark:text-red-200">
+-                  {breakingArticles.length} {breakingArticles.length === 1 ? 'aktivna BREAKING vest' : 'aktivne BREAKING vesti'}
++                  {breakingArticles.length} {breakingArticles.length === 1 ? 'aktivna hitna vest' : 'aktivne hitne vesti'}
+                 </p>
+                 <p className="text-xs text-red-600 dark:text-red-400 truncate">
+                   {breakingArticles.map((a) => a.title).join(' • ')}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/components/article/article-card.tsx repo/src/components/article/article-card.tsx
+--- a/src/components/article/article-card.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/components/article/article-card.tsx	2026-07-16 19:46:26.065233517 +0000
+@@ -32,7 +32,7 @@
+         </div>
+         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+           {article.breaking && (
+-            <div className="breaking-badge inline-block mb-3">BREAKING</div>
++            <div className="breaking-badge inline-block mb-3">HITNO</div>
+           )}
+           <span className={cn('category-badge mb-3 inline-block', categoryColor)}>
+             {categoryLabel}
+@@ -106,7 +106,7 @@
+           priority={priority}
+         />
+         {article.breaking && (
+-          <div className="absolute top-2 left-2 breaking-badge text-xs">BREAKING</div>
++          <div className="absolute top-2 left-2 breaking-badge text-xs">HITNO</div>
+         )}
+         <span className={cn('absolute bottom-2 left-2 category-badge', categoryColor)}>
+           {categoryLabel}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/components/article/reading-progress.tsx repo/src/components/article/reading-progress.tsx
+--- a/src/components/article/reading-progress.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b/src/components/article/reading-progress.tsx	2026-07-16 19:46:49.877234932 +0000
+@@ -0,0 +1,54 @@
++'use client'
++
++import { useEffect, useState, useRef } from 'react'
++
++interface Props {
++  targetId: string
++}
++
++export function ReadingProgress({ targetId }: Props) {
++  const [progress, setProgress] = useState(0)
++  const ticking = useRef(false)
++
++  useEffect(() => {
++    function updateProgress() {
++      const target = document.getElementById(targetId)
++      if (!target) return
++
++      const rect = target.getBoundingClientRect()
++      const viewportHeight = window.innerHeight
++      const totalScrollable = rect.height - viewportHeight + rect.top
++
++      // Koliko je pređeno od vrha teksta do sada, u odnosu na ukupnu visinu teksta
++      const scrolled = -rect.top
++      const percent = totalScrollable > 0 ? Math.min(100, Math.max(0, (scrolled / totalScrollable) * 100)) : 0
++
++      setProgress(percent)
++      ticking.current = false
++    }
++
++    function onScroll() {
++      if (!ticking.current) {
++        ticking.current = true
++        requestAnimationFrame(updateProgress)
++      }
++    }
++
++    updateProgress()
++    window.addEventListener('scroll', onScroll, { passive: true })
++    window.addEventListener('resize', onScroll)
++    return () => {
++      window.removeEventListener('scroll', onScroll)
++      window.removeEventListener('resize', onScroll)
++    }
++  }, [targetId])
++
++  return (
++    <div className="fixed top-0 left-0 right-0 z-40 h-1 bg-gray-200/50 dark:bg-gray-800/50">
++      <div
++        className="h-full bg-brand-red transition-[width] duration-150 ease-out"
++        style={{ width: `${progress}%` }}
++      />
++    </div>
++  )
++}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/components/home/hero-section.tsx repo/src/components/home/hero-section.tsx
+--- a/src/components/home/hero-section.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/components/home/hero-section.tsx	2026-07-16 19:46:26.076331762 +0000
+@@ -34,7 +34,7 @@
+           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+             {main.breaking && (
+-              <span className="breaking-badge inline-block mb-3">BREAKING</span>
++              <span className="breaking-badge inline-block mb-3">HITNO</span>
+             )}
+             <span className={cn('category-badge mb-3 inline-block', CATEGORY_COLORS[main.category])}>
+               {CATEGORY_LABELS[main.category]}
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/components/home/trending-section.tsx repo/src/components/home/trending-section.tsx
+--- a/src/components/home/trending-section.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/components/home/trending-section.tsx	2026-07-16 19:46:26.088533310 +0000
+@@ -15,7 +15,7 @@
+     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+       <div className="bg-brand-red px-4 py-3 flex items-center gap-2">
+         <TrendingUp className="w-4 h-4 text-white" />
+-        <h2 className="text-white font-bold text-sm uppercase tracking-widest">Trending</h2>
++        <h2 className="text-white font-bold text-sm uppercase tracking-widest">Popularno</h2>
+       </div>
+       <div className="divide-y divide-gray-100 dark:divide-gray-800">
+         {articles.slice(0, 6).map((article, i) => (
+diff -ruN '--exclude=node_modules' '--exclude=package-lock.json' '--exclude=.next' '--exclude=public' '--exclude=*.patch' '--exclude=tsconfig.tsbuildinfo' live18/src/components/layout/footer.tsx repo/src/components/layout/footer.tsx
+--- a/src/components/layout/footer.tsx	2026-07-16 19:42:22.000000000 +0000
++++ b/src/components/layout/footer.tsx	2026-07-16 19:46:13.758214116 +0000
+@@ -1,9 +1,16 @@
+ import Link from 'next/link'
+-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react'
++import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react'
+ import { CATEGORY_LABELS } from '@/types'
+ 
+-export function Footer() {
++interface Props {
++  facebookUrl?: string | null
++  instagramUrl?: string | null
++  twitterUrl?: string | null
++}
++
++export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
+   const categories = Object.entries(CATEGORY_LABELS)
++  const hasSocialLinks = facebookUrl || instagramUrl || twitterUrl
+ 
+   return (
+     <footer className="bg-gray-900 dark:bg-black text-gray-300">
+@@ -24,20 +31,25 @@
+             <p className="text-sm leading-relaxed mb-4">
+               Najnovije vesti iz Zrenjanina, Vojvodine i Srbije. Politika, ekonomija, sport, kultura i hronika.
+             </p>
+-            <div className="flex items-center gap-3">
+-              <a href="#" aria-label="Facebook" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+-                <Facebook className="w-4 h-4" />
+-              </a>
+-              <a href="#" aria-label="Twitter" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+-                <Twitter className="w-4 h-4" />
+-              </a>
+-              <a href="#" aria-label="Instagram" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+-                <Instagram className="w-4 h-4" />
+-              </a>
+-              <a href="#" aria-label="YouTube" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+-                <Youtube className="w-4 h-4" />
+-              </a>
+-            </div>
++            {hasSocialLinks && (
++              <div className="flex items-center gap-3">
++                {facebookUrl && (
++                  <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
++                    <Facebook className="w-4 h-4" />
++                  </a>
++                )}
++                {twitterUrl && (
++                  <a href={twitterUrl} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
++                    <Twitter className="w-4 h-4" />
++                  </a>
++                )}
++                {instagramUrl && (
++                  <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
++                    <Instagram className="w-4 h-4" />
++                  </a>
++                )}
++              </div>
++            )}
+           </div>
+ 
+           {/* Categories */}

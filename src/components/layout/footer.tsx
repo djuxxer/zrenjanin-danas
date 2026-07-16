@@ -1,9 +1,16 @@
 import Link from 'next/link'
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react'
 import { CATEGORY_LABELS } from '@/types'
 
-export function Footer() {
+interface Props {
+  facebookUrl?: string | null
+  instagramUrl?: string | null
+  twitterUrl?: string | null
+}
+
+export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
   const categories = Object.entries(CATEGORY_LABELS)
+  const hasSocialLinks = facebookUrl || instagramUrl || twitterUrl
 
   return (
     <footer className="bg-gray-900 dark:bg-black text-gray-300">
@@ -24,20 +31,25 @@ export function Footer() {
             <p className="text-sm leading-relaxed mb-4">
               Najnovije vesti iz Zrenjanina, Vojvodine i Srbije. Politika, ekonomija, sport, kultura i hronika.
             </p>
-            <div className="flex items-center gap-3">
-              <a href="#" aria-label="Facebook" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a href="#" aria-label="Twitter" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a href="#" aria-label="Instagram" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a href="#" aria-label="YouTube" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
-                <Youtube className="w-4 h-4" />
-              </a>
-            </div>
+            {hasSocialLinks && (
+              <div className="flex items-center gap-3">
+                {facebookUrl && (
+                  <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                )}
+                {twitterUrl && (
+                  <a href={twitterUrl} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                )}
+                {instagramUrl && (
+                  <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-2 rounded-full bg-gray-800 hover:bg-brand-red transition-colors">
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Categories */}

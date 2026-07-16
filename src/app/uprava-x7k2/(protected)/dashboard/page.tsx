@@ -113,7 +113,7 @@ export default function AdminDashboard() {
               <AlertCircle className="w-5 h-5 text-brand-red flex-shrink-0" />
               <div className="min-w-0">
                 <p className="font-semibold text-sm text-red-800 dark:text-red-200">
-                  {breakingArticles.length} {breakingArticles.length === 1 ? 'aktivna BREAKING vest' : 'aktivne BREAKING vesti'}
+                  {breakingArticles.length} {breakingArticles.length === 1 ? 'aktivna hitna vest' : 'aktivne hitne vesti'}
                 </p>
                 <p className="text-xs text-red-600 dark:text-red-400 truncate">
                   {breakingArticles.map((a) => a.title).join(' • ')}

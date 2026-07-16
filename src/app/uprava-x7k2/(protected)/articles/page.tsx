@@ -133,10 +133,10 @@ export default function AdminArticlesPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {article.breaking && (
-                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold uppercase">Breaking</span>
+                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold uppercase">Hitno</span>
                         )}
                         {article.featured && (
-                          <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold uppercase">Featured</span>
+                          <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold uppercase">Istaknuto</span>
                         )}
                         <span className="font-medium text-gray-900 dark:text-white line-clamp-1 max-w-xs">{article.title}</span>
                       </div>
