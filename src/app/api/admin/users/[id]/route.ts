@@ -24,45 +24,61 @@ async function requireAdmin() {
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const guard = await requireAdmin()
-  if ('error' in guard) return NextResponse.json({ error: guard.error }, { status: guard.status })
+  try {
+    const guard = await requireAdmin()
+    if ('error' in guard) return NextResponse.json({ error: guard.error }, { status: guard.status })
 
-  const { id } = await params
-  const { role } = await request.json()
+    const { id } = await params
+    const { role } = await request.json()
 
-  if (!role) return NextResponse.json({ error: 'Uloga je obavezna.' }, { status: 400 })
+    if (!role) return NextResponse.json({ error: 'Uloga je obavezna.' }, { status: 400 })
 
-  // Bezbednosna mera: niko ne sme da bude unapređen u Admin ulogu kroz UI/API —
-  // to je namerno moguće samo direktno kroz bazu.
-  if (role === 'admin') {
+    // Bezbednosna mera: niko ne sme da bude unapređen u Admin ulogu kroz UI/API —
+    // to je namerno moguće samo direktno kroz bazu.
+    if (role === 'admin') {
+      return NextResponse.json(
+        { error: 'Unapređenje u Admin ulogu nije dozvoljeno kroz admin panel — samo direktno kroz bazu.' },
+        { status: 403 }
+      )
+    }
+
+    const admin = createAdminClient()
+    const { error } = await admin.from('profiles').update({ role }).eq('id', id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('PATCH /api/admin/users/[id] failed:', err)
     return NextResponse.json(
-      { error: 'Unapređenje u Admin ulogu nije dozvoljeno kroz admin panel — samo direktno kroz bazu.' },
-      { status: 403 }
+      { error: err instanceof Error ? err.message : 'Neočekivana greška na serveru.' },
+      { status: 500 }
     )
   }
-
-  const admin = createAdminClient()
-  const { error } = await admin.from('profiles').update({ role }).eq('id', id)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-
-  return NextResponse.json({ success: true })
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const guard = await requireAdmin()
-  if ('error' in guard) return NextResponse.json({ error: guard.error }, { status: guard.status })
+  try {
+    const guard = await requireAdmin()
+    if ('error' in guard) return NextResponse.json({ error: guard.error }, { status: guard.status })
 
-  const { id } = await params
+    const { id } = await params
 
-  if ('user' in guard && guard.user.id === id) {
-    return NextResponse.json({ error: 'Ne možeš obrisati sopstveni nalog.' }, { status: 400 })
+    if ('user' in guard && guard.user.id === id) {
+      return NextResponse.json({ error: 'Ne možeš obrisati sopstveni nalog.' }, { status: 400 })
+    }
+
+    const admin = createAdminClient()
+    const { error } = await admin.auth.admin.deleteUser(id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('DELETE /api/admin/users/[id] failed:', err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Neočekivana greška na serveru.' },
+      { status: 500 }
+    )
   }
-
-  const admin = createAdminClient()
-  const { error } = await admin.auth.admin.deleteUser(id)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-
-  return NextResponse.json({ success: true })
 }
