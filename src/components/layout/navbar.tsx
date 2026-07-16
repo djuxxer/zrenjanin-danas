@@ -75,33 +75,14 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-2">
-            {/* Search */}
-            {searchOpen ? (
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
-                <input
-                  autoFocus
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Pretražite vesti..."
-                  className="border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-800 w-64 focus:outline-none focus:border-brand-red"
-                />
-                <button type="submit" className="p-2 hover:text-brand-red transition-colors">
-                  <Search className="w-5 h-5" />
-                </button>
-                <button type="button" onClick={() => setSearchOpen(false)} className="p-2">
-                  <X className="w-5 h-5" />
-                </button>
-              </form>
-            ) : (
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="p-2 hover:text-brand-red transition-colors"
-                aria-label="Pretraga"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-            )}
+            {/* Search toggle */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="p-2 hover:text-brand-red transition-colors"
+              aria-label="Pretraga"
+            >
+              {searchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+            </button>
 
             {/* Dark mode */}
             {mounted && (
@@ -125,6 +106,31 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Search bar — pun red, ne gura ostatak header-a na malim ekranima */}
+      {searchOpen && (
+        <div className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 py-3">
+          <div className="container mx-auto px-4">
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <input
+                autoFocus
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Pretražite vesti..."
+                className="flex-1 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+              />
+              <button
+                type="submit"
+                className="flex-shrink-0 bg-brand-red hover:bg-brand-red-dark text-white p-2.5 rounded-lg transition-colors"
+                aria-label="Pretraži"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Nav links */}
       <nav className="hidden lg:block border-b border-gray-100 dark:border-gray-800">
