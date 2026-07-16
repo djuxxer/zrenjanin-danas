@@ -7,7 +7,7 @@ import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn, createSlug } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 import { createClient } from '@/lib/supabase/client'
-import { ImageUploadButton } from '@/components/admin/image-upload-button'
+import { ImageUploadButton } from '@/components/uprava-x7k2/image-upload-button'
 
 const EMPTY_FORM = {
   title: '',
@@ -133,7 +133,7 @@ export default function NewArticlePage() {
 
     setSaved(publish ? 'published' : 'draft')
     setTimeout(() => {
-      router.push('/admin/articles')
+      router.push('/uprava-x7k2/articles')
     }, 1200)
   }
 

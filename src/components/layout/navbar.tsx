@@ -53,7 +53,6 @@ export function Navbar() {
               <Tv2 className="w-3 h-3" />
               <span>LIVE</span>
             </Link>
-            <Link href="/admin" className="hover:text-white transition-colors">Admin</Link>
           </div>
         </div>
       </div>

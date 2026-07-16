@@ -21,14 +21,14 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Sve vesti', href: '/admin/articles', icon: FileText },
-  { label: 'Nova vest', href: '/admin/articles/new', icon: PlusCircle },
-  { label: 'Korisnici', href: '/admin/users', icon: Users },
-  { label: 'Komentari', href: '/admin/comments', icon: MessageSquare },
-  { label: 'Statistika', href: '/admin/stats', icon: BarChart2 },
-  { label: 'Podešavanja', href: '/admin/settings', icon: Settings },
-  { label: 'Moj profil', href: '/admin/profile', icon: UserCircle },
+  { label: 'Dashboard', href: '/uprava-x7k2/dashboard', icon: LayoutDashboard },
+  { label: 'Sve vesti', href: '/uprava-x7k2/articles', icon: FileText },
+  { label: 'Nova vest', href: '/uprava-x7k2/articles/new', icon: PlusCircle },
+  { label: 'Korisnici', href: '/uprava-x7k2/users', icon: Users },
+  { label: 'Komentari', href: '/uprava-x7k2/comments', icon: MessageSquare },
+  { label: 'Statistika', href: '/uprava-x7k2/stats', icon: BarChart2 },
+  { label: 'Podešavanja', href: '/uprava-x7k2/settings', icon: Settings },
+  { label: 'Moj profil', href: '/uprava-x7k2/profile', icon: UserCircle },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/admin/login')
+    router.push('/uprava-x7k2/login')
     router.refresh()
   }
 
@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800 h-16">
           {sidebarOpen && (
-            <Link href="/admin/dashboard" className="font-headline font-black text-white text-lg leading-tight">
+            <Link href="/uprava-x7k2/dashboard" className="font-headline font-black text-white text-lg leading-tight">
               ZD<span className="text-brand-red">•</span>Admin
             </Link>
           )}

@@ -7,7 +7,7 @@ import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 import { createClient } from '@/lib/supabase/client'
-import { ImageUploadButton } from '@/components/admin/image-upload-button'
+import { ImageUploadButton } from '@/components/uprava-x7k2/image-upload-button'
 
 const EMPTY_FORM = {
   title: '',
@@ -157,7 +157,7 @@ export default function EditArticlePage({ params }: Props) {
 
     setSaved(publish ? 'published' : 'draft')
     setTimeout(() => {
-      router.push('/admin/articles')
+      router.push('/uprava-x7k2/articles')
     }, 1200)
   }
 
@@ -176,7 +176,7 @@ export default function EditArticlePage({ params }: Props) {
     return (
       <div className="text-center py-32 text-gray-500">
         <p className="text-xl mb-2">Vest nije pronađena.</p>
-        <button onClick={() => router.push('/admin/articles')} className="text-brand-red hover:underline text-sm">
+        <button onClick={() => router.push('/uprava-x7k2/articles')} className="text-brand-red hover:underline text-sm">
           ← Nazad na sve vesti
         </button>
       </div>

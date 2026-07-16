@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/admin/dashboard'
+  const redirectTo = searchParams.get('redirectTo') || '/uprava-x7k2/dashboard'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

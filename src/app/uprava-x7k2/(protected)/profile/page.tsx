@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Save, Loader2, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { ImageUploadButton } from '@/components/admin/image-upload-button'
+import { ImageUploadButton } from '@/components/uprava-x7k2/image-upload-button'
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',

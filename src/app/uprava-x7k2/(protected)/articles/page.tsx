@@ -73,7 +73,7 @@ export default function AdminArticlesPage() {
           <p className="text-gray-500 text-sm">{articles.length} ukupno vesti</p>
         </div>
         <Link
-          href="/admin/articles/new"
+          href="/uprava-x7k2/articles/new"
           className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
         >
           <PlusCircle className="w-4 h-4" />
@@ -168,7 +168,7 @@ export default function AdminArticlesPage() {
                           <Eye className="w-4 h-4" />
                         </Link>
                         <Link
-                          href={`/admin/articles/${article.id}/edit`}
+                          href={`/uprava-x7k2/articles/${article.id}/edit`}
                           className="p-1.5 hover:text-brand-red transition-colors rounded hover:bg-red-50 dark:hover:bg-red-950/20"
                           title="Uredi"
                         >

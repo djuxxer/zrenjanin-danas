@@ -32,7 +32,7 @@ export default function AdminDashboard() {
         .from('articles')
         .select('id, slug, title, category, views, published, breaking, created_at')
         .order('created_at', { ascending: false }),
-      fetch('/api/admin/users').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch('/api/uprava-x7k2/users').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ])
 
     setArticles(articleData ?? [])
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
           <p className="text-gray-500 text-sm mt-0.5">Pregled portala Zrenjanin Danas</p>
         </div>
         <Link
-          href="/admin/articles/new"
+          href="/uprava-x7k2/articles/new"
           className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
         >
           <PlusCircle className="w-4 h-4" />
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
                   {breakingArticles.map((a) => a.title).join(' • ')}
                 </p>
               </div>
-              <Link href="/admin/articles" className="ml-auto text-xs text-brand-red font-semibold hover:underline flex-shrink-0">
+              <Link href="/uprava-x7k2/articles" className="ml-auto text-xs text-brand-red font-semibold hover:underline flex-shrink-0">
                 Upravljaj →
               </Link>
             </div>
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <h2 className="font-bold text-sm uppercase tracking-wide text-gray-500">Nedavne vesti</h2>
-              <Link href="/admin/articles" className="text-xs text-brand-red font-semibold hover:underline">
+              <Link href="/uprava-x7k2/articles" className="text-xs text-brand-red font-semibold hover:underline">
                 Sve vesti
               </Link>
             </div>
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
                   </span>
                   <div className="flex items-center gap-1">
                     <Link
-                      href={`/admin/articles/${article.id}/edit`}
+                      href={`/uprava-x7k2/articles/${article.id}/edit`}
                       className="p-1.5 hover:text-brand-red transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20"
                     >
                       <Edit className="w-4 h-4" />
@@ -180,9 +180,9 @@ export default function AdminDashboard() {
           {/* Quick actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { label: 'Statistika i učinak novinara', href: '/admin/stats', desc: 'Pregledi kroz vreme, top vesti, učinak po novinaru' },
-              { label: 'Komentari', href: '/admin/comments', desc: 'Odobri ili obriši komentare čitalaca' },
-              { label: 'Podešavanja', href: '/admin/settings', desc: 'Osnovna podešavanja portala' },
+              { label: 'Statistika i učinak novinara', href: '/uprava-x7k2/stats', desc: 'Pregledi kroz vreme, top vesti, učinak po novinaru' },
+              { label: 'Komentari', href: '/uprava-x7k2/comments', desc: 'Odobri ili obriši komentare čitalaca' },
+              { label: 'Podešavanja', href: '/uprava-x7k2/settings', desc: 'Osnovna podešavanja portala' },
             ].map((action) => (
               <Link
                 key={action.label}

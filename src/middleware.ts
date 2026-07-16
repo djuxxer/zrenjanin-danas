@@ -1,14 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Rute koje NE zahtevaju login (ostatak /admin je zaštićen)
-const PUBLIC_ADMIN_PATHS = ['/admin/login']
+// Rute koje NE zahtevaju login (ostatak /uprava-x7k2 je zaštićen)
+const PUBLIC_ADMIN_PATHS = ['/uprava-x7k2/login']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Ova zaštita se odnosi samo na /admin rute
-  if (!pathname.startsWith('/admin')) {
+  // Ova zaštita se odnosi samo na /uprava-x7k2 rute
+  if (!pathname.startsWith('/uprava-x7k2')) {
     return NextResponse.next()
   }
 
@@ -39,21 +39,21 @@ export async function middleware(request: NextRequest) {
 
   const isPublicAdminPath = PUBLIC_ADMIN_PATHS.some((path) => pathname.startsWith(path))
 
-  // Nije ulogovan i pokušava da pristupi zaštićenoj /admin ruti -> login
+  // Nije ulogovan i pokušava da pristupi zaštićenoj /uprava-x7k2 ruti -> login
   if (!user && !isPublicAdminPath) {
-    const loginUrl = new URL('/admin/login', request.url)
+    const loginUrl = new URL('/uprava-x7k2/login', request.url)
     loginUrl.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Već je ulogovan i pokušava da ode na /admin/login -> pravo na dashboard
+  // Već je ulogovan i pokušava da ode na /uprava-x7k2/login -> pravo na dashboard
   if (user && isPublicAdminPath) {
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+    return NextResponse.redirect(new URL('/uprava-x7k2/dashboard', request.url))
   }
 
   return response
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/uprava-x7k2/:path*'],
 }

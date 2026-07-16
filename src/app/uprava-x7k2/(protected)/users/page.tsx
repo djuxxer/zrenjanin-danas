@@ -40,7 +40,7 @@ export default function AdminUsersPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/admin/users')
+      const res = await fetch('/api/uprava-x7k2/users')
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Greška pri učitavanju korisnika.')
       setUsers(data.users)
@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
     setInviteMessage(null)
 
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch('/api/uprava-x7k2/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: inviteEmail, role: inviteRole, full_name: inviteName }),
@@ -85,7 +85,7 @@ export default function AdminUsersPage() {
     if (!confirm(`Da li sigurno želiš da obrišeš korisnika "${name}"? Ova akcija je nepovratna.`)) return
     setDeletingId(id)
     try {
-      const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/uprava-x7k2/users/${id}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Greška prilikom brisanja.')
       setUsers((prev) => prev.filter((u) => u.id !== id))
@@ -100,7 +100,7 @@ export default function AdminUsersPage() {
     const prev = users
     setUsers((p) => p.map((u) => (u.id === id ? { ...u, role } : u)))
     try {
-      const res = await fetch(`/api/admin/users/${id}`, {
+      const res = await fetch(`/api/uprava-x7k2/users/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role }),
