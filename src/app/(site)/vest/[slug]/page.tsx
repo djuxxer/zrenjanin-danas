@@ -6,6 +6,7 @@ import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'l
 import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
 import { getApprovedComments } from '@/lib/comments'
 import { embedRichContent } from '@/lib/embed-content'
+import { sanitizeArticleContent } from '@/lib/sanitize-content'
 import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, formatDateTime, readingTime, SITE_NAME, SITE_URL } from '@/lib/utils'
 import { ArticleCard } from '@/components/article/article-card'
@@ -210,7 +211,7 @@ export default async function ArticlePage({ params }: Props) {
             <div
               id="article-body"
               className="article-content mb-8"
-              dangerouslySetInnerHTML={{ __html: embedRichContent(article.content) }}
+              dangerouslySetInnerHTML={{ __html: embedRichContent(sanitizeArticleContent(article.content)) }}
             />
 
             {/* Tags */}
