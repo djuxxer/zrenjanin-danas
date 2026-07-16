@@ -84,6 +84,7 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
                 { label: 'Oglašavanje', href: '/oglasavanje' },
                 { label: 'Politika privatnosti', href: '/privatnost' },
                 { label: 'Uslovi korišćenja', href: '/uslovi' },
+                { label: 'Impresum', href: '/impresum' },
                 { label: 'RSS', href: '/api/rss' },
                 { label: 'Sitemap', href: '/sitemap.xml' },
               ].map((link) => (
@@ -124,7 +125,7 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
       {/* Bottom bar */}
       <div className="border-t border-gray-800 py-4">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-gray-500">
-          <span>© 2025 Zrenjanin Danas d.o.o. Sva prava zadržana.</span>
+          <span>© {new Date().getFullYear()} Zrenjanin Danas. Sva prava zadržana.</span>
           <span>Odgovorno novinarstvo za bolji Zrenjanin</span>
         </div>
       </div>

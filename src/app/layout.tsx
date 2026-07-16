@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   keywords: ['Zrenjanin', 'vesti', 'Vojvodina', 'Srbija', 'lokalne vesti', 'Banat'],
   authors: [{ name: 'Redakcija Zrenjanin Danas' }],
   creator: 'Zrenjanin Danas',
-  publisher: 'Zrenjanin Danas d.o.o.',
+  publisher: 'Zrenjanin Danas',
   openGraph: {
     type: 'website',
     locale: 'sr_RS',
@@ -40,7 +40,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    creator: '@ZrenjaninDanas',
   },
   robots: {
     index: true,
