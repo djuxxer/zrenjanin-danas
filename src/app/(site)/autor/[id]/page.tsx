@@ -13,7 +13,6 @@ interface Props {
 
 const ROLE_LABELS = {
   admin: 'Glavni i odgovorni urednik',
-  urednik: 'Urednik',
   novinar: 'Novinar',
 }
 

@@ -32,7 +32,7 @@ export default function AdminDashboard() {
         .from('articles')
         .select('id, slug, title, category, views, published, breaking, created_at')
         .order('created_at', { ascending: false }),
-      fetch('/api/uprava-x7k2/users').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch('/api/admin/users').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ])
 
     setArticles(articleData ?? [])

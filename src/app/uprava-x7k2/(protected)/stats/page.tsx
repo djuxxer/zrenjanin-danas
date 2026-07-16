@@ -21,7 +21,7 @@ interface ArticleRow {
 interface ProfileRow {
   id: string
   full_name: string
-  role: 'admin' | 'urednik' | 'novinar'
+  role: 'admin' | 'novinar'
 }
 
 export default function AdminStatsPage() {

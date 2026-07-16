@@ -7,7 +7,6 @@ import { ImageUploadButton } from '@/components/admin/image-upload-button'
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',
-  urednik: 'Urednik',
   novinar: 'Novinar',
 }
 

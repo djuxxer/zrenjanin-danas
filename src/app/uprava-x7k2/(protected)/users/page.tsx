@@ -1,13 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { UserPlus, Edit, Trash2, Shield, User, Feather, Loader2, X } from 'lucide-react'
+import { UserPlus, Edit, Trash2, Shield, Feather, Loader2, X } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import type { UserRole } from '@/types'
 
 const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: typeof Shield; desc: string }> = {
   admin: { label: 'Admin', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', icon: Shield, desc: 'Pun pristup svim funkcijama' },
-  urednik: { label: 'Urednik', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', icon: User, desc: 'Odobrava i objavljuje vesti' },
   novinar: { label: 'Novinar', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: Feather, desc: 'Kreira i uređuje vesti' },
 }
 
@@ -34,6 +33,7 @@ export default function AdminUsersPage() {
   const [showInvite, setShowInvite] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteName, setInviteName] = useState('')
+  const [invitePassword, setInvitePassword] = useState('')
   const [inviteRole, setInviteRole] = useState<UserRole>('novinar')
   const [inviting, setInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -44,7 +44,7 @@ export default function AdminUsersPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/uprava-x7k2/users')
+      const res = await fetch('/api/admin/users')
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Greška pri učitavanju korisnika.')
       setUsers(data.users)
@@ -60,26 +60,32 @@ export default function AdminUsersPage() {
   }, [])
 
   async function handleInvite() {
-    if (!inviteEmail.trim()) return
+    if (!inviteEmail.trim() || !invitePassword.trim()) return
     setInviting(true)
     setInviteMessage(null)
 
     try {
-      const res = await fetch('/api/uprava-x7k2/users', {
+      const res = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: inviteEmail, role: inviteRole, full_name: inviteName }),
+        body: JSON.stringify({
+          email: inviteEmail,
+          password: invitePassword,
+          role: inviteRole,
+          full_name: inviteName,
+        }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Greška prilikom slanja pozivnice.')
+      if (!res.ok) throw new Error(data.error || 'Greška prilikom kreiranja naloga.')
 
-      setInviteMessage({ type: 'success', text: `Pozivnica poslata na ${inviteEmail}.` })
+      setInviteMessage({ type: 'success', text: `Nalog za ${inviteEmail} je napravljen. Prosledi mu email i lozinku ručno.` })
       setInviteEmail('')
       setInviteName('')
+      setInvitePassword('')
       setInviteRole('novinar')
       await loadUsers()
     } catch (e) {
-      setInviteMessage({ type: 'error', text: e instanceof Error ? e.message : 'Greška prilikom slanja pozivnice.' })
+      setInviteMessage({ type: 'error', text: e instanceof Error ? e.message : 'Greška prilikom kreiranja naloga.' })
     } finally {
       setInviting(false)
     }
@@ -89,7 +95,7 @@ export default function AdminUsersPage() {
     if (!confirm(`Da li sigurno želiš da obrišeš korisnika "${name}"? Ova akcija je nepovratna.`)) return
     setDeletingId(id)
     try {
-      const res = await fetch(`/api/uprava-x7k2/users/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Greška prilikom brisanja.')
       setUsers((prev) => prev.filter((u) => u.id !== id))
@@ -104,7 +110,7 @@ export default function AdminUsersPage() {
     const prev = users
     setUsers((p) => p.map((u) => (u.id === id ? { ...u, role } : u)))
     try {
-      const res = await fetch(`/api/uprava-x7k2/users/${id}`, {
+      const res = await fetch(`/api/admin/users/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role }),
@@ -129,19 +135,23 @@ export default function AdminUsersPage() {
           className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
         >
           <UserPlus className="w-4 h-4" />
-          Pozovi korisnika
+          Dodaj korisnika
         </button>
       </div>
 
-      {/* Invite form */}
+      {/* Add user form */}
       {showInvite && (
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-brand-red/30 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-sm">Pozovi novog korisnika</h3>
+            <h3 className="font-bold text-sm">Dodaj novog korisnika</h3>
             <button onClick={() => setShowInvite(false)} className="text-gray-400 hover:text-gray-600">
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          <p className="text-xs text-gray-500 mb-3">
+            Nalog se pravi odmah, bez slanja mejla — sam prosledi novinaru email i lozinku (npr. telefonom ili lično).
+          </p>
 
           {inviteMessage && (
             <div
@@ -156,7 +166,7 @@ export default function AdminUsersPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Ime i prezime</label>
               <input
@@ -167,13 +177,23 @@ export default function AdminUsersPage() {
                 className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
               />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="block text-xs text-gray-500 mb-1">Email adresa</label>
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="ime@zrenjanindanas.rs"
+                className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Lozinka</label>
+              <input
+                type="text"
+                value={invitePassword}
+                onChange={(e) => setInvitePassword(e.target.value)}
+                placeholder="Unesi lozinku za novinara"
                 className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
               />
             </div>
@@ -193,11 +213,11 @@ export default function AdminUsersPage() {
           <div className="flex gap-2 mt-3">
             <button
               onClick={handleInvite}
-              disabled={inviting || !inviteEmail.trim()}
+              disabled={inviting || !inviteEmail.trim() || !invitePassword.trim()}
               className="flex items-center gap-2 btn-primary text-sm py-2 disabled:opacity-60"
             >
               {inviting && <Loader2 className="w-4 h-4 animate-spin" />}
-              Pošalji pozivnicu
+              Dodaj nalog
             </button>
             <button onClick={() => setShowInvite(false)} className="text-sm text-gray-500 hover:text-gray-700 px-4 py-2">
               Otkaži

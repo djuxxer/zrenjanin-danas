@@ -5,7 +5,7 @@ export interface AuthorProfile {
   full_name: string
   bio: string | null
   avatar_url: string | null
-  role: 'admin' | 'urednik' | 'novinar'
+  role: 'admin' | 'novinar'
 }
 
 export async function getAuthorById(id: string): Promise<AuthorProfile | undefined> {

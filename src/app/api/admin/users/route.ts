@@ -80,10 +80,10 @@ export async function POST(request: Request) {
     const guard = await requireAdmin()
     if ('error' in guard) return NextResponse.json({ error: guard.error }, { status: guard.status })
 
-    const { email, role, full_name } = await request.json()
+    const { email, password, role, full_name } = await request.json()
 
-    if (!email || !role) {
-      return NextResponse.json({ error: 'Email i uloga su obavezni.' }, { status: 400 })
+    if (!email || !password || !role) {
+      return NextResponse.json({ error: 'Email, lozinka i uloga su obavezni.' }, { status: 400 })
     }
 
     // Bezbednosna mera: Admin nalog se ne sme praviti kroz UI/API, samo direktno kroz bazu —
@@ -97,8 +97,13 @@ export async function POST(request: Request) {
 
     const admin = createAdminClient()
 
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-      data: { full_name: full_name || email.split('@')[0], role },
+    // Nalog se pravi direktno, sa lozinkom koju je Admin uneo — NE šalje se nikakav email.
+    // Admin ručno prosledi email/lozinku novinaru (telefonom, lično, itd.)
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: full_name || email.split('@')[0], role },
     })
 
     if (error) {

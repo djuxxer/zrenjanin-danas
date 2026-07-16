@@ -7,7 +7,7 @@ export type Category =
   | 'ekonomija'
   | 'zrenjanin'
 
-export type UserRole = 'admin' | 'urednik' | 'novinar'
+export type UserRole = 'admin' | 'novinar'
 
 export interface User {
   id: string
