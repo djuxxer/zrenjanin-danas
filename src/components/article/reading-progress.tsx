@@ -8,18 +8,25 @@ interface Props {
 
 export function ReadingProgress({ targetId }: Props) {
   const [progress, setProgress] = useState(0)
+  const [headerHeight, setHeaderHeight] = useState(0)
   const ticking = useRef(false)
 
   useEffect(() => {
-    function updateProgress() {
+    function update() {
+      // Meri trenutnu visinu header-a (menja se kad se otvori pretraga/mobilni meni)
+      const header = document.querySelector('header')
+      if (header) setHeaderHeight(header.getBoundingClientRect().height)
+
       const target = document.getElementById(targetId)
-      if (!target) return
+      if (!target) {
+        ticking.current = false
+        return
+      }
 
       const rect = target.getBoundingClientRect()
       const viewportHeight = window.innerHeight
       const totalScrollable = rect.height - viewportHeight + rect.top
 
-      // Koliko je pređeno od vrha teksta do sada, u odnosu na ukupnu visinu teksta
       const scrolled = -rect.top
       const percent = totalScrollable > 0 ? Math.min(100, Math.max(0, (scrolled / totalScrollable) * 100)) : 0
 
@@ -30,11 +37,11 @@ export function ReadingProgress({ targetId }: Props) {
     function onScroll() {
       if (!ticking.current) {
         ticking.current = true
-        requestAnimationFrame(updateProgress)
+        requestAnimationFrame(update)
       }
     }
 
-    updateProgress()
+    update()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
     return () => {
@@ -44,7 +51,10 @@ export function ReadingProgress({ targetId }: Props) {
   }, [targetId])
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gray-200/50 dark:bg-gray-800/50">
+    <div
+      className="fixed left-0 right-0 z-40 h-1 bg-gray-200/50 dark:bg-gray-800/50 transition-[top] duration-200"
+      style={{ top: `${headerHeight}px` }}
+    >
       <div
         className="h-full bg-brand-red transition-[width] duration-150 ease-out"
         style={{ width: `${progress}%` }}

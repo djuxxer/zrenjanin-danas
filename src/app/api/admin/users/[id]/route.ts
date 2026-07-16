@@ -32,6 +32,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   if (!role) return NextResponse.json({ error: 'Uloga je obavezna.' }, { status: 400 })
 
+  // Bezbednosna mera: niko ne sme da bude unapređen u Admin ulogu kroz UI/API —
+  // to je namerno moguće samo direktno kroz bazu.
+  if (role === 'admin') {
+    return NextResponse.json(
+      { error: 'Unapređenje u Admin ulogu nije dozvoljeno kroz admin panel — samo direktno kroz bazu.' },
+      { status: 403 }
+    )
+  }
+
   const admin = createAdminClient()
   const { error } = await admin.from('profiles').update({ role }).eq('id', id)
 

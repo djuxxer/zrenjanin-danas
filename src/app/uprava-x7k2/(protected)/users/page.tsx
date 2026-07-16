@@ -11,6 +11,10 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: typeof
   novinar: { label: 'Novinar', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: Feather, desc: 'Kreira i uređuje vesti' },
 }
 
+// Admin uloga se NAMERNO ne nudi kroz UI (ni pri pozivu, ni pri izmeni uloge) —
+// iz bezbednosnih razloga, novi Admin nalog se pravi isključivo direktno kroz bazu.
+const INVITABLE_ROLES = Object.entries(ROLE_CONFIG).filter(([role]) => role !== 'admin') as [UserRole, typeof ROLE_CONFIG[UserRole]][]
+
 interface AdminUser {
   id: string
   email: string
@@ -180,7 +184,7 @@ export default function AdminUsersPage() {
                 onChange={(e) => setInviteRole(e.target.value as UserRole)}
                 className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
               >
-                {Object.entries(ROLE_CONFIG).map(([role, cfg]) => (
+                {INVITABLE_ROLES.map(([role, cfg]) => (
                   <option key={role} value={role}>{cfg.label}</option>
                 ))}
               </select>
@@ -246,15 +250,24 @@ export default function AdminUsersPage() {
                   </div>
                   <div className="hidden sm:flex items-center gap-1">
                     <RoleIcon className="w-3 h-3 text-gray-400" />
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
-                      className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border-0 cursor-pointer', roleConfig.color)}
-                    >
-                      {Object.entries(ROLE_CONFIG).map(([role, cfg]) => (
-                        <option key={role} value={role}>{cfg.label}</option>
-                      ))}
-                    </select>
+                    {user.role === 'admin' ? (
+                      <span
+                        className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', roleConfig.color)}
+                        title="Admin uloga se menja isključivo direktno kroz bazu"
+                      >
+                        {roleConfig.label}
+                      </span>
+                    ) : (
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
+                        className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border-0 cursor-pointer', roleConfig.color)}
+                      >
+                        {INVITABLE_ROLES.map(([role, cfg]) => (
+                          <option key={role} value={role}>{cfg.label}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   <div className="hidden md:block text-center">
                     <p className="text-sm font-bold text-gray-900 dark:text-white">{user.articles}</p>

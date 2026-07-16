@@ -77,6 +77,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email i uloga su obavezni.' }, { status: 400 })
   }
 
+  // Bezbednosna mera: Admin nalog se ne sme praviti kroz UI/API, samo direktno kroz bazu —
+  // ovo važi čak i ako neko pokuša da zaobiđe padajući meni i pošalje zahtev direktno.
+  if (role === 'admin') {
+    return NextResponse.json(
+      { error: 'Admin nalog se ne može kreirati kroz admin panel — samo direktno kroz bazu.' },
+      { status: 403 }
+    )
+  }
+
   const admin = createAdminClient()
 
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
