@@ -78,27 +78,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav */}
         <nav className="flex-1 py-4 overflow-y-auto">
           <ul className="space-y-1 px-2">
-            {NAV_ITEMS.map((item) => {
-              const Icon = item.icon
-              const active = pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium',
-                      active
-                        ? 'bg-brand-red text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    )}
-                    title={!sidebarOpen ? item.label : undefined}
-                  >
+            {(() => {
+              // Bira NAJSPECIFIČNIJU stavku menija za trenutnu putanju (najduži href koji odgovara),
+              // umesto da nezavisno pali sve stavke čiji href je "prefiks" trenutne putanje
+              // (npr. i "Sve vesti" i "Nova vest" bi se inače istovremeno palili na /articles/new).
+              const activeHref = NAV_ITEMS
+                .filter((item) => pathname === item.href || pathname.startsWith(item.href + '/'))
+                .sort((a, b) => b.href.length - a.href.length)[0]?.href
+
+              return NAV_ITEMS.map((item) => {
+                const Icon = item.icon
+                const active = item.href === activeHref
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium',
+                        active
+                          ? 'bg-brand-red text-white'
+                          : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                      )}
+                      title={!sidebarOpen ? item.label : undefined}
+                    >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     {sidebarOpen && <span>{item.label}</span>}
                   </Link>
                 </li>
               )
-            })}
+            })
+            })()}
           </ul>
         </nav>
 

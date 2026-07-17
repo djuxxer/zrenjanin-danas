@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef, use } from 'react'
+import { useState, useMemo, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2 } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
@@ -9,6 +9,7 @@ import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 import { createClient } from '@/lib/supabase/client'
 import { ImageUploadButton } from '@/components/admin/image-upload-button'
 import { ImageGalleryPicker } from '@/components/admin/image-gallery-picker'
+import { RichTextEditor } from '@/components/admin/rich-text-editor'
 
 const EMPTY_FORM = {
   title: '',
@@ -54,25 +55,6 @@ export default function EditArticlePage({ params }: Props) {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
-  const contentRef = useRef<HTMLTextAreaElement>(null)
-
-  function insertImageIntoContent(url: string) {
-    const imgTag = `\n<img src="${url}" alt="" style="width:100%;border-radius:0.75rem;margin:1.5rem 0;" />\n`
-    const textarea = contentRef.current
-    if (!textarea) {
-      set('content', form.content + imgTag)
-      return
-    }
-    const start = textarea.selectionStart ?? form.content.length
-    const end = textarea.selectionEnd ?? form.content.length
-    const newContent = form.content.slice(0, start) + imgTag + form.content.slice(end)
-    set('content', newContent)
-    setTimeout(() => {
-      textarea.focus()
-      const cursorPos = start + imgTag.length
-      textarea.setSelectionRange(cursorPos, cursorPos)
-    }, 0)
-  }
 
   useEffect(() => {
     async function load() {
@@ -292,28 +274,11 @@ export default function EditArticlePage({ params }: Props) {
               {activeTab === 'content' && (
                 <div className="space-y-4">
                   <div>
-                    <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                      <label className="block text-xs font-bold uppercase tracking-wide text-gray-500">
-                        Sadržaj vesti *
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <div className="w-52">
-                          <ImageUploadButton onUploaded={insertImageIntoContent} />
-                        </div>
-                        <div className="w-56">
-                          <ImageGalleryPicker onSelect={insertImageIntoContent} />
-                        </div>
-                      </div>
-                    </div>
-                    <textarea
-                      ref={contentRef}
-                      value={form.content}
-                      onChange={(e) => set('content', e.target.value)}
-                      placeholder="Unesite tekst vesti... (podržan HTML format)"
-                      rows={16}
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red resize-y font-mono"
-                    />
-                    <p className="text-xs text-gray-400 mt-1">Podržan HTML format: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;a&gt;, &lt;blockquote&gt;. Klikni u tekst gde želiš sliku, pa dugme iznad — ubacuje se tačno na tom mestu.</p>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Sadržaj vesti *
+                    </label>
+                    <RichTextEditor value={form.content} onChange={(html) => set('content', html)} />
+                    <p className="text-xs text-gray-400 mt-1">Vizuelno = piši/uređuj kao u Word-u. Kod = ručna izmena HTML-a. Lepljenje teksta se automatski deli u pasuse.</p>
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
