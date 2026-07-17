@@ -39,9 +39,6 @@ export function HeroSection({ big, small, latest }: HeroSectionProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-            {main.traka_gore && (
-              <span className="breaking-badge inline-block mb-3">HITNO</span>
-            )}
             <span className={cn('category-badge mb-3 inline-block', CATEGORY_COLORS[main.category])}>
               {CATEGORY_LABELS[main.category]}
             </span>

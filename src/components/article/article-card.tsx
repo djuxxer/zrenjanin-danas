@@ -31,9 +31,6 @@ export function ArticleCard({ article, variant = 'default', className, priority 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          {article.traka_gore && (
-            <div className="breaking-badge inline-block mb-3">HITNO</div>
-          )}
           <span className={cn('category-badge mb-3 inline-block', categoryColor)}>
             {categoryLabel}
           </span>
@@ -105,9 +102,6 @@ export function ArticleCard({ article, variant = 'default', className, priority 
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           priority={priority}
         />
-        {article.traka_gore && (
-          <div className="absolute top-2 left-2 breaking-badge text-xs">HITNO</div>
-        )}
         <span className={cn('absolute bottom-2 left-2 category-badge', categoryColor)}>
           {categoryLabel}
         </span>

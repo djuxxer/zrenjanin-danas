@@ -151,9 +151,6 @@ export default async function ArticlePage({ params }: Props) {
             {/* Header */}
             <header className="mb-6">
               <div className="flex items-center gap-2 mb-3">
-                {article.traka_gore && (
-                  <span className="breaking-badge">HITNO</span>
-                )}
                 <span className={cn('category-badge', categoryColor)}>{categoryLabel}</span>
               </div>
 
