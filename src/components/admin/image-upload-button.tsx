@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { Upload, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { compressImage } from '@/lib/compress-image'
 
 interface Props {
   onUploaded: (url: string) => void
@@ -19,8 +20,8 @@ export function ImageUploadButton({ onUploaded }: Props) {
 
     setError(null)
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Slika je prevelika (max 5MB).')
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Slika je prevelika (max 10MB).')
       return
     }
 
@@ -37,12 +38,14 @@ export function ImageUploadButton({ onUploaded }: Props) {
       return
     }
 
-    const ext = file.name.split('.').pop()
-    const path = `${user.id}/${Date.now()}.${ext}`
+    const compressed = await compressImage(file)
+
+    const ext = compressed.name.split('.').pop()
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
     const { error: uploadError } = await supabase.storage
       .from('article-images')
-      .upload(path, file, { cacheControl: '3600', upsert: false })
+      .upload(path, compressed, { cacheControl: '3600', upsert: false })
 
     setUploading(false)
 
