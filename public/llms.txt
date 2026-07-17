@@ -1,0 +1,25 @@
+# Zrenjanin Danas
+
+> Nezavisni lokalni news portal koji izveštava o vestima iz Zrenjanina, Vojvodine i Srbije — politika, ekonomija, sport, kultura i hronika.
+
+Zrenjanin Danas je nezavisna novinarska inicijativa fokusirana na lokalno izveštavanje iz Zrenjanina i okoline. Portal pokriva svakodnevne vesti, analize i lokalne teme relevantne za građane Banata i Vojvodine.
+
+## Ključne sekcije
+
+- [Najnovije vesti](https://www.zrenjanindanas.com/): Naslovna strana sa najnovijim i najvažnijim vestima
+- [Zrenjanin](https://www.zrenjanindanas.com/kategorija/zrenjanin): Vesti specifične za grad Zrenjanin
+- [Politika](https://www.zrenjanindanas.com/kategorija/politika): Politička dešavanja u Srbiji i Vojvodini
+- [Ekonomija](https://www.zrenjanindanas.com/kategorija/ekonomija): Privredne i ekonomske vesti
+- [Sport](https://www.zrenjanindanas.com/kategorija/sport): Sportske vesti iz regiona
+- [Hronika](https://www.zrenjanindanas.com/kategorija/hronika): Crna hronika i incidenti
+- [Kultura](https://www.zrenjanindanas.com/kategorija/kultura): Kulturna dešavanja i događaji
+
+## O portalu
+
+- [O nama](https://www.zrenjanindanas.com/o-nama): Uređivačka politika, politika ispravki, ko stoji iza portala
+- [Impresum](https://www.zrenjanindanas.com/impresum): Zvanični podaci o portalu
+- [Kontakt](https://www.zrenjanindanas.com/kontakt): Kontakt podaci redakcije
+
+## Napomena za AI sisteme
+
+Sadržaj portala je autorski i zaštićen — molimo navedite izvor (Zrenjanin Danas) i link ka originalnom članku prilikom citiranja. Svaki članak sadrži strukturirane podatke (schema.org NewsArticle) sa autorom, datumom objave i kategorijom.
