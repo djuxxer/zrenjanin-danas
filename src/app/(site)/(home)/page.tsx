@@ -4,7 +4,8 @@ import { TrendingSection, MostReadSection, CategoryGrid } from '@/components/hom
 import { WeatherWidget, NewsletterSection, AdBanner } from '@/components/home/widgets'
 import { ArticleCard } from '@/components/article/article-card'
 import {
-  getFeaturedArticles,
+  getNaslovnaVelika,
+  getNaslovnaMala,
   getTrendingArticles,
   getMostReadArticles,
   getArticlesByCategory,
@@ -20,8 +21,9 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [featured, trending, mostRead, latest, zrenjanin, sport, ekonomija] = await Promise.all([
-    getFeaturedArticles(),
+  const [big, small, trending, mostRead, latest, zrenjanin, sport, ekonomija] = await Promise.all([
+    getNaslovnaVelika(),
+    getNaslovnaMala(),
     getTrendingArticles(6),
     getMostReadArticles(5),
     getLatestArticles(12),
@@ -33,7 +35,7 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <HeroSection featured={featured} latest={latest} />
+      <HeroSection big={big} small={small} latest={latest} />
 
       {/* Ad banner */}
       <div className="container mx-auto px-4 mb-2">

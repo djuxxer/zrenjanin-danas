@@ -1,9 +1,14 @@
-'use client'
+import Link from 'next/link'
+import type { Article } from '@/types'
 
-import { BREAKING_TICKER } from '@/lib/demo-data'
+interface Props {
+  articles: Article[]
+}
 
-export function BreakingTicker() {
-  const items = [...BREAKING_TICKER, ...BREAKING_TICKER]
+export function BreakingTicker({ articles }: Props) {
+  if (articles.length === 0) return null
+
+  const items = [...articles, ...articles]
 
   return (
     <div className="bg-brand-red text-white py-2 overflow-hidden">
@@ -13,11 +18,11 @@ export function BreakingTicker() {
         </div>
         <div className="ticker-wrap flex-1">
           <div className="ticker-content text-sm font-medium">
-            {items.map((item, i) => (
-              <span key={i} className="mr-16">
+            {items.map((article, i) => (
+              <Link key={`${article.id}-${i}`} href={`/vest/${article.slug}`} className="mr-16 hover:underline">
                 <span className="mr-2 opacity-60">▶</span>
-                {item}
-              </span>
+                {article.title}
+              </Link>
             ))}
           </div>
         </div>

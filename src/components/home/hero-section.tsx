@@ -6,13 +6,14 @@ import { cn, timeAgo } from '@/lib/utils'
 import type { Article } from '@/types'
 
 interface HeroSectionProps {
-  featured: Article[]
+  big: Article[]
+  small: Article[]
   latest: Article[]
 }
 
-export function HeroSection({ featured, latest }: HeroSectionProps) {
-  const [main, ...secondary] = featured
-  const sideCards = (secondary.length > 0 ? secondary : latest.filter((a) => a.id !== main?.id)).slice(0, 2)
+export function HeroSection({ big, small, latest }: HeroSectionProps) {
+  const main = big[0]
+  const sideCards = (small.length > 0 ? small : latest.filter((a) => a.id !== main?.id)).slice(0, 2)
   const sideLatest = latest.filter((a) => a.id !== main?.id && !sideCards.find((s) => s.id === a.id)).slice(0, 3)
 
   if (!main) return null
@@ -38,7 +39,7 @@ export function HeroSection({ featured, latest }: HeroSectionProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-            {main.breaking && (
+            {main.traka_gore && (
               <span className="breaking-badge inline-block mb-3">HITNO</span>
             )}
             <span className={cn('category-badge mb-3 inline-block', CATEGORY_COLORS[main.category])}>

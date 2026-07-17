@@ -17,9 +17,9 @@ type ArticleRow = {
   published: boolean
   published_at: string | null
   scheduled_at: string | null
-  breaking: boolean
-  featured: boolean
-  trending: boolean
+  naslovna_velika: boolean
+  naslovna_mala: boolean
+  traka_gore: boolean
   views: number
   seo_title: string | null
   seo_description: string | null
@@ -61,9 +61,9 @@ function mapArticle(row: ArticleRow): Article {
     published: row.published,
     published_at: row.published_at ?? undefined,
     scheduled_at: row.scheduled_at ?? undefined,
-    breaking: row.breaking,
-    featured: row.featured,
-    trending: row.trending,
+    naslovna_velika: row.naslovna_velika,
+    naslovna_mala: row.naslovna_mala,
+    traka_gore: row.traka_gore,
     views: row.views,
     seo_title: row.seo_title ?? undefined,
     seo_description: row.seo_description ?? undefined,
@@ -77,7 +77,7 @@ function mapArticle(row: ArticleRow): Article {
 
 const ARTICLE_SELECT = `
   id, slug, title, subtitle, content, excerpt, category, image_url, image_alt,
-  author_id, published, published_at, scheduled_at, breaking, featured, trending,
+  author_id, published, published_at, scheduled_at, naslovna_velika, naslovna_mala, traka_gore,
   views, seo_title, seo_description, og_image, tags, related_ids, created_at, updated_at,
   author:profiles ( id, full_name, avatar_url, role )
 `
@@ -94,40 +94,55 @@ export async function getAllArticles(): Promise<Article[]> {
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export async function getFeaturedArticles(): Promise<Article[]> {
+export async function getNaslovnaVelika(): Promise<Article[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
-    .eq('featured', true)
+    .eq('naslovna_velika', true)
     .order('published_at', { ascending: false })
-    .limit(5)
+    .limit(3)
 
   if (error || !data) return []
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
-export async function getBreakingArticles(): Promise<Article[]> {
+export async function getNaslovnaMala(): Promise<Article[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
-    .eq('breaking', true)
+    .eq('naslovna_mala', true)
+    .order('published_at', { ascending: false })
+    .limit(4)
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
+}
+
+export async function getTrakaGore(): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .eq('traka_gore', true)
     .order('published_at', { ascending: false })
 
   if (error || !data) return []
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
+// "Popularno" ide isključivo po pravim pregledima (views), bez ručne oznake —
+// ne postoji vise "trending" flag, ovo je stvarna popularnost.
 export async function getTrendingArticles(limit = 6): Promise<Article[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
-    .eq('trending', true)
     .order('views', { ascending: false })
     .limit(limit)
 

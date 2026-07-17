@@ -19,7 +19,7 @@ BEGIN
     RETURN;
   END IF;
 
-  INSERT INTO public.articles (slug, title, subtitle, content, excerpt, category, image_url, image_alt, author_id, published, published_at, breaking, featured, trending, views, seo_title, seo_description, tags) VALUES
+  INSERT INTO public.articles (slug, title, subtitle, content, excerpt, category, image_url, image_alt, author_id, published, published_at, traka_gore, naslovna_mala, views, seo_title, seo_description, tags) VALUES
   (
     'vucic-poseta-zrenjanin-investicije-infrastruktura-2025',
     'Predsednik Vučić najavio rekordna ulaganja u infrastrukturu Zrenjanina',
@@ -32,7 +32,6 @@ BEGIN
     author,
     true,
     NOW() - INTERVAL '2 hours',
-    true,
     true,
     true,
     15420,
@@ -54,7 +53,6 @@ BEGIN
     NOW() - INTERVAL '4 hours',
     false,
     true,
-    true,
     8930,
     'Novi most na Begeju: Završetak do kraja 2025, vredan 18 miliona evra | Zrenjanin Danas',
     'Zrenjanin dobija moderan most na Begeju vredan 18 miliona evra — EU fondovi, biciklističke staze i kapacitet za 20.000 vozila dnevno.',
@@ -73,7 +71,6 @@ BEGIN
     true,
     NOW() - INTERVAL '6 hours',
     false,
-    true,
     true,
     12100,
     'Continental Zrenjanin: 500 novih radnih mesta i 45 miliona evra investicija | Zrenjanin Danas',

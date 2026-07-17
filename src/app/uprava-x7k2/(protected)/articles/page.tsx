@@ -13,8 +13,8 @@ interface ArticleRow {
   title: string
   category: Category
   published: boolean
-  breaking: boolean
-  featured: boolean
+  naslovna_velika: boolean
+  naslovna_mala: boolean
   views: number
 }
 
@@ -35,7 +35,7 @@ export default function AdminArticlesPage() {
     const supabase = createClient()
     const { data } = await supabase
       .from('articles')
-      .select('id, slug, title, category, published, breaking, featured, views')
+      .select('id, slug, title, category, published, naslovna_velika, naslovna_mala, views')
       .order('created_at', { ascending: false })
     setArticles(data ?? [])
     setLoading(false)
@@ -132,11 +132,11 @@ export default function AdminArticlesPage() {
                   <tr key={article.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        {article.breaking && (
-                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold uppercase">Hitno</span>
+                        {article.naslovna_velika && (
+                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold uppercase">Naslovna velika</span>
                         )}
-                        {article.featured && (
-                          <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold uppercase">Istaknuto</span>
+                        {article.naslovna_mala && (
+                          <span className="text-[10px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold uppercase">Naslovna mala</span>
                         )}
                         <span className="font-medium text-gray-900 dark:text-white line-clamp-1 max-w-xs">{article.title}</span>
                       </div>

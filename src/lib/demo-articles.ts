@@ -22,13 +22,17 @@ function getDemoArticlesFull(): Article[] {
   return cache
 }
 
-export function demoFeatured(): Article[] {
-  return getDemoArticlesFull().filter((a) => a.published && a.featured).slice(0, 5)
+export function demoNaslovnaVelika(): Article[] {
+  return getDemoArticlesFull().filter((a) => a.published && a.naslovna_velika).slice(0, 3)
+}
+
+export function demoNaslovnaMala(): Article[] {
+  return getDemoArticlesFull().filter((a) => a.published && a.naslovna_mala).slice(0, 4)
 }
 
 export function demoTrending(limit = 6): Article[] {
   return getDemoArticlesFull()
-    .filter((a) => a.published && a.trending)
+    .filter((a) => a.published)
     .sort((a, b) => b.views - a.views)
     .slice(0, limit)
 }

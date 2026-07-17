@@ -33,9 +33,9 @@ export interface Article {
   published: boolean
   published_at?: string
   scheduled_at?: string
-  breaking: boolean
-  featured: boolean
-  trending: boolean
+  naslovna_velika: boolean
+  naslovna_mala: boolean
+  traka_gore: boolean
   views: number
   seo_title?: string
   seo_description?: string

@@ -13,7 +13,7 @@ interface ArticleRow {
   category: Category
   views: number
   published: boolean
-  breaking: boolean
+  traka_gore: boolean
   created_at: string
 }
 
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     const [{ data: articleData }, usersRes] = await Promise.all([
       supabase
         .from('articles')
-        .select('id, slug, title, category, views, published, breaking, created_at')
+        .select('id, slug, title, category, views, published, traka_gore, created_at')
         .order('created_at', { ascending: false }),
       fetch('/api/admin/users').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ])
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
 
   const totalViews = articles.reduce((sum, a) => sum + a.views, 0)
   const trendingCount = articles.filter((a) => a.published).length
-  const breakingArticles = articles.filter((a) => a.breaking && a.published)
+  const trakaGoreArticles = articles.filter((a) => a.traka_gore && a.published)
   const recent = articles.slice(0, 5)
 
   const STATS = [
@@ -108,15 +108,15 @@ export default function AdminDashboard() {
           </div>
 
           {/* Breaking news alert */}
-          {breakingArticles.length > 0 && (
+          {trakaGoreArticles.length > 0 && (
             <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-brand-red flex-shrink-0" />
               <div className="min-w-0">
                 <p className="font-semibold text-sm text-red-800 dark:text-red-200">
-                  {breakingArticles.length} {breakingArticles.length === 1 ? 'aktivna hitna vest' : 'aktivne hitne vesti'}
+                  {trakaGoreArticles.length} {trakaGoreArticles.length === 1 ? 'vest na traci gore' : 'vesti na traci gore'}
                 </p>
                 <p className="text-xs text-red-600 dark:text-red-400 truncate">
-                  {breakingArticles.map((a) => a.title).join(' • ')}
+                  {trakaGoreArticles.map((a) => a.title).join(' • ')}
                 </p>
               </div>
               <Link href="/uprava-x7k2/articles" className="ml-auto text-xs text-brand-red font-semibold hover:underline flex-shrink-0">

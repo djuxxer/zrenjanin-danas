@@ -21,9 +21,9 @@ const EMPTY_FORM = {
   seo_title: '',
   seo_description: '',
   tags: '',
-  breaking: false,
-  featured: false,
-  trending: false,
+  naslovna_velika: false,
+  naslovna_mala: false,
+  traka_gore: false,
   scheduled_at: '',
 }
 
@@ -77,9 +77,9 @@ export default function EditArticlePage({ params }: Props) {
         seo_title: data.seo_title ?? '',
         seo_description: data.seo_description ?? '',
         tags: (data.tags ?? []).join(', '),
-        breaking: data.breaking ?? false,
-        featured: data.featured ?? false,
-        trending: data.trending ?? false,
+        naslovna_velika: data.naslovna_velika ?? false,
+        naslovna_mala: data.naslovna_mala ?? false,
+        traka_gore: data.traka_gore ?? false,
         scheduled_at: data.scheduled_at ?? '',
       })
       setLoading(false)
@@ -138,9 +138,9 @@ export default function EditArticlePage({ params }: Props) {
         image_alt: form.image_alt,
         published: publish,
         scheduled_at: form.scheduled_at || null,
-        breaking: form.breaking,
-        featured: form.featured,
-        trending: form.trending,
+        naslovna_velika: form.naslovna_velika,
+        naslovna_mala: form.naslovna_mala,
+        traka_gore: form.traka_gore,
         seo_title: form.seo_title || null,
         seo_description: form.seo_description || null,
         focus_keyphrase: form.focus_keyphrase || null,
@@ -513,9 +513,9 @@ export default function EditArticlePage({ params }: Props) {
             <h3 className="font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Oznake</h3>
             <div className="space-y-2">
               {[
-                { key: 'breaking', label: 'Hitna vest', color: 'text-red-600' },
-                { key: 'featured', label: 'Istaknuta vest', color: 'text-yellow-600' },
-                { key: 'trending', label: 'Popularno', color: 'text-orange-600' },
+                { key: 'naslovna_velika', label: 'Naslovna velika', color: 'text-red-600' },
+                { key: 'naslovna_mala', label: 'Naslovna mala', color: 'text-yellow-600' },
+                { key: 'traka_gore', label: 'Traka gore', color: 'text-orange-600' },
               ].map(({ key, label, color }) => (
                 <label key={key} className="flex items-center justify-between cursor-pointer group">
                   <span className={cn('text-sm font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors', form[key as keyof typeof form] ? color : 'text-gray-500')}>

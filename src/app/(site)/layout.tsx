@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/footer'
 import { BreakingTicker } from '@/components/layout/breaking-ticker'
 import { CookieConsentAndAnalytics } from '@/components/providers/cookie-consent'
 import { createClient } from '@/lib/supabase/server'
+import { getTrakaGore, getLatestArticles } from '@/lib/articles'
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -12,9 +13,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     .eq('id', 1)
     .maybeSingle()
 
+  // Traka prikazuje stvarne vesti sa oznakom "Traka gore"; ako trenutno nema nijedne, prikazuje najnovije objavljene.
+  const breaking = await getTrakaGore()
+  const tickerArticles = breaking.length > 0 ? breaking : await getLatestArticles(6)
+
   return (
     <>
-      <BreakingTicker />
+      <BreakingTicker articles={tickerArticles} />
       <Navbar />
       <main className="min-h-screen bg-gray-50 dark:bg-gray-950">{children}</main>
       <Footer

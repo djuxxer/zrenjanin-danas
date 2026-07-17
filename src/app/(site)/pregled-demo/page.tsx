@@ -3,7 +3,7 @@ import { HeroSection } from '@/components/home/hero-section'
 import { TrendingSection, MostReadSection, CategoryGrid } from '@/components/home/trending-section'
 import { WeatherWidget, NewsletterSection, AdBanner } from '@/components/home/widgets'
 import { ArticleCard } from '@/components/article/article-card'
-import { demoFeatured, demoTrending, demoMostRead, demoLatest, demoByCategory } from '@/lib/demo-articles'
+import { demoNaslovnaVelika, demoNaslovnaMala, demoTrending, demoMostRead, demoLatest, demoByCategory } from '@/lib/demo-articles'
 
 export const metadata: Metadata = {
   title: 'Pregled izgleda (demo) — Zrenjanin Danas',
@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 }
 
 export default function DemoPreviewPage() {
-  const featured = demoFeatured()
+  const big = demoNaslovnaVelika()
+  const small = demoNaslovnaMala()
   const trending = demoTrending(6)
   const mostRead = demoMostRead(5)
   const latest = demoLatest(12)
@@ -26,7 +27,7 @@ export default function DemoPreviewPage() {
       </div>
 
       {/* Hero */}
-      <HeroSection featured={featured} latest={latest} />
+      <HeroSection big={big} small={small} latest={latest} />
 
       {/* Ad banner */}
       <div className="container mx-auto px-4 mb-2">

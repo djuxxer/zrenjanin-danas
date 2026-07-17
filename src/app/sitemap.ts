@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${SITE_URL}/vest/${article.slug}`,
     lastModified: new Date(article.updated_at),
     changeFrequency: 'daily',
-    priority: article.featured ? 0.9 : 0.7,
+    priority: article.naslovna_velika ? 0.9 : 0.7,
   }))
 
   const categoryUrls: MetadataRoute.Sitemap = categories.map((cat) => ({
