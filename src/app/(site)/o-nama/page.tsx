@@ -58,8 +58,8 @@ export default function AboutPage() {
           <p>
             Trudimo se da svaka objavljena informacija bude tačna, ali greške su ljudske i mogu se desiti.
             Ukoliko primetite netačnost u nekom od naših tekstova, molimo vas da nas obavestite na{' '}
-            <a href="mailto:redakcija@zrenjanindanas.rs" className="text-brand-red hover:underline">
-              redakcija@zrenjanindanas.rs
+            <a href="mailto:redakcija@zrenjanindanas.com" className="text-brand-red hover:underline">
+              redakcija@zrenjanindanas.com
             </a>. Greške ćemo ispraviti u najkraćem mogućem roku, a značajne izmene ćemo jasno naznačiti u
             samom tekstu.
           </p>
@@ -72,8 +72,8 @@ export default function AboutPage() {
           </div>
           <p>
             Za sva pitanja, sugestije ili prijave grešaka, pišite nam na{' '}
-            <a href="mailto:redakcija@zrenjanindanas.rs" className="text-brand-red hover:underline">
-              redakcija@zrenjanindanas.rs
+            <a href="mailto:redakcija@zrenjanindanas.com" className="text-brand-red hover:underline">
+              redakcija@zrenjanindanas.com
             </a>{' '}
             ili posetite našu{' '}
             <a href="/kontakt" className="text-brand-red hover:underline">

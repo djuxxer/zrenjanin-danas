@@ -348,7 +348,7 @@ export default function NewArticlePage() {
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Google pregled</p>
                     <div className="space-y-1">
-                      <p className="text-xs text-green-700 dark:text-green-500">zrenjanindanas.rs › vest › {form.title ? form.title.toLowerCase().replace(/\s+/g, '-').slice(0, 30) : 'naslov-vesti'}</p>
+                      <p className="text-xs text-green-700 dark:text-green-500">zrenjanindanas.com › vest › {form.title ? form.title.toLowerCase().replace(/\s+/g, '-').slice(0, 30) : 'naslov-vesti'}</p>
                       <p className="text-blue-700 dark:text-blue-400 font-medium text-base line-clamp-1">
                         {form.seo_title || form.title || 'SEO naslov vesti | Zrenjanin Danas'}
                       </p>

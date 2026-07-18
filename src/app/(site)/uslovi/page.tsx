@@ -86,8 +86,8 @@ export default function TermsPage() {
           <h2 className="font-headline font-bold text-xl mb-2">8. Kontakt</h2>
           <p>
             Za sva pitanja u vezi sa ovim uslovima korišćenja, kontaktirajte nas na{' '}
-            <a href="mailto:redakcija@zrenjanindanas.rs" className="text-brand-red hover:underline">
-              redakcija@zrenjanindanas.rs
+            <a href="mailto:redakcija@zrenjanindanas.com" className="text-brand-red hover:underline">
+              redakcija@zrenjanindanas.com
             </a>.
           </p>
         </section>

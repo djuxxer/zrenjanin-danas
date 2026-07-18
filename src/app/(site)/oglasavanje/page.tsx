@@ -60,8 +60,8 @@ export default function AdvertisingPage() {
           <Mail className="w-5 h-5 text-brand-red flex-shrink-0" />
           <p className="text-sm">
             Za cenovnik i dostupne termine, pišite nam na{' '}
-            <a href="mailto:redakcija@zrenjanindanas.rs" className="text-brand-red hover:underline font-semibold">
-              redakcija@zrenjanindanas.rs
+            <a href="mailto:redakcija@zrenjanindanas.com" className="text-brand-red hover:underline font-semibold">
+              redakcija@zrenjanindanas.com
             </a>{' '}
             sa naznakom &ldquo;Oglašavanje&rdquo;.
           </p>

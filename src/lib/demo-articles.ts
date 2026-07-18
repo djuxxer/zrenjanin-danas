@@ -11,7 +11,7 @@ function getDemoArticlesFull(): Article[] {
     author_id: 'demo-author',
     author: {
       id: 'demo-author',
-      email: 'redakcija@zrenjanindanas.rs',
+      email: 'redakcija@zrenjanindanas.com',
       full_name: 'Redakcija Zrenjanin Danas',
       role: 'novinar' as const,
       created_at: new Date().toISOString(),

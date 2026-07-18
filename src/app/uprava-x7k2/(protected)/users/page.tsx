@@ -204,7 +204,7 @@ export default function AdminUsersPage() {
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="ime@zrenjanindanas.rs"
+                placeholder="ime@zrenjanindanas.com"
                 className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
               />
             </div>

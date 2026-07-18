@@ -19,8 +19,8 @@ export default function PrivacyPolicyPage() {
           <p>
             {SITE_NAME} je lokalni news portal koji izveštava o vestima iz Zrenjanina, Vojvodine i Srbije.
             Za sva pitanja u vezi sa ovom politikom privatnosti možete nas kontaktirati na{' '}
-            <a href="mailto:redakcija@zrenjanindanas.rs" className="text-brand-red hover:underline">
-              redakcija@zrenjanindanas.rs
+            <a href="mailto:redakcija@zrenjanindanas.com" className="text-brand-red hover:underline">
+              redakcija@zrenjanindanas.com
             </a>.
           </p>
         </section>

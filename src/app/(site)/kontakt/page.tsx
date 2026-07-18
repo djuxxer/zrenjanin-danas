@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { MapPin, Phone, Mail, Clock } from 'lucide-react'
+import { Mail, Clock } from 'lucide-react'
 import { SITE_NAME } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -19,27 +19,11 @@ export default function ContactPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-5">
           <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-brand-red flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-sm">Adresa redakcije</p>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">Trg slobode 10<br />23000 Zrenjanin, Srbija</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Phone className="w-5 h-5 text-brand-red flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-sm">Telefon</p>
-              <a href="tel:+38123000000" className="text-gray-600 dark:text-gray-300 text-sm hover:text-brand-red transition-colors">
-                +381 23 000 000
-              </a>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
             <Mail className="w-5 h-5 text-brand-red flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-sm">Email redakcije</p>
-              <a href="mailto:redakcija@zrenjanindanas.rs" className="text-gray-600 dark:text-gray-300 text-sm hover:text-brand-red transition-colors">
-                redakcija@zrenjanindanas.rs
+              <a href="mailto:redakcija@zrenjanindanas.com" className="text-gray-600 dark:text-gray-300 text-sm hover:text-brand-red transition-colors">
+                redakcija@zrenjanindanas.com
               </a>
             </div>
           </div>

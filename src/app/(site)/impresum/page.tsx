@@ -32,8 +32,8 @@ export default function ImpresumPage() {
           <p>
             Za sadržaj objavljen na portalu odgovara redakcija {SITE_NAME}. Kontakt za sva pitanja, primedbe,
             zahteve za ispravku ili uklanjanje sadržaja:{' '}
-            <a href="mailto:redakcija@zrenjanindanas.rs" className="text-brand-red hover:underline">
-              redakcija@zrenjanindanas.rs
+            <a href="mailto:redakcija@zrenjanindanas.com" className="text-brand-red hover:underline">
+              redakcija@zrenjanindanas.com
             </a>
           </p>
         </section>

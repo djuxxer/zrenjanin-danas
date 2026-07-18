@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Mail } from 'lucide-react'
 import { CATEGORY_LABELS } from '@/types'
 
 interface Props {
@@ -103,18 +103,10 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
               Kontakt
             </h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-brand-red mt-0.5 flex-shrink-0" />
-                <span>Trg slobode 10<br />23000 Zrenjanin, Srbija</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-brand-red flex-shrink-0" />
-                <a href="tel:+38123000000" className="hover:text-white transition-colors">+381 23 000 000</a>
-              </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-brand-red flex-shrink-0" />
-                <a href="mailto:redakcija@zrenjanindanas.rs" className="hover:text-white transition-colors text-xs">
-                  redakcija@zrenjanindanas.rs
+                <a href="mailto:redakcija@zrenjanindanas.com" className="hover:text-white transition-colors text-xs">
+                  redakcija@zrenjanindanas.com
                 </a>
               </li>
             </ul>
