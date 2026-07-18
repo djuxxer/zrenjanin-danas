@@ -64,7 +64,16 @@ export function RichTextEditor({ value, onChange }: Props) {
   }
 
   function insertImage(url: string) {
-    const imgHtml = `<img src="${url}" alt="" style="width:100%;border-radius:0.75rem;margin:1.5rem 0;" />`
+    // Alt tekst je obavezan za svaku sliku, ne samo naslovnu — bitno za
+    // pristupačnost i SEO. Ne dozvoljavamo ubacivanje slike bez njega.
+    let altText = ''
+    while (!altText.trim()) {
+      const input = prompt('Unesi alt tekst za ovu sliku (obavezno, opisuje sliku za pretraživače i osobe sa oštećenim vidom):')
+      if (input === null) return // korisnik je otkazao — slika se ne ubacuje
+      altText = input
+    }
+
+    const imgHtml = `<img src="${url}" alt="${altText.replace(/"/g, '&quot;')}" style="width:100%;border-radius:0.75rem;margin:1.5rem 0;" />`
 
     if (mode === 'visual') {
       editorRef.current?.focus()

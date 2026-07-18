@@ -201,6 +201,9 @@ export default async function ArticlePage({ params }: Props) {
               </div>
               <figcaption className="text-xs text-gray-500 mt-2 text-center italic">
                 {article.image_alt}
+                {article.image_source && (
+                  <span className="not-italic"> — Izvor: {article.image_source}</span>
+                )}
               </figcaption>
             </figure>
 

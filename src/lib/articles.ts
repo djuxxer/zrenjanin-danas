@@ -13,6 +13,7 @@ type ArticleRow = {
   category: Category
   image_url: string
   image_alt: string
+  image_source: string | null
   author_id: string | null
   published: boolean
   published_at: string | null
@@ -47,6 +48,7 @@ function mapArticle(row: ArticleRow): Article {
     category: row.category,
     image_url: row.image_url,
     image_alt: row.image_alt,
+    image_source: row.image_source ?? undefined,
     author_id: row.author_id ?? '',
     author: row.author
       ? {
@@ -76,7 +78,7 @@ function mapArticle(row: ArticleRow): Article {
 }
 
 const ARTICLE_SELECT = `
-  id, slug, title, subtitle, content, excerpt, category, image_url, image_alt,
+  id, slug, title, subtitle, content, excerpt, category, image_url, image_alt, image_source,
   author_id, published, published_at, scheduled_at, naslovna_velika, naslovna_mala, traka_gore,
   views, seo_title, seo_description, og_image, tags, related_ids, created_at, updated_at,
   author:profiles ( id, full_name, avatar_url, role )

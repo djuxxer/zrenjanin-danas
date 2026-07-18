@@ -28,6 +28,7 @@ export interface Article {
   category: Category
   image_url: string
   image_alt: string
+  image_source?: string
   author_id: string
   author?: User
   published: boolean

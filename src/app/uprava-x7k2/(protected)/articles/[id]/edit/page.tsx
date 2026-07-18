@@ -19,6 +19,7 @@ const EMPTY_FORM = {
   category: 'zrenjanin' as Category,
   image_url: '',
   image_alt: '',
+  image_source: '',
   focus_keyphrase: '',
   seo_title: '',
   seo_description: '',
@@ -36,6 +37,7 @@ const REQUIRED_FOR_PUBLISH: { key: keyof typeof EMPTY_FORM; label: string; tab: 
   { key: 'excerpt', label: 'Kratak opis (excerpt)', tab: 'content' },
   { key: 'image_url', label: 'URL naslovne slike', tab: 'content' },
   { key: 'image_alt', label: 'Alt tekst slike', tab: 'content' },
+  { key: 'image_source', label: 'Izvor slike', tab: 'content' },
   { key: 'focus_keyphrase', label: 'Ključna fraza (focus keyphrase)', tab: 'seo' },
   { key: 'seo_title', label: 'SEO naslov', tab: 'seo' },
   { key: 'seo_description', label: 'Meta description', tab: 'seo' },
@@ -75,6 +77,7 @@ export default function EditArticlePage({ params }: Props) {
         category: data.category,
         image_url: data.image_url ?? '',
         image_alt: data.image_alt ?? '',
+        image_source: data.image_source ?? '',
         focus_keyphrase: data.focus_keyphrase ?? '',
         seo_title: data.seo_title ?? '',
         seo_description: data.seo_description ?? '',
@@ -138,6 +141,7 @@ export default function EditArticlePage({ params }: Props) {
         category: form.category,
         image_url: form.image_url,
         image_alt: form.image_alt,
+        image_source: form.image_source || null,
         published: publish,
         scheduled_at: form.scheduled_at || null,
         naslovna_velika: form.naslovna_velika,
@@ -579,6 +583,16 @@ export default function EditArticlePage({ params }: Props) {
                   value={form.image_alt}
                   onChange={(e) => set('image_alt', e.target.value)}
                   placeholder="Opis slike za pretraživače..."
+                  className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Izvor slike *</label>
+                <input
+                  type="text"
+                  value={form.image_source}
+                  onChange={(e) => set('image_source', e.target.value)}
+                  placeholder="npr. Unsplash, Redakcija, ime fotografa..."
                   className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
                 />
               </div>
