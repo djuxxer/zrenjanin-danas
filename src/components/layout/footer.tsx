@@ -25,7 +25,7 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
               </div>
               <div>
                 <span className="block font-headline font-black text-xl text-white">ZRENJANIN</span>
-                <span className="block text-brand-red font-bold text-xs tracking-[0.3em] uppercase -mt-1">DANAS</span>
+                <span className="block text-brand-red-accent font-bold text-xs tracking-[0.3em] uppercase -mt-1">DANAS</span>
               </div>
             </div>
             <p className="text-sm leading-relaxed mb-4">

@@ -46,7 +46,7 @@ function LoginForm() {
               <span className="text-white font-headline font-black text-xl">Z</span>
             </div>
             <span className="font-headline font-black text-2xl text-white">
-              ZRENJANIN<span className="text-brand-red"> DANAS</span>
+              ZRENJANIN<span className="text-brand-red-accent"> DANAS</span>
             </span>
           </div>
           <p className="text-gray-400 text-sm">Prijava u admin panel</p>

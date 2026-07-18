@@ -68,7 +68,7 @@ export function Navbar() {
               <span className="block font-headline font-black text-2xl text-gray-900 dark:text-white tracking-tight">
                 ZRENJANIN
               </span>
-              <span className="block text-brand-red font-bold text-sm tracking-[0.3em] uppercase -mt-1">
+              <span className="block text-brand-red dark:text-brand-red-accent font-bold text-sm tracking-[0.3em] uppercase -mt-1">
                 DANAS
               </span>
             </div>

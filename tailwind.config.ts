@@ -14,6 +14,7 @@ const config: Config = {
           red: '#0F2A5C',
           'red-dark': '#0A1D42',
           'red-light': '#1E4A8A',
+          'red-accent': '#6FA8DC',
         },
       },
       fontFamily: {

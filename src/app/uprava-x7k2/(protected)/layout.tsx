@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex items-center justify-between p-4 border-b border-gray-800 h-16">
           {sidebarOpen && (
             <Link href="/uprava-x7k2/dashboard" className="font-headline font-black text-white text-lg leading-tight">
-              ZD<span className="text-brand-red">•</span>Admin
+              ZD<span className="text-brand-red-accent">•</span>Admin
             </Link>
           )}
           <button

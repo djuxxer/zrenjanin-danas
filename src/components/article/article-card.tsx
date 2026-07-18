@@ -69,7 +69,7 @@ export function ArticleCard({ article, variant = 'default', className, priority 
           <h3 className="font-headline font-semibold text-sm leading-snug line-clamp-2 group-hover:text-brand-red transition-colors">
             {article.title}
           </h3>
-          <span className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(article.published_at!)}</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400">{timeAgo(article.published_at!)}</span>
         </div>
       </Link>
     )
@@ -85,7 +85,7 @@ export function ArticleCard({ article, variant = 'default', className, priority 
         <h3 className="font-headline font-semibold text-sm leading-snug group-hover:text-brand-red transition-colors">
           {article.title}
         </h3>
-        <span className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(article.published_at!)}</span>
+        <span className="text-xs text-gray-600 dark:text-gray-400">{timeAgo(article.published_at!)}</span>
       </Link>
     )
   }
