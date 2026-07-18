@@ -11,9 +11,9 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          red: '#C8102E',
-          'red-dark': '#9B0C23',
-          'red-light': '#E8213F',
+          red: '#0F2A5C',
+          'red-dark': '#0A1D42',
+          'red-light': '#1E4A8A',
         },
       },
       fontFamily: {

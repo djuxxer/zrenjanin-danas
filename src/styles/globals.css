@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    --brand-red: 200 16 46;
-    --brand-red-dark: 155 12 35;
-    --brand-red-light: 232 33 63;
+    --brand-red: 15 42 92;
+    --brand-red-dark: 10 29 66;
+    --brand-red-light: 30 74 138;
     color-scheme: light dark;
   }
 
