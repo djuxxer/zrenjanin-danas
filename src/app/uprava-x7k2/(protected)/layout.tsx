@@ -35,7 +35,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+
+  // Zatvori mobilni meni automatski pri promeni stranice
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const supabase = createClient()
@@ -51,27 +57,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.refresh()
   }
 
+  function handleSidebarToggle() {
+    // Na telefonu/tabletu (ispod lg) dugme zatvara off-canvas meni;
+    // na desktopu skuplja/širi sidebar.
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setMobileMenuOpen(false)
+    } else {
+      setSidebarOpen(!sidebarOpen)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+      {/* Zatamnjena pozadina iza mobilnog menija */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 bg-gray-900 text-gray-100 flex flex-col transition-all duration-300',
-          sidebarOpen ? 'w-60' : 'w-16'
+          'fixed inset-y-0 left-0 z-50 bg-gray-900 text-gray-100 flex flex-col transition-transform duration-300 w-64',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full',
+          'lg:translate-x-0',
+          sidebarOpen ? 'lg:w-60' : 'lg:w-16'
         )}
       >
         {/* Logo */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800 h-16">
-          {sidebarOpen && (
+          {(sidebarOpen || mobileMenuOpen) && (
             <Link href="/uprava-x7k2/dashboard" className="font-headline font-black text-white text-lg leading-tight">
               ZD<span className="text-brand-red-accent">•</span>Admin
             </Link>
           )}
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={handleSidebarToggle}
             className="p-1.5 rounded-lg hover:bg-gray-800 transition-colors ml-auto"
           >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {(sidebarOpen || mobileMenuOpen) ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
@@ -99,10 +125,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           ? 'bg-brand-red text-white'
                           : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                       )}
-                      title={!sidebarOpen ? item.label : undefined}
+                      title={!sidebarOpen && !mobileMenuOpen ? item.label : undefined}
                     >
                     <Icon className="w-5 h-5 flex-shrink-0" />
-                    {sidebarOpen && <span>{item.label}</span>}
+                    {(sidebarOpen || mobileMenuOpen) && <span>{item.label}</span>}
                   </Link>
                 </li>
               )
@@ -113,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* User */}
         <div className="border-t border-gray-800 p-4">
-          {sidebarOpen ? (
+          {(sidebarOpen || mobileMenuOpen) ? (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center font-bold text-sm text-white">
                 A
@@ -145,15 +171,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main */}
       <div
         className={cn(
-          'flex-1 flex flex-col transition-all duration-300',
-          sidebarOpen ? 'ml-60' : 'ml-16'
+          'flex-1 flex flex-col transition-all duration-300 min-w-0 w-full',
+          sidebarOpen ? 'lg:ml-60' : 'lg:ml-16'
         )}
       >
         {/* Top bar */}
-        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 sticky top-0 z-40">
-          <h1 className="font-bold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-wide">
-            CMS Panel
-          </h1>
+        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
+              aria-label="Otvori meni"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="font-bold text-gray-700 dark:text-gray-200 text-sm uppercase tracking-wide">
+              CMS Panel
+            </h1>
+          </div>
           <div className="flex items-center gap-3">
             <button className="relative p-2 hover:text-brand-red transition-colors">
               <Bell className="w-5 h-5" />
@@ -162,7 +197,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               href="/"
               target="_blank"
-              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors"
+              className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap"
             >
               Pogledaj sajt →
             </Link>
@@ -170,7 +205,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 overflow-auto">{children}</main>
       </div>
     </div>
   )
