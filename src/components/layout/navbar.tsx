@@ -63,7 +63,8 @@ export function Navbar() {
         <div className="container mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="relative w-10 h-12 flex-shrink-0">
-              <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain" priority />
+              <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain dark:hidden" priority />
+              <Image src="/logo-icon-dark.png" alt="Zrenjanin Danas logo" fill className="object-contain hidden dark:block" priority />
             </div>
             <div className="leading-tight">
               <span className="block font-headline font-black text-2xl text-gray-900 dark:text-white tracking-tight">

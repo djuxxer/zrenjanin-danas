@@ -44,7 +44,7 @@ function LoginForm() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
             <div className="relative w-10 h-12 flex-shrink-0">
-              <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain" />
+              <Image src="/logo-icon-dark.png" alt="Zrenjanin Danas logo" fill className="object-contain" />
             </div>
             <span className="font-headline font-black text-2xl text-white">
               ZRENJANIN<span className="text-brand-red-accent"> DANAS</span>

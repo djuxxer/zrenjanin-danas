@@ -22,7 +22,7 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="relative w-10 h-12 flex-shrink-0">
-                <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain" />
+                <Image src="/logo-icon-dark.png" alt="Zrenjanin Danas logo" fill className="object-contain" />
               </div>
               <div>
                 <span className="block font-headline font-black text-xl text-white">ZRENJANIN</span>

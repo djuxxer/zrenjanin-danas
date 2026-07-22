@@ -8,15 +8,10 @@ interface Props {
 
 export function ReadingProgress({ targetId }: Props) {
   const [progress, setProgress] = useState(0)
-  const [headerHeight, setHeaderHeight] = useState(0)
   const ticking = useRef(false)
 
   useEffect(() => {
     function update() {
-      // Meri trenutnu visinu header-a (menja se kad se otvori pretraga/mobilni meni)
-      const header = document.querySelector('header')
-      if (header) setHeaderHeight(header.getBoundingClientRect().height)
-
       const target = document.getElementById(targetId)
       if (!target) {
         ticking.current = false
@@ -51,12 +46,11 @@ export function ReadingProgress({ targetId }: Props) {
   }, [targetId])
 
   return (
-    <div
-      className="fixed left-0 right-0 z-40 h-1 bg-gray-200/50 dark:bg-gray-800/50 transition-[top] duration-200"
-      style={{ top: `${headerHeight}px` }}
-    >
+    // Namerno "top-0" i visok z-index — traka se postavlja preko postojeće
+    // trake sa vestima na vrhu, umesto da zauzima dodatan prostor (bitno na telefonu).
+    <div className="fixed top-0 left-0 right-0 z-[70] h-[3px] bg-black/20">
       <div
-        className="h-full bg-brand-red transition-[width] duration-150 ease-out"
+        className="h-full bg-white shadow-[0_0_4px_rgba(0,0,0,0.4)] transition-[width] duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
