@@ -9,12 +9,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await getAllArticles()
   const categories = Object.keys(CATEGORY_LABELS)
 
-  const articleUrls: MetadataRoute.Sitemap = articles.map((article) => ({
-    url: `${SITE_URL}/vest/${article.slug}`,
-    lastModified: new Date(article.updated_at),
-    changeFrequency: 'daily',
-    priority: article.naslovna_velika ? 0.9 : 0.7,
-  }))
+  const articleUrls: MetadataRoute.Sitemap = articles.map((article) => {
+    const updated = article.updated_at ? new Date(article.updated_at) : new Date()
+    return {
+      url: `${SITE_URL}/vest/${article.slug}`,
+      lastModified: isNaN(updated.getTime()) ? new Date() : updated,
+      changeFrequency: 'daily',
+      priority: article.naslovna_velika ? 0.9 : 0.7,
+    }
+  })
 
   const categoryUrls: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${SITE_URL}/kategorija/${cat}`,

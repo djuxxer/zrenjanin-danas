@@ -8,16 +8,25 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string | Date) {
-  return format(new Date(date), 'd. MMMM yyyy.', { locale: sr })
+export function formatDate(date: string | Date | null | undefined) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  return format(d, 'd. MMMM yyyy.', { locale: sr })
 }
 
-export function formatDateTime(date: string | Date) {
-  return format(new Date(date), 'd. MMMM yyyy. HH:mm', { locale: sr })
+export function formatDateTime(date: string | Date | null | undefined) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  return format(d, 'd. MMMM yyyy. HH:mm', { locale: sr })
 }
 
-export function timeAgo(date: string | Date) {
-  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: sr })
+export function timeAgo(date: string | Date | null | undefined) {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  return formatDistanceToNow(d, { addSuffix: true, locale: sr })
 }
 
 export function createSlug(text: string): string {
