@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { format, formatDistanceToNow } from 'date-fns'
-import { sr } from 'date-fns/locale'
+import { srLatn as sr } from 'date-fns/locale'
 import slugify from 'slugify'
 
 export function cn(...inputs: ClassValue[]) {
