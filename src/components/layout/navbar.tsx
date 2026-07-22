@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { Search, Menu, X, Sun, Moon, Tv2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -61,8 +62,8 @@ export function Navbar() {
       <div className="border-b border-gray-100 dark:border-gray-800 py-3">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-brand-red rounded flex items-center justify-center">
-              <span className="text-white font-headline font-black text-xl leading-none">Z</span>
+            <div className="relative w-10 h-12 flex-shrink-0">
+              <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain" priority />
             </div>
             <div className="leading-tight">
               <span className="block font-headline font-black text-2xl text-gray-900 dark:text-white tracking-tight">

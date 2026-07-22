@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 
@@ -42,8 +43,8 @@ function LoginForm() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-brand-red rounded flex items-center justify-center">
-              <span className="text-white font-headline font-black text-xl">Z</span>
+            <div className="relative w-10 h-12 flex-shrink-0">
+              <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain" />
             </div>
             <span className="font-headline font-black text-2xl text-white">
               ZRENJANIN<span className="text-brand-red-accent"> DANAS</span>

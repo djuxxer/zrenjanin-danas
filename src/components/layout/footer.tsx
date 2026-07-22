@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Twitter, Instagram, Mail } from 'lucide-react'
 import { CATEGORY_LABELS } from '@/types'
 
@@ -20,8 +21,8 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-brand-red rounded flex items-center justify-center">
-                <span className="text-white font-headline font-black text-xl">Z</span>
+              <div className="relative w-10 h-12 flex-shrink-0">
+                <Image src="/logo-icon.png" alt="Zrenjanin Danas logo" fill className="object-contain" />
               </div>
               <div>
                 <span className="block font-headline font-black text-xl text-white">ZRENJANIN</span>
