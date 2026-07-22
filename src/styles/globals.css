@@ -109,6 +109,10 @@
   animation: ticker 40s linear infinite;
 }
 
+.ticker-wrap:hover .ticker-content {
+  animation-play-state: paused;
+}
+
 @keyframes ticker {
   0% { transform: translateX(100vw); }
   100% { transform: translateX(-100%); }
