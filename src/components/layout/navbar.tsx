@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes'
 import { Search, Menu, X, Sun, Moon, Tv2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/types'
+import { useWeather } from '@/lib/use-weather'
 
 const categories = Object.entries(CATEGORY_LABELS)
 
@@ -17,6 +18,7 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const { weather } = useWeather()
 
   useEffect(() => {
     setMounted(true)
@@ -48,6 +50,12 @@ export function Navbar() {
             <span id="live-time" className="tabular-nums" suppressHydrationWarning>
               {new Date().toLocaleString('sr-RS', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
+            {weather && (
+              <span className="hidden sm:flex items-center gap-1.5 border-l border-gray-700 pl-4">
+                <weather.Icon className="w-3.5 h-3.5" />
+                {weather.temp}°C, {weather.label}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <Link href="#" className="hover:text-white transition-colors flex items-center gap-1">
