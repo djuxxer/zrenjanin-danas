@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react'
+import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight, Pencil } from 'lucide-react'
 import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
 import { getApprovedComments } from '@/lib/comments'
 import { embedRichContent } from '@/lib/embed-content'
@@ -76,6 +76,12 @@ export default async function ArticlePage({ params }: Props) {
   const sameAs = [siteSettings?.facebook_url, siteSettings?.instagram_url, siteSettings?.twitter_url].filter(
     (url): url is string => Boolean(url)
   )
+
+  // Ako je posetilac ulogovan (novinar/admin), prikaži brz link ka izmeni ove vesti
+  const {
+    data: { user: loggedInUser },
+  } = await supabaseForSettings.auth.getUser()
+
   const categoryLabel = CATEGORY_LABELS[article.category]
   const categoryColor = CATEGORY_COLORS[article.category]
   const articleUrl = `${SITE_URL}/vest/${slug}`
@@ -150,8 +156,17 @@ export default async function ArticlePage({ params }: Props) {
           <div className="lg:col-span-3">
             {/* Header */}
             <header className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-between gap-2 mb-3">
                 <span className={cn('category-badge', categoryColor)}>{categoryLabel}</span>
+                {loggedInUser && (
+                  <Link
+                    href={`/uprava-x7k2/articles/${article.id}/edit`}
+                    className="flex items-center gap-1.5 bg-gray-900 hover:bg-black text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Uredi vest
+                  </Link>
+                )}
               </div>
 
               <h1 className="font-headline font-black text-3xl md:text-4xl leading-tight mb-3 text-balance">
