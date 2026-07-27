@@ -15,6 +15,7 @@ import {
   PlusCircle,
   Bell,
   MessageSquare,
+  Newspaper,
   UserCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { label: 'Nova vest', href: '/uprava-x7k2/articles/new', icon: PlusCircle },
   { label: 'Korisnici', href: '/uprava-x7k2/users', icon: Users },
   { label: 'Komentari', href: '/uprava-x7k2/comments', icon: MessageSquare },
+  { label: 'Pratimo', href: '/uprava-x7k2/pratimo', icon: Newspaper },
   { label: 'Statistika', href: '/uprava-x7k2/stats', icon: BarChart2 },
   { label: 'Podešavanja', href: '/uprava-x7k2/settings', icon: Settings },
   { label: 'Moj profil', href: '/uprava-x7k2/profile', icon: UserCircle },
