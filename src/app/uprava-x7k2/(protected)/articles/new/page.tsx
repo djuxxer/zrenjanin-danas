@@ -153,7 +153,7 @@ export default function NewArticlePage() {
           <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Nova vest</h1>
           <p className="text-gray-500 text-sm">Kreirajte i objavite novu vest</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <button
             onClick={() => handleSave(false)}
             disabled={saving}

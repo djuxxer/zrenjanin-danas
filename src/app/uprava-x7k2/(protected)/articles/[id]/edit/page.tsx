@@ -197,7 +197,7 @@ export default function EditArticlePage({ params }: Props) {
           <h1 className="font-headline font-black text-2xl text-gray-900 dark:text-white">Izmena vesti</h1>
           <p className="text-gray-500 text-sm">Uredi postojeću vest</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <button
             onClick={() => handleSave(false)}
             disabled={saving}
