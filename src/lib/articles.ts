@@ -291,7 +291,13 @@ export async function recordArticleView(articleId: string): Promise<void> {
     if (isLikelyBot(userAgent)) return
 
     const supabase = await createClient()
-    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    // Cloudflare salje pravu IP adresu posetioca u 'cf-connecting-ip' —
+    // 'x-forwarded-for' iza Cloudflare-a moze da sadrzi promenljivu edge IP
+    // adresu (razlicitu iz zahteva u zahtev), sto bi pokvarilo dedup po IP-ju.
+    const ip =
+      headersList.get('cf-connecting-ip') ||
+      headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      'unknown'
     const ipHash = createHash('sha256').update(ip).digest('hex')
 
     await supabase.rpc('increment_article_views', {
