@@ -255,18 +255,43 @@ export async function getArticlesByAuthor(authorId: string): Promise<Article[]> 
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
+// Poznati botovi/crawleri koji ne treba da se broje kao pregledi vesti —
+// SEO alati, AI asistenti, i botovi za generisanje "preview" prikaza kad se
+// link deli na drustvenim mrezama (Facebook, itd.)
+const BOT_PATTERNS = [
+  'bot', 'crawl', 'spider', 'slurp', 'facebookexternalhit', 'whatsapp',
+  'telegrambot', 'discordbot', 'linkedinbot', 'pinterest', 'redditbot',
+  'mj12bot', 'ahrefsbot', 'semrushbot', 'seranking', 'dotbot', 'petalbot',
+  'gptbot', 'claudebot', 'claude-searchbot', 'perplexitybot', 'anthropic',
+  'ccbot', 'bytespider', 'yandex', 'baiduspider', 'googlebot',
+  'headlesschrome', 'phantomjs', 'puppeteer', 'playwright',
+]
+
+function isLikelyBot(userAgent: string): boolean {
+  const ua = userAgent.toLowerCase()
+  // Golo "Google" (bez "bot") se takodje javlja kod nekih Google servisa/pregleda linkova
+  if (ua === 'google' || ua.trim() === '') return true
+  return BOT_PATTERNS.some((pattern) => ua.includes(pattern))
+}
+
 /**
  * Beleži pregled vesti (uveća views + upisuje red u article_views za analitiku).
  * IP adresa se hešuje pre snimanja — ne čuvamo je u čitljivom obliku.
  * Radi preko RPC funkcije (increment_article_views) koja bezbedno zaobilazi RLS
  * samo za ovu jednu, kontrolisanu operaciju.
+ *
+ * Poznati botovi/crawleri se PRESKAČU — ne uvećavaju broj pregleda, da statistika
+ * odražava stvarne čitaoce, ne SEO alate i "preview" botove drustvenih mreza.
  */
 export async function recordArticleView(articleId: string): Promise<void> {
   try {
-    const supabase = await createClient()
     const headersList = await headers()
-    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     const userAgent = headersList.get('user-agent') || 'unknown'
+
+    if (isLikelyBot(userAgent)) return
+
+    const supabase = await createClient()
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     const ipHash = createHash('sha256').update(ip).digest('hex')
 
     await supabase.rpc('increment_article_views', {
