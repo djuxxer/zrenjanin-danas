@@ -81,7 +81,7 @@ const ARTICLE_SELECT = `
   id, slug, title, subtitle, content, excerpt, category, image_url, image_alt, image_source,
   author_id, published, published_at, scheduled_at, naslovna_velika, naslovna_mala, traka_gore,
   views, seo_title, seo_description, og_image, tags, related_ids, created_at, updated_at,
-  author:profiles ( id, full_name, avatar_url, role )
+  author:profiles!articles_author_id_fkey ( id, full_name, avatar_url, role )
 `
 
 export async function getAllArticles(): Promise<Article[]> {
