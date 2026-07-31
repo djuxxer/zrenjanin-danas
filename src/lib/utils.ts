@@ -51,4 +51,4 @@ export function readingTime(content: string): number {
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://zrenjanindanas.com'
 export const SITE_NAME = 'Zrenjanin Danas'
 export const SITE_DESCRIPTION =
-  'Najnovije vesti iz Zrenjanina, Vojvodine i Srbije — politika, ekonomija, sport, kultura i hronika.'
+  'Najnovije vesti iz Zrenjanina, Vojvodine i Srbije — ekonomija, sport, kultura i hronika.'

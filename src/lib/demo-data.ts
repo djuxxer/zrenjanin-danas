@@ -15,7 +15,7 @@ export const DEMO_ARTICLES: Omit<Article, 'id' | 'author_id' | 'author' | 'creat
 
 <p>Predsednik je obišao i gradilište novog mosta na Begeju koji je u poodmakloj fazi izgradnje, te razgovarao sa radnicima i inženjerima. Most bi trebalo da bude završen do kraja 2025. godine.</p>`,
     excerpt: 'Predsednik Vučić obišao Zrenjanin i najavio investicioni paket od 200 miliona evra za infrastrukturu, privredu i nova radna mesta u Banatu.',
-    category: 'politika',
+    category: 'zrenjanin',
     image_url: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=1200&q=80',
     image_alt: 'Državna ceremonija i infrastrukturni projekti u Srbiji',
     published: true,

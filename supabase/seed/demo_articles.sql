@@ -26,7 +26,7 @@ BEGIN
     'Srbija ubrzano napreduje — novi putevi, fabrike i radna mesta za građane Banata',
     '<p>Predsednik Republike Srbije Aleksandar Vučić posetio je danas Zrenjanin...</p>',
     'Predsednik Vučić obišao Zrenjanin i najavio investicioni paket od 200 miliona evra za infrastrukturu, privredu i nova radna mesta u Banatu.',
-    'politika',
+    'zrenjanin',
     'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=1200&q=80',
     'Državna ceremonija i infrastrukturni projekti u Srbiji',
     author,

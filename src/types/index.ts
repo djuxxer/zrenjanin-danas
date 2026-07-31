@@ -1,5 +1,4 @@
 export type Category =
-  | 'politika'
   | 'drustvo'
   | 'hronika'
   | 'sport'
@@ -69,7 +68,6 @@ export type CategoryLabel = {
 }
 
 export const CATEGORY_LABELS: CategoryLabel = {
-  politika: 'Politika',
   drustvo: 'Društvo',
   hronika: 'Hronika',
   sport: 'Sport',
@@ -79,7 +77,6 @@ export const CATEGORY_LABELS: CategoryLabel = {
 }
 
 export const CATEGORY_COLORS: Record<Category, string> = {
-  politika: 'bg-red-600',
   drustvo: 'bg-blue-600',
   hronika: 'bg-gray-700',
   sport: 'bg-green-600',

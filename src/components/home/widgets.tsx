@@ -93,22 +93,3 @@ export function NewsletterSection() {
     </div>
   )
 }
-
-export function AdBanner({ size = 'medium' }: { size?: 'small' | 'medium' | 'large' }) {
-  const heights: Record<string, string> = {
-    small: 'h-20',
-    medium: 'h-32',
-    large: 'h-48',
-  }
-
-  return (
-    <div
-      className={`${heights[size]} bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700`}
-    >
-      <div className="text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Reklama</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Oglasite se na Zrenjanin Danas</p>
-      </div>
-    </div>
-  )
-}

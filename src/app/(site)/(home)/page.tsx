@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { HeroSection } from '@/components/home/hero-section'
 import { TrendingSection, MostReadSection, CategoryGrid } from '@/components/home/trending-section'
-import { NewsletterSection, AdBanner } from '@/components/home/widgets'
+import { NewsletterSection } from '@/components/home/widgets'
 import { ArticleCard } from '@/components/article/article-card'
 import {
   getNaslovnaVelika,
@@ -36,11 +36,6 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <HeroSection big={big} small={small} latest={latest} />
-
-      {/* Ad banner */}
-      <div className="container mx-auto px-4 mb-2">
-        <AdBanner size="medium" />
-      </div>
 
       {/* Main content + Sidebar */}
       <div className="container mx-auto px-4 py-6">
@@ -85,7 +80,6 @@ export default async function HomePage() {
           {/* Sidebar */}
           <aside className="space-y-5">
             <TrendingSection articles={trending} />
-            <AdBanner size="large" />
             <MostReadSection articles={mostRead} />
             <NewsletterSection />
           </aside>
