@@ -38,7 +38,8 @@ export default function AdminStatsPage() {
       const [{ data: articleData }, { data: profileData }] = await Promise.all([
         supabase
           .from('articles')
-          .select('id, slug, title, category, views, published, author_id, created_at'),
+          .select('id, slug, title, category, views, published, author_id, created_at')
+          .is('deleted_at', null),
         supabase.from('profiles').select('id, full_name, role'),
       ])
 

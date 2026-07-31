@@ -90,6 +90,7 @@ export async function getAllArticles(): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .order('published_at', { ascending: false })
 
   if (error || !data) return []
@@ -102,6 +103,7 @@ export async function getNaslovnaVelika(): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .eq('naslovna_velika', true)
     .order('published_at', { ascending: false })
     .limit(3)
@@ -116,6 +118,7 @@ export async function getNaslovnaMala(): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .eq('naslovna_mala', true)
     .order('published_at', { ascending: false })
     .limit(4)
@@ -130,6 +133,7 @@ export async function getTrakaGore(): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .eq('traka_gore', true)
     .order('published_at', { ascending: false })
 
@@ -145,6 +149,7 @@ export async function getTrendingArticles(limit = 6): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .order('views', { ascending: false })
     .limit(limit)
 
@@ -158,6 +163,7 @@ export async function getMostReadArticles(limit = 5): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .order('views', { ascending: false })
     .limit(limit)
 
@@ -172,6 +178,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     .select(ARTICLE_SELECT)
     .eq('slug', slug)
     .eq('published', true)
+    .is('deleted_at', null)
     .maybeSingle()
 
   if (error || !data) return undefined
@@ -184,6 +191,7 @@ export async function getArticlesByCategory(category: Category, limit?: number):
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .eq('category', category)
     .order('published_at', { ascending: false })
 
@@ -200,6 +208,7 @@ export async function getRelatedArticles(article: Article, limit = 3): Promise<A
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .eq('category', article.category)
     .neq('id', article.id)
     .order('views', { ascending: false })
@@ -222,6 +231,7 @@ export async function searchArticles(query: string): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .or(`title.ilike.%${safeQuery}%,excerpt.ilike.%${safeQuery}%`)
     .order('published_at', { ascending: false })
 
@@ -235,6 +245,7 @@ export async function getLatestArticles(limit = 10): Promise<Article[]> {
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .order('published_at', { ascending: false })
     .limit(limit)
 
@@ -248,6 +259,7 @@ export async function getArticlesByAuthor(authorId: string): Promise<Article[]> 
     .from('articles')
     .select(ARTICLE_SELECT)
     .eq('published', true)
+    .is('deleted_at', null)
     .eq('author_id', authorId)
     .order('published_at', { ascending: false })
 

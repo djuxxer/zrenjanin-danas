@@ -31,6 +31,7 @@ export default function AdminDashboard() {
       supabase
         .from('articles')
         .select('id, slug, title, category, views, published, traka_gore, created_at')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false }),
       fetch('/api/admin/users').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ])
@@ -45,10 +46,16 @@ export default function AdminDashboard() {
   }, [])
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(`Obrisati vest "${title}"?`)) return
+    if (!confirm(`Prebaci vest "${title}" u koš? Možeš je vratiti kasnije sa stranice "Sve vesti".`)) return
     setDeletingId(id)
     const supabase = createClient()
-    const { error } = await supabase.from('articles').delete().eq('id', id)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const { error } = await supabase
+      .from('articles')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null })
+      .eq('id', id)
     setDeletingId(null)
     if (error) return alert('Greška: ' + error.message)
     setArticles((prev) => prev.filter((a) => a.id !== id))
