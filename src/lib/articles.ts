@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import { createHash } from 'crypto'
 import type { Article, Category, User } from '@/types'
@@ -178,6 +179,30 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
     .select(ARTICLE_SELECT)
     .eq('slug', slug)
     .eq('published', true)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (error || !data) return undefined
+  return mapArticle(data as unknown as ArticleRow)
+}
+
+/**
+ * Dohvata vest po ID-u za PREGLED, bez obzira na status objave (nacrt ili objavljena).
+ * Koristi se isključivo za privatne "link za pregled" — ID (UUID) je dovoljno
+ * nepogodiv da služi kao neformalan pristupni ključ, ne pojavljuje se nigde
+ * javno (sitemap, liste, pretraga) dok vest zvanično ne bude objavljena.
+ * I dalje se poštuje meko brisanje — obrisana vest se ne može pregledati.
+ *
+ * Namerno koristi admin klijent (bypass RLS) SAMO za ovaj jedan, precizan upit
+ * po tačnom ID-u — ne dodajemo šire RLS pravilo koje bi inače dozvolilo bilo
+ * kome da direktnim API pozivom (mimo naše stranice) vidi SVE nacrte odjednom.
+ */
+export async function getArticleByIdForPreview(id: string): Promise<Article | undefined> {
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle()
 

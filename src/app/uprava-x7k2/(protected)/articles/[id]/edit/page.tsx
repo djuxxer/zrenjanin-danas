@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2 } from 'lucide-react'
+import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2, Link2 } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
@@ -203,6 +203,18 @@ export default function EditArticlePage({ params }: Props) {
           <p className="text-gray-500 text-sm">Uredi postojeću vest</p>
         </div>
         <div className="hidden sm:flex items-center gap-2">
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/pregled/${id}`
+              navigator.clipboard.writeText(url)
+              setPublishError(null)
+              alert(`Link za pregled kopiran:\n${url}\n\nOvaj link možeš da pošalješ bilo kome — prikazaće vest čak i dok je nacrt, bez potrebe za logovanjem.`)
+            }}
+            className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+          >
+            <Link2 className="w-4 h-4" />
+            Link za pregled
+          </button>
           <button
             onClick={() => handleSave(false)}
             disabled={saving}
