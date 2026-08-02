@@ -57,6 +57,7 @@ export default function EditArticlePage({ params }: Props) {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
+  const [originalPublishedAt, setOriginalPublishedAt] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -87,6 +88,7 @@ export default function EditArticlePage({ params }: Props) {
         traka_gore: data.traka_gore ?? false,
         scheduled_at: data.scheduled_at ?? '',
       })
+      setOriginalPublishedAt(data.published_at ?? null)
       setLoading(false)
     }
     load()
@@ -143,6 +145,9 @@ export default function EditArticlePage({ params }: Props) {
         image_alt: form.image_alt,
         image_source: form.image_source || null,
         published: publish,
+        // Datum objave se postavlja SAMO prvi put kad vest postane objavljena
+        // (ako je ranije bila nacrt bez datuma) — kasnija dorada ne pomera datum.
+        ...(publish && !originalPublishedAt ? { published_at: new Date().toISOString() } : {}),
         scheduled_at: form.scheduled_at || null,
         naslovna_velika: form.naslovna_velika,
         naslovna_mala: form.naslovna_mala,
