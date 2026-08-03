@@ -98,6 +98,28 @@ export async function getAllArticles(): Promise<Article[]> {
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
+/**
+ * Vesti objavljene u poslednja 48 sata — koristi se ISKLJUČIVO za Google News
+ * sitemap, koji po Google-ovim pravilima sme da sadrži samo vesti iz tog
+ * vremenskog okvira (stariji članci se moraju ukloniti iz news sitemap-a,
+ * regularni sitemap i dalje nosi sve vesti bez vremenskog ograničenja).
+ */
+export async function getRecentArticlesForNewsSitemap(): Promise<Article[]> {
+  const supabase = await createClient()
+  const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .is('deleted_at', null)
+    .gte('published_at', twoDaysAgo)
+    .order('published_at', { ascending: false })
+
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
+}
+
 export async function getNaslovnaVelika(): Promise<Article[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
