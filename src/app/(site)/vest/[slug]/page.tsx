@@ -101,13 +101,15 @@ export default async function ArticlePage({ params }: Props) {
       ...(article.author_id ? { url: `${SITE_URL}/autor/${article.author_id}` } : {}),
     },
     publisher: {
-      '@type': 'Organization',
+      '@type': 'NewsMediaOrganization',
       name: SITE_NAME,
+      url: SITE_URL,
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
       ...(sameAs.length > 0 ? { sameAs } : {}),
     },
     url: articleUrl,
     mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+    isAccessibleForFree: true,
   }
 
   // BreadcrumbList schema
