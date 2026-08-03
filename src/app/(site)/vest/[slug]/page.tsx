@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = article.seo_title || article.title
   const description = article.seo_description || article.excerpt
   const ogImage = article.og_image || article.image_url
+  const categoryLabelForMeta = CATEGORY_LABELS[article.category]
 
   return {
     title,
@@ -41,7 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${SITE_URL}/vest/${slug}`,
       siteName: SITE_NAME,
       publishedTime: article.published_at,
+      modifiedTime: article.updated_at,
       authors: [article.author?.full_name || 'Redakcija'],
+      section: categoryLabelForMeta,
       images: [{ url: ogImage, width: 1200, height: 630, alt: article.image_alt }],
     },
     twitter: {

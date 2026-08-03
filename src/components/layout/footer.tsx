@@ -30,7 +30,7 @@ export function Footer({ facebookUrl, instagramUrl, twitterUrl }: Props) {
               </div>
             </div>
             <p className="text-sm leading-relaxed mb-4">
-              Najnovije vesti iz Zrenjanina, Vojvodine i Srbije. Politika, ekonomija, sport, kultura i hronika.
+              Najnovije vesti iz Zrenjanina, Vojvodine i Srbije. Ekonomija, sport, kultura i hronika.
             </p>
             {hasSocialLinks && (
               <div className="flex items-center gap-3">

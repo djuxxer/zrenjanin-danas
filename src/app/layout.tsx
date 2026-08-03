@@ -23,7 +23,6 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ['Zrenjanin', 'vesti', 'Vojvodina', 'Srbija', 'lokalne vesti', 'Banat'],
   authors: [{ name: 'Redakcija Zrenjanin Danas' }],
   creator: 'Zrenjanin Danas',
   publisher: 'Zrenjanin Danas',
