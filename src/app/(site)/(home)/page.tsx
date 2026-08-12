@@ -43,38 +43,42 @@ export default async function HomePage() {
           {/* Main column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Zrenjanin section */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-1 h-6 bg-brand-red rounded-full" />
-                <h2 className="font-headline font-bold text-xl">Zrenjanin</h2>
-                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
-                <a href="/kategorija/zrenjanin" className="text-brand-red text-sm font-semibold hover:underline">
-                  Sve vesti →
-                </a>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {zrenjanin.slice(0, 4).map((a) => (
-                  <ArticleCard key={a.id} article={a} />
-                ))}
-              </div>
-            </section>
+            {zrenjanin.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-1 h-6 bg-brand-red rounded-full" />
+                  <h2 className="font-headline font-bold text-xl">Zrenjanin</h2>
+                  <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                  <a href="/kategorija/zrenjanin" className="text-brand-red text-sm font-semibold hover:underline">
+                    Sve vesti →
+                  </a>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {zrenjanin.slice(0, 4).map((a) => (
+                    <ArticleCard key={a.id} article={a} />
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Economy section */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-1 h-6 bg-yellow-500 rounded-full" />
-                <h2 className="font-headline font-bold text-xl">Ekonomija</h2>
-                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
-                <a href="/kategorija/ekonomija" className="text-brand-red text-sm font-semibold hover:underline">
-                  Sve vesti →
-                </a>
-              </div>
-              <div className="space-y-3">
-                {ekonomija.map((a) => (
-                  <ArticleCard key={a.id} article={a} variant="horizontal" />
-                ))}
-              </div>
-            </section>
+            {ekonomija.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-1 h-6 bg-yellow-500 rounded-full" />
+                  <h2 className="font-headline font-bold text-xl">Ekonomija</h2>
+                  <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                  <a href="/kategorija/ekonomija" className="text-brand-red text-sm font-semibold hover:underline">
+                    Sve vesti →
+                  </a>
+                </div>
+                <div className="space-y-3">
+                  {ekonomija.map((a) => (
+                    <ArticleCard key={a.id} article={a} variant="horizontal" />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -87,9 +91,11 @@ export default async function HomePage() {
       </div>
 
       {/* Sport section */}
-      <div className="bg-gray-100 dark:bg-gray-900 py-2">
-        <CategoryGrid title="Sport" articles={sport} />
-      </div>
+      {sport.length > 0 && (
+        <div className="bg-gray-100 dark:bg-gray-900 py-2">
+          <CategoryGrid title="Sport" articles={sport} />
+        </div>
+      )}
 
       {/* Latest articles */}
       <section className="container mx-auto px-4 py-8">
