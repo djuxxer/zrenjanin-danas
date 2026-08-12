@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: '*.supabase.co' },
     ],
+    // Smanjen broj varijanti veličina (Next.js podrazumevano pravi do 16 po slici).
+    // Slike su već kompresovane na klijentu pre otpremanja (WebP, max 1600px),
+    // pa manje varijanti ovde znači manje posla za Sharp i manji memorijski
+    // otisak servera — sveden na stvarne veličine koje sajt zaista koristi.
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256],
+    minimumCacheTTL: 2678400,
   },
   async headers() {
     return [
