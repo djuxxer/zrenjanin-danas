@@ -159,6 +159,7 @@ export async function getTrakaGore(): Promise<Article[]> {
     .is('deleted_at', null)
     .eq('traka_gore', true)
     .order('published_at', { ascending: false })
+    .limit(5)
 
   if (error || !data) return []
   return (data as unknown as ArticleRow[]).map(mapArticle)

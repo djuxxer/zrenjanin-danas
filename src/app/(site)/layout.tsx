@@ -15,7 +15,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   // Traka prikazuje stvarne vesti sa oznakom "Traka gore"; ako trenutno nema nijedne, prikazuje najnovije objavljene.
   const breaking = await getTrakaGore()
-  const tickerArticles = breaking.length > 0 ? breaking : await getLatestArticles(6)
+  const tickerArticles = breaking.length > 0 ? breaking : await getLatestArticles(5)
 
   return (
     <>
