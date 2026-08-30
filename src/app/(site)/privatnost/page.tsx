@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
             <li><strong>Komentari:</strong> ime i email adresa koje unesete prilikom ostavljanja komentara. Email adresa se ne prikazuje javno.</li>
             <li><strong>Newsletter prijava:</strong> email adresa koju dobrovoljno ostavite radi primanja našeg newsletter-a.</li>
             <li><strong>Podaci o korišćenju:</strong> osnovni podaci o poseti (koje stranice posećujete, koliko dugo, tip uređaja) radi razumevanja čitanosti i unapređenja sadržaja.</li>
-            <li><strong>Kolačići (cookies):</strong> koristimo kolačiće za analitiku i, ukoliko date saglasnost, za marketinške svrhe (detaljnije u sekciji 5).</li>
+            <li><strong>Kolačići (cookies):</strong> koristimo kolačiće za analitiku i, gde je primenjivo, za marketinške svrhe (detaljnije u sekciji 5).</li>
           </ul>
         </section>
 
@@ -60,9 +60,9 @@ export default function PrivacyPolicyPage() {
           <h2 className="font-headline font-bold text-xl mb-2">5. Kolačići (cookies)</h2>
           <p>
             Koristimo kolačiće za osnovnu analitiku posete (npr. Google Analytics) i, ukoliko je uključeno,
-            marketinške alate (npr. Facebook Pixel). Prilikom prve posete sajtu možete prihvatiti ili odbiti
-            korišćenje ovih kolačića putem banera koji se prikazuje na dnu ekrana. Odbijanje ne utiče na vašu
-            mogućnost čitanja sadržaja portala.
+            marketinške alate (npr. Facebook Pixel). Ove kolačiće možete onemogućiti u podešavanjima svog
+            internet pregledača u bilo kom trenutku — uputstvo obično nalazite pod "Podešavanja privatnosti"
+            ili "Kolačići" u meniju pregledača.
           </p>
         </section>
 
@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
             <li>Zatražite uvid u podatke koje o vama čuvamo</li>
             <li>Zatražite ispravku netačnih podataka</li>
             <li>Zatražite brisanje vaših podataka</li>
-            <li>Povučete saglasnost za korišćenje kolačića u bilo kom trenutku</li>
+            <li>Onemogućite kolačiće putem podešavanja svog internet pregledača</li>
           </ul>
         </section>
 
