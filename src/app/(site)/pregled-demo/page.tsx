@@ -16,7 +16,7 @@ export default function DemoPreviewPage() {
   const trending = demoTrending(6)
   const mostRead = demoMostRead(5)
   const latest = demoLatest(12)
-  const zrenjanin = demoByCategory('zrenjanin', 5)
+  const drustvo = demoByCategory('drustvo', 5)
   const sport = demoByCategory('sport', 5)
   const ekonomija = demoByCategory('ekonomija', 5)
 
@@ -34,15 +34,15 @@ export default function DemoPreviewPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Zrenjanin section */}
+            {/* Društvo section */}
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1 h-6 bg-brand-red rounded-full" />
-                <h2 className="font-headline font-bold text-xl">Zrenjanin</h2>
+                <h2 className="font-headline font-bold text-xl">Društvo</h2>
                 <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {zrenjanin.slice(0, 4).map((a) => (
+                {drustvo.slice(0, 4).map((a) => (
                   <ArticleCard key={a.id} article={a} />
                 ))}
               </div>

@@ -15,7 +15,7 @@ export const DEMO_ARTICLES: Omit<Article, 'id' | 'author_id' | 'author' | 'creat
 
 <p>Predsednik je obišao i gradilište novog mosta na Begeju koji je u poodmakloj fazi izgradnje, te razgovarao sa radnicima i inženjerima. Most bi trebalo da bude završen do kraja 2025. godine.</p>`,
     excerpt: 'Predsednik Vučić obišao Zrenjanin i najavio investicioni paket od 200 miliona evra za infrastrukturu, privredu i nova radna mesta u Banatu.',
-    category: 'zrenjanin',
+    category: 'drustvo',
     image_url: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=1200&q=80',
     image_alt: 'Državna ceremonija i infrastrukturni projekti u Srbiji',
     published: true,
@@ -40,7 +40,7 @@ export const DEMO_ARTICLES: Omit<Article, 'id' | 'author_id' | 'author' | 'creat
 
 <p>"Ovaj most nije samo betonska konstrukcija — to je simbol budućnosti Zrenjanina," izjavio je glavni inženjer projekta Vladimir Nikolić. "Koristimo najsavremenije tehnologije i materijale koji garantuju vek trajanja od najmanje 100 godina."</p>`,
     excerpt: 'Izgradnja mosta na Begeju u završnoj fazi — vrednost projekta 18 miliona evra, otvaranje planiranog za decembar 2025.',
-    category: 'zrenjanin',
+    category: 'drustvo',
     image_url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=80',
     image_alt: 'Izgradnja novog mosta u gradu',
     published: true,
@@ -390,7 +390,7 @@ export const DEMO_ARTICLES: Omit<Article, 'id' | 'author_id' | 'author' | 'creat
 
 <p>"Gradski park je srce Zrenjanina. Rekonstrukcija je poklon gradu od gradske uprave i signal da Zrenjanin postaje grad koji drži do kvaliteta javnih prostora," rekao je gradonačelnik.</p>`,
     excerpt: 'Gradski park u Zrenjaninu dobija fontanu, dečije igralište i LED rasvetu — rekonstrukcija od 900.000 evra, otvaranje proleće 2026.',
-    category: 'zrenjanin',
+    category: 'drustvo',
     image_url: 'https://images.unsplash.com/photo-1468971050039-be99497410af?w=1200&q=80',
     image_alt: 'Lepo uređen gradski park sa fontanom',
     published: true,

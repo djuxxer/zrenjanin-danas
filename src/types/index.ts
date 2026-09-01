@@ -4,7 +4,6 @@ export type Category =
   | 'sport'
   | 'kultura'
   | 'ekonomija'
-  | 'zrenjanin'
 
 export type UserRole = 'admin' | 'novinar'
 
@@ -73,7 +72,6 @@ export const CATEGORY_LABELS: CategoryLabel = {
   sport: 'Sport',
   kultura: 'Kultura',
   ekonomija: 'Ekonomija',
-  zrenjanin: 'Zrenjanin',
 }
 
 export const CATEGORY_COLORS: Record<Category, string> = {
@@ -82,5 +80,4 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   sport: 'bg-green-600',
   kultura: 'bg-purple-600',
   ekonomija: 'bg-yellow-600',
-  zrenjanin: 'bg-brand-red',
 }

@@ -12,6 +12,11 @@ import sanitizeHtml from 'sanitize-html'
  * uklanjaju. YouTube/Instagram iframe embed-ovi se dodaju POSLE ovog koraka
  * (u embed-content.ts), preko sopstvenog, kontrolisanog koda — ne dolaze od
  * korisničkog unosa, pa ne prolaze kroz ovu proveru.
+ *
+ * Svi linkovi su podrazumevano "nofollow" (ne prenose SEO vrednost). Admin
+ * može da ubaci link sa data-dofollow="true" markerom (kroz editor) da bi
+ * TAČNO TAJ link ostao "dofollow" — npr. za recipročnu razmenu linkova sa
+ * regionalnim portalima. Marker se uklanja iz finalnog HTML-a.
  */
 export function sanitizeArticleContent(html: string): string {
   return sanitizeHtml(html, {
@@ -24,14 +29,24 @@ export function sanitizeArticleContent(html: string): string {
       'table', 'thead', 'tbody', 'tr', 'th', 'td',
     ],
     allowedAttributes: {
-      a: ['href', 'target', 'rel'],
+      a: ['href', 'target', 'rel', 'data-dofollow'],
       img: ['src', 'alt', 'style', 'width', 'height'],
       '*': ['class'],
     },
     allowedSchemes: ['http', 'https', 'mailto'],
-    // Force safe rel/target on all links da se spreči "tabnabbing"
     transformTags: {
-      a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer nofollow', target: '_blank' }),
+      a: (tagName, attribs) => {
+        const isDofollow = attribs['data-dofollow'] === 'true'
+        const { 'data-dofollow': _drop, ...rest } = attribs
+        return {
+          tagName,
+          attribs: {
+            ...rest,
+            rel: isDofollow ? 'noopener noreferrer' : 'noopener noreferrer nofollow',
+            target: '_blank',
+          },
+        }
+      },
     },
   })
 }

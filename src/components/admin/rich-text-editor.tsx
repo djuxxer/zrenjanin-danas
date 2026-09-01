@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 interface Props {
   value: string
   onChange: (html: string) => void
+  isAdmin?: boolean
 }
 
 /**
@@ -23,7 +24,7 @@ interface Props {
  * podeljen u pasuse — sprečava haos od skrivenog Word markup-a koji bi
  * inače sve zbio bez razmaka.
  */
-export function RichTextEditor({ value, onChange }: Props) {
+export function RichTextEditor({ value, onChange, isAdmin = false }: Props) {
   const [mode, setMode] = useState<'visual' | 'code'>('visual')
   const editorRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -158,7 +159,24 @@ export function RichTextEditor({ value, onChange }: Props) {
             title="Link"
             onClick={() => {
               const url = prompt('Unesi URL:')
-              if (url) exec('createLink', url)
+              if (!url) return
+
+              // Samo admin ima opciju da označi konkretan link kao "dofollow"
+              // (prenosi SEO vrednost) — svi ostali linkovi ostaju "nofollow" po defaultu.
+              if (isAdmin) {
+                const dofollow = confirm(
+                  'Da li ovaj link treba da bude "dofollow" (prenosi SEO vrednost)?\n\nOK = da, dofollow\nOtkaži = ne, standardno (nofollow)'
+                )
+                if (dofollow) {
+                  editorRef.current?.focus()
+                  const selectedText = window.getSelection()?.toString() || url
+                  document.execCommand('insertHTML', false, `<a href="${url}" data-dofollow="true">${selectedText}</a>`)
+                  syncFromEditor()
+                  return
+                }
+              }
+
+              exec('createLink', url)
             }}
             className={toolbarBtn}
           >

@@ -21,13 +21,13 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [big, small, trending, mostRead, latest, zrenjanin, sport, ekonomija] = await Promise.all([
+  const [big, small, trending, mostRead, latest, drustvo, sport, ekonomija] = await Promise.all([
     getNaslovnaVelika(),
     getNaslovnaMala(),
     getTrendingArticles(6),
     getMostReadArticles(5),
     getLatestArticles(12),
-    getArticlesByCategory('zrenjanin', 5),
+    getArticlesByCategory('drustvo', 5),
     getArticlesByCategory('sport', 5),
     getArticlesByCategory('ekonomija', 5),
   ])
@@ -42,19 +42,19 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Zrenjanin section */}
-            {zrenjanin.length > 0 && (
+            {/* Društvo section */}
+            {drustvo.length > 0 && (
               <section>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-6 bg-brand-red rounded-full" />
-                  <h2 className="font-headline font-bold text-xl">Zrenjanin</h2>
+                  <h2 className="font-headline font-bold text-xl">Društvo</h2>
                   <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
-                  <a href="/kategorija/zrenjanin" className="text-brand-red text-sm font-semibold hover:underline">
+                  <a href="/kategorija/drustvo" className="text-brand-red text-sm font-semibold hover:underline">
                     Sve vesti →
                   </a>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {zrenjanin.slice(0, 4).map((a) => (
+                  {drustvo.slice(0, 4).map((a) => (
                     <ArticleCard key={a.id} article={a} />
                   ))}
                 </div>

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2, Link2, ShieldAlert } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn, timeAgo } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
 import { createClient } from '@/lib/supabase/client'
 import { ImageUploadButton } from '@/components/admin/image-upload-button'
@@ -16,7 +16,7 @@ const EMPTY_FORM = {
   subtitle: '',
   content: '',
   excerpt: '',
-  category: 'zrenjanin' as Category,
+  category: 'drustvo' as Category,
   image_url: '',
   image_alt: '',
   image_source: '',
@@ -61,6 +61,7 @@ export default function EditArticlePage({ params }: Props) {
   const [originalPublishedAt, setOriginalPublishedAt] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminOverride, setAdminOverride] = useState(false)
+  const [recoverableDraft, setRecoverableDraft] = useState<{ savedAt: string } | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -103,9 +104,52 @@ export default function EditArticlePage({ params }: Props) {
       })
       setOriginalPublishedAt(data.published_at ?? null)
       setLoading(false)
+
+      // Proveri da li postoji nesačuvan tekst u browseru od pre (npr. slučajan refresh)
+      try {
+        const raw = localStorage.getItem(`draft_edit_${id}`)
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (parsed?.form?.content && parsed.form.content !== (data.content ?? '')) {
+            setRecoverableDraft({ savedAt: parsed.savedAt })
+          }
+        }
+      } catch {}
     }
     load()
   }, [id])
+
+  // Automatski čuvaj u browseru dok se piše — ali tek KAD je pravi sadržaj vesti
+  // učitan (da ne prepišemo eventualni sačuvan nacrt praznim EMPTY_FORM stanjem).
+  useEffect(() => {
+    if (loading || recoverableDraft) return
+    const timeout = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          `draft_edit_${id}`,
+          JSON.stringify({ form, activeTab, savedAt: new Date().toISOString() })
+        )
+      } catch {}
+    }, 600)
+    return () => clearTimeout(timeout)
+  }, [form, activeTab, loading, recoverableDraft, id])
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(`draft_edit_${id}`)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        setForm((prev) => ({ ...prev, ...parsed.form }))
+        if (parsed.activeTab) setActiveTab(parsed.activeTab)
+      }
+    } catch {}
+    setRecoverableDraft(null)
+  }
+
+  function discardDraft() {
+    localStorage.removeItem(`draft_edit_${id}`)
+    setRecoverableDraft(null)
+  }
 
   const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -187,6 +231,7 @@ export default function EditArticlePage({ params }: Props) {
       return
     }
 
+    localStorage.removeItem(`draft_edit_${id}`)
     setSaved(publish ? 'published' : 'draft')
     setTimeout(() => {
       router.push('/uprava-x7k2/articles')
@@ -217,6 +262,29 @@ export default function EditArticlePage({ params }: Props) {
 
   return (
     <div className="space-y-5 max-w-6xl">
+      {recoverableDraft && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <p className="text-sm text-blue-800 dark:text-blue-300">
+            Pronašli smo nesačuvane izmene od <strong>{timeAgo(recoverableDraft.savedAt)}</strong> — verovatno od
+            slučajnog zatvaranja stranice ili refresh-a. Da li da ih vratim?
+          </p>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={restoreDraft}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Vrati izmene
+            </button>
+            <button
+              onClick={discardDraft}
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5"
+            >
+              Odbaci
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -319,7 +387,7 @@ export default function EditArticlePage({ params }: Props) {
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
                       Sadržaj vesti *
                     </label>
-                    <RichTextEditor value={form.content} onChange={(html) => set('content', html)} />
+                    <RichTextEditor value={form.content} onChange={(html) => set('content', html)} isAdmin={isAdmin} />
                     <p className="text-xs text-gray-400 mt-1">Vizuelno = piši/uređuj kao u Word-u. Kod = ručna izmena HTML-a. Lepljenje teksta se automatski deli u pasuse.</p>
                   </div>
                   <div>
