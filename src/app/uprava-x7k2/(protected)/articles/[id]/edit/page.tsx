@@ -99,6 +99,7 @@ export default function EditArticlePage({ params }: Props) {
         naslovna_mala: data.naslovna_mala ?? false,
         traka_gore: data.traka_gore ?? false,
         scheduled_at: data.scheduled_at ?? '',
+        custom_published_at: '',
       })
       setOriginalPublishedAt(data.published_at ?? null)
       setLoading(false)
