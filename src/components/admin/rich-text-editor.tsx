@@ -39,7 +39,12 @@ export function RichTextEditor({ value, onChange }: Props) {
   }, [mode, value])
 
   function syncFromEditor() {
-    if (editorRef.current) onChange(editorRef.current.innerHTML)
+    if (!editorRef.current) return
+    // Ukloni prazne pasuse (nastaju kad se dva puta pritisne Enter) — bez ovoga
+    // svaki prazan <p> dobija sopstvenu marginu i pravi utisak "duplog razmaka"
+    // koji se ne poklapa sa onim što se vidi kad je vest objavljena.
+    const cleaned = editorRef.current.innerHTML.replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '')
+    onChange(cleaned)
   }
 
   function exec(command: string, arg?: string) {
@@ -181,7 +186,7 @@ export function RichTextEditor({ value, onChange }: Props) {
           suppressContentEditableWarning
           onInput={syncFromEditor}
           onPaste={handlePaste}
-          className="prose prose-sm dark:prose-invert max-w-none w-full min-h-[320px] px-4 py-3 text-sm bg-white dark:bg-gray-900 focus:outline-none"
+          className="article-content max-w-none w-full min-h-[320px] px-4 py-3 text-sm bg-white dark:bg-gray-900 focus:outline-none"
         />
       ) : (
         <textarea

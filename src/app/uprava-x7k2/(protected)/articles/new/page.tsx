@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2 } from 'lucide-react'
+import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2, ShieldAlert } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn, createSlug } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
@@ -29,6 +29,7 @@ const EMPTY_FORM = {
   traka_gore: false,
   published: false,
   scheduled_at: '',
+  custom_published_at: '',
 }
 
 // Polja koja MORAJU biti popunjena pre nego što se vest može objaviti
@@ -51,6 +52,17 @@ export default function NewArticlePage() {
   const [saved, setSaved] = useState<'published' | 'draft' | null>(null)
   const [saving, setSaving] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminOverride, setAdminOverride] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+      setIsAdmin(profile?.role === 'admin')
+    })
+  }, [])
 
   const set = (key: keyof typeof EMPTY_FORM, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -58,7 +70,15 @@ export default function NewArticlePage() {
   const seo = useMemo(() => calculateSeoScore(form), [form])
 
   const handleSave = async (publish: boolean) => {
-    if (publish) {
+    const overrideActive = isAdmin && adminOverride
+
+    if (!form.title.trim()) {
+      setPublishError('Naslov je uvek obavezan, čak i uz override.')
+      setActiveTab('content')
+      return
+    }
+
+    if (publish && !overrideActive) {
       const missing = REQUIRED_FOR_PUBLISH.filter((f) => !String(form[f.key]).trim())
 
       if (missing.length > 0) {
@@ -76,10 +96,6 @@ export default function NewArticlePage() {
         setActiveTab('seo')
         return
       }
-    } else if (!form.title.trim()) {
-      setPublishError('Unesi bar naslov da bi sačuvao nacrt.')
-      setActiveTab('content')
-      return
     }
 
     setPublishError(null)
@@ -114,7 +130,7 @@ export default function NewArticlePage() {
       image_source: form.image_source || null,
       author_id: user.id,
       published: publish,
-      published_at: publish ? new Date().toISOString() : null,
+      published_at: publish ? (form.custom_published_at ? new Date(form.custom_published_at).toISOString() : new Date().toISOString()) : null,
       scheduled_at: form.scheduled_at || null,
       naslovna_velika: form.naslovna_velika,
       naslovna_mala: form.naslovna_mala,
@@ -417,6 +433,46 @@ export default function NewArticlePage() {
                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <span>Zakazana objava je aktivna samo u produkciji sa Supabase backend-om.</span>
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Datum objave (opciono — "unazad")
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="datetime-local"
+                        value={form.custom_published_at}
+                        onChange={(e) => set('custom_published_at', e.target.value)}
+                        className="w-full pl-9 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Ostavi prazno da koristiš trenutan datum/vreme. Postavi stariji datum ako želiš da vest ne
+                      izgleda kao najnovija (npr. neće se ubaciti na vrh naslovne kao sveža objava).
+                    </p>
+                  </div>
+
+                  {isAdmin && (
+                    <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={adminOverride}
+                          onChange={(e) => setAdminOverride(e.target.checked)}
+                          className="w-4 h-4 accent-brand-red"
+                        />
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                          <ShieldAlert className="w-4 h-4 text-amber-500" />
+                          Admin override — preskoči SEO/obavezna polja
+                        </span>
+                      </label>
+                      <p className="text-xs text-gray-400 mt-1 ml-6">
+                        Vidljivo samo tebi (Admin). Kad je uključeno, vest se može objaviti bez ključne fraze,
+                        SEO naslova/opisa i bez ispunjenog SEO praga — samo naslov ostaje obavezan.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
