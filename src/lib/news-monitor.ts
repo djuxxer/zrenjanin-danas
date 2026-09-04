@@ -30,8 +30,20 @@ export async function fetchGoogleNewsMonitor(query: string, limit = 30): Promise
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=sr&gl=RS&ceid=RS:sr`
 
   try {
-    const res = await fetch(url, { next: { revalidate: 900 } }) // keširaj 15 min
-    if (!res.ok) return []
+    const res = await fetch(url, {
+      next: { revalidate: 900 }, // keširaj 15 min
+      headers: {
+        // Google poslednjih meseci strože blokira zahteve bez "pravog" User-Agent-a —
+        // bez ovoga, server-side fetch (bez header-a) biva tretiran kao bot i odbijen.
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        Accept: 'application/rss+xml, application/xml, text/xml, */*',
+      },
+    })
+    if (!res.ok) {
+      console.error(`Google News RSS vratio status ${res.status} za upit "${query}"`)
+      return []
+    }
     const xml = await res.text()
 
     const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) ?? []
@@ -52,7 +64,8 @@ export async function fetchGoogleNewsMonitor(query: string, limit = 30): Promise
 
       return { title, link, pubDate, source }
     })
-  } catch {
+  } catch (err) {
+    console.error('Greška prilikom povlačenja Google News RSS feed-a:', err)
     return []
   }
 }
