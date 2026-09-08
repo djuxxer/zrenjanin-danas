@@ -34,7 +34,7 @@ export function ArticleCard({ article, variant = 'default', className, priority 
           <span className={cn('category-badge mb-3 inline-block', categoryColor)}>
             {categoryLabel}
           </span>
-          <h2 className="text-white font-headline font-bold text-2xl md:text-4xl leading-tight mb-2 text-balance group-hover:text-red-200 transition-colors">
+          <h2 className="text-white font-headline font-bold text-lg sm:text-2xl md:text-4xl leading-tight mb-2 line-clamp-3 text-balance group-hover:text-red-200 transition-colors">
             {article.title}
           </h2>
           {article.subtitle && (

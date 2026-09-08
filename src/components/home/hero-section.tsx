@@ -42,7 +42,7 @@ export function HeroSection({ big, small, latest }: HeroSectionProps) {
             <span className={cn('category-badge mb-3 inline-block', CATEGORY_COLORS[main.category])}>
               {CATEGORY_LABELS[main.category]}
             </span>
-            <h2 className="text-white font-headline font-bold text-2xl md:text-4xl leading-tight mb-2 group-hover:text-red-200 transition-colors">
+            <h2 className="text-white font-headline font-bold text-lg sm:text-2xl md:text-4xl leading-tight mb-2 line-clamp-3 group-hover:text-red-200 transition-colors">
               {main.title}
             </h2>
             {main.subtitle && (
