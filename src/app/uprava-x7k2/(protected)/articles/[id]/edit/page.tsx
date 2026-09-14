@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ImageUploadButton } from '@/components/admin/image-upload-button'
 import { ImageGalleryPicker } from '@/components/admin/image-gallery-picker'
 import { RichTextEditor } from '@/components/admin/rich-text-editor'
+import { InternalLinkSuggestions } from '@/components/admin/internal-link-suggestions'
 
 const EMPTY_FORM = {
   title: '',
@@ -181,6 +182,14 @@ export default function EditArticlePage({ params }: Props) {
           `SEO ocena je ${seo.score}% — potrebno je najmanje ${SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi. Proveri SEO tab i popravi označene stavke.`
         )
         setActiveTab('seo')
+        return
+      }
+
+      if (!/href=["']\/vest\//.test(form.content)) {
+        setPublishError(
+          'Vest mora da sadrži bar jedan interni link (ka drugoj vesti na sajtu) da bi mogla da se objavi. Pogledaj predložene linkove iznad teksta.'
+        )
+        setActiveTab('content')
         return
       }
     }
@@ -383,6 +392,7 @@ export default function EditArticlePage({ params }: Props) {
             <div className="p-5">
               {activeTab === 'content' && (
                 <div className="space-y-4">
+                  <InternalLinkSuggestions title={form.title} excludeId={id} />
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
                       Sadržaj vesti *

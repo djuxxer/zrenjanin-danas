@@ -195,6 +195,49 @@ export async function getMostReadArticles(limit = 5): Promise<Article[]> {
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
+const STOP_WORD_SET = new Set([
+  'i', 'u', 'na', 'za', 'sa', 'od', 'do', 'je', 'su', 'se', 'da', 'ali', 'kao',
+  'ne', 'ce', 'će', 'iz', 'po', 'ka', 'pre', 'posle', 'kod', 'bez',
+  'novi', 'nova', 'novo', 'novog', 'nove', 'ovo', 'ova', 'ovaj', 'ove',
+  'grad', 'gradu', 'grada', 'zrenjanin', 'zrenjaninu', 'zrenjaninski', 'zrenjaninska',
+  'danas', 'godine', 'godina', 'sve', 'svi', 'kako', 'sta', 'šta', 'koji', 'koja',
+])
+
+/**
+ * Predlaže postojeće (objavljene) vesti za interno linkovanje, na osnovu
+ * preklapanja ključnih reči iz naslova nove vesti sa naslovima već objavljenih.
+ * Koristi se u admin panelu kao pomoć novinaru pri pisanju — ne menja ništa
+ * automatski, samo predlaže linkove koje novinar sam ubacuje u tekst.
+ */
+export async function suggestRelatedByTitle(title: string, excludeId?: string): Promise<Article[]> {
+  const keywords = title
+    .toLowerCase()
+    .replace(/[^\p{L}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 3 && !STOP_WORD_SET.has(w))
+    .slice(0, 6)
+
+  if (keywords.length === 0) return []
+
+  const supabase = await createClient()
+  const orFilter = keywords.map((k) => `title.ilike.%${k}%`).join(',')
+
+  let query = supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .is('deleted_at', null)
+    .or(orFilter)
+    .order('published_at', { ascending: false })
+    .limit(8)
+
+  if (excludeId) query = query.neq('id', excludeId)
+
+  const { data, error } = await query
+  if (error || !data) return []
+  return (data as unknown as ArticleRow[]).map(mapArticle)
+}
+
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   const supabase = await createClient()
   const { data, error } = await supabase

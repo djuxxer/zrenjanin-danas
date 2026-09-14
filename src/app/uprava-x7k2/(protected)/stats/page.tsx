@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Eye, FileText, TrendingUp, Loader2, Trophy, ExternalLink } from 'lucide-react'
+import { Eye, FileText, TrendingUp, Loader2, Trophy, ExternalLink, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_LABELS, CATEGORY_COLORS, type Category } from '@/types'
 import { cn } from '@/lib/utils'
@@ -29,6 +29,65 @@ export default function AdminStatsPage() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([])
   const [viewsToday, setViewsToday] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const [rangeFrom, setRangeFrom] = useState('')
+  const [rangeTo, setRangeTo] = useState('')
+  const [rangeResult, setRangeResult] = useState<{ total: number; byArticle: { title: string; slug: string; views: number }[] } | null>(null)
+  const [rangeLoading, setRangeLoading] = useState(false)
+  const [rangeError, setRangeError] = useState<string | null>(null)
+
+  async function loadRange() {
+    if (!rangeFrom || !rangeTo) {
+      setRangeError('Izaberi oba datuma (od i do).')
+      return
+    }
+    setRangeError(null)
+    setRangeLoading(true)
+    const supabase = createClient()
+
+    const fromISO = new Date(rangeFrom + 'T00:00:00').toISOString()
+    const toISO = new Date(rangeTo + 'T23:59:59').toISOString()
+
+    const { data, error } = await supabase
+      .from('article_views')
+      .select('article_id')
+      .gte('viewed_at', fromISO)
+      .lte('viewed_at', toISO)
+
+    setRangeLoading(false)
+
+    if (error) {
+      setRangeError('Nemaš dozvolu da vidiš ove podatke, ili je došlo do greške.')
+      return
+    }
+
+    const counts: Record<string, number> = {}
+    for (const row of data ?? []) {
+      counts[row.article_id] = (counts[row.article_id] ?? 0) + 1
+    }
+
+    const byArticle = Object.entries(counts)
+      .map(([articleId, views]) => {
+        const article = articles.find((a) => a.id === articleId)
+        return { title: article?.title ?? '(obrisana vest)', slug: article?.slug ?? '', views }
+      })
+      .sort((a, b) => b.views - a.views)
+
+    setRangeResult({ total: data?.length ?? 0, byArticle })
+  }
+
+  function exportRangeCsv() {
+    if (!rangeResult) return
+    const header = 'Naslov,Pregledi\n'
+    const rows = rangeResult.byArticle.map((r) => `"${r.title.replace(/"/g, '""')}",${r.views}`).join('\n')
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `pregledi_${rangeFrom}_do_${rangeTo}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   useEffect(() => {
     async function load() {
@@ -142,6 +201,73 @@ export default function AdminStatsPage() {
             <p className="text-xs text-gray-400 mt-1">Dostupno samo Admin/Urednik nalozima</p>
           )}
         </div>
+      </div>
+
+      {/* Pregledi za proizvoljan period */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <h2 className="font-bold text-sm mb-1 flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-gray-400" />
+          Pregledi za period
+        </h2>
+        <p className="text-xs text-gray-500 mb-4">Izvuci ukupan broj pregleda i raspodelu po vestima za bilo koji vremenski period (npr. ceo mesec).</p>
+        <div className="flex flex-col sm:flex-row items-end gap-3 mb-4">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Od</label>
+            <input
+              type="date"
+              value={rangeFrom}
+              onChange={(e) => setRangeFrom(e.target.value)}
+              className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Do</label>
+            <input
+              type="date"
+              value={rangeTo}
+              onChange={(e) => setRangeTo(e.target.value)}
+              className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+            />
+          </div>
+          <button
+            onClick={loadRange}
+            disabled={rangeLoading}
+            className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60"
+          >
+            {rangeLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            Prikaži
+          </button>
+          {rangeResult && (
+            <button
+              onClick={exportRangeCsv}
+              className="text-sm font-semibold text-brand-red hover:underline px-2 py-2"
+            >
+              Izvezi CSV
+            </button>
+          )}
+        </div>
+
+        {rangeError && <p className="text-sm text-red-600 mb-3">{rangeError}</p>}
+
+        {rangeResult && (
+          <div>
+            <p className="text-sm font-semibold mb-3">
+              Ukupno pregleda u periodu: <span className="text-brand-red">{rangeResult.total.toLocaleString('sr-RS')}</span>
+            </p>
+            {rangeResult.byArticle.length === 0 ? (
+              <p className="text-sm text-gray-500">Nema pregleda u ovom periodu.</p>
+            ) : (
+              <div className="max-h-72 overflow-y-auto space-y-1">
+                {rangeResult.byArticle.map((r, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50 dark:border-gray-800">
+                    <span className="line-clamp-1 flex-1">{r.title}</span>
+                    <span className="font-semibold text-gray-500 flex-shrink-0 ml-3">{r.views.toLocaleString('sr-RS')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Journalist performance */}
