@@ -37,11 +37,14 @@ export function demoTrending(limit = 6): Article[] {
     .slice(0, limit)
 }
 
-export function demoMostRead(limit = 5): Article[] {
-  return getDemoArticlesFull()
-    .filter((a) => a.published)
-    .sort((a, b) => b.views - a.views)
-    .slice(0, limit)
+export function demoRandom(limit = 5): Article[] {
+  const published = getDemoArticlesFull().filter((a) => a.published)
+  const shuffled = [...published]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled.slice(0, limit)
 }
 
 export function demoLatest(limit = 12): Article[] {

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { TrendingUp, BarChart2, Flame } from 'lucide-react'
+import { TrendingUp, Flame, Sparkles } from 'lucide-react'
 import type { Article } from '@/types'
 import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/types'
 import { cn, timeAgo } from '@/lib/utils'
@@ -46,26 +46,26 @@ export function TrendingSection({ articles }: TrendingSectionProps) {
   )
 }
 
-interface MostReadProps {
+interface RecommendedProps {
   articles: Article[]
 }
 
-export function MostReadSection({ articles }: MostReadProps) {
+export function RecommendedSection({ articles }: RecommendedProps) {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
       <div className="bg-gray-900 dark:bg-gray-800 px-4 py-3 flex items-center gap-2">
-        <BarChart2 className="w-4 h-4 text-white" />
-        <h2 className="text-white font-bold text-sm uppercase tracking-widest">Najčitanije</h2>
+        <Sparkles className="w-4 h-4 text-white" />
+        <h2 className="text-white font-bold text-sm uppercase tracking-widest">Preporučujemo</h2>
       </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
-        {articles.slice(0, 5).map((article, i) => (
+        {articles.slice(0, 5).map((article) => (
           <Link
             key={article.id}
             href={`/vest/${article.slug}`}
             className="group flex items-start gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
           >
-            <span className="font-headline font-black text-2xl text-brand-red leading-none w-7 flex-shrink-0 pt-1">
-              {i + 1}
+            <span className={cn('category-badge text-[10px] mt-1 flex-shrink-0', CATEGORY_COLORS[article.category])}>
+              {CATEGORY_LABELS[article.category]}
             </span>
             <div className="flex-1 min-w-0">
               <h3 className="font-headline font-semibold text-sm leading-snug line-clamp-2 group-hover:text-brand-red transition-colors">

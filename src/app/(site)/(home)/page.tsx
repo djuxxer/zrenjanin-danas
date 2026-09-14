@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import { HeroSection } from '@/components/home/hero-section'
-import { TrendingSection, MostReadSection, CategoryGrid } from '@/components/home/trending-section'
+import { TrendingSection, RecommendedSection, CategoryGrid } from '@/components/home/trending-section'
 import { NewsletterSection } from '@/components/home/widgets'
 import { ArticleCard } from '@/components/article/article-card'
 import {
   getNaslovnaVelika,
   getNaslovnaMala,
   getTrendingArticles,
-  getMostReadArticles,
+  getRandomArticles,
   getArticlesByCategory,
   getLatestArticles,
 } from '@/lib/articles'
@@ -21,11 +21,11 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [big, small, trending, mostRead, latest, drustvo, sport, ekonomija] = await Promise.all([
+  const [big, small, trending, recommended, latest, drustvo, sport, ekonomija] = await Promise.all([
     getNaslovnaVelika(),
     getNaslovnaMala(),
     getTrendingArticles(6),
-    getMostReadArticles(5),
+    getRandomArticles(5),
     getLatestArticles(12),
     getArticlesByCategory('drustvo', 5),
     getArticlesByCategory('sport', 5),
@@ -84,7 +84,7 @@ export default async function HomePage() {
           {/* Sidebar */}
           <aside className="space-y-5">
             <TrendingSection articles={trending} />
-            <MostReadSection articles={mostRead} />
+            <RecommendedSection articles={recommended} />
             <NewsletterSection />
           </aside>
         </div>

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { HeroSection } from '@/components/home/hero-section'
-import { TrendingSection, MostReadSection, CategoryGrid } from '@/components/home/trending-section'
+import { TrendingSection, RecommendedSection, CategoryGrid } from '@/components/home/trending-section'
 import { NewsletterSection } from '@/components/home/widgets'
 import { ArticleCard } from '@/components/article/article-card'
-import { demoNaslovnaVelika, demoNaslovnaMala, demoTrending, demoMostRead, demoLatest, demoByCategory } from '@/lib/demo-articles'
+import { demoNaslovnaVelika, demoNaslovnaMala, demoTrending, demoRandom, demoLatest, demoByCategory } from '@/lib/demo-articles'
 
 export const metadata: Metadata = {
   title: 'Pregled izgleda (demo) — Zrenjanin Danas',
@@ -14,7 +14,7 @@ export default function DemoPreviewPage() {
   const big = demoNaslovnaVelika()
   const small = demoNaslovnaMala()
   const trending = demoTrending(6)
-  const mostRead = demoMostRead(5)
+  const recommended = demoRandom(5)
   const latest = demoLatest(12)
   const drustvo = demoByCategory('drustvo', 5)
   const sport = demoByCategory('sport', 5)
@@ -66,7 +66,7 @@ export default function DemoPreviewPage() {
           {/* Sidebar */}
           <aside className="space-y-5">
             <TrendingSection articles={trending} />
-            <MostReadSection articles={mostRead} />
+            <RecommendedSection articles={recommended} />
             <NewsletterSection />
           </aside>
         </div>

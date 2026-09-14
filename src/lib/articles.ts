@@ -195,6 +195,36 @@ export async function getMostReadArticles(limit = 5): Promise<Article[]> {
   return (data as unknown as ArticleRow[]).map(mapArticle)
 }
 
+/**
+ * Nasumičan izbor vesti (za sekciju "Preporučujemo") — namerno RAZLIČIT od
+ * "Popularno" (koje je čisto po pregledima), da se dve sekcije na početnoj
+ * ne bi preklapale i prikazivale isti sadržaj dva puta.
+ * Uzima uzorak iz poslednjih 50 objavljenih vesti, pa nasumično bira "limit"
+ * od njih — dovoljno je za trenutan obim sajta, bez potrebe za posebnom
+ * SQL funkcijom za "prava" nasumična pretraga u bazi.
+ */
+export async function getRandomArticles(limit = 5): Promise<Article[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select(ARTICLE_SELECT)
+    .eq('published', true)
+    .is('deleted_at', null)
+    .order('published_at', { ascending: false })
+    .limit(50)
+
+  if (error || !data) return []
+  const mapped = (data as unknown as ArticleRow[]).map(mapArticle)
+
+  // Fisher-Yates mešanje
+  for (let i = mapped.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[mapped[i], mapped[j]] = [mapped[j], mapped[i]]
+  }
+
+  return mapped.slice(0, limit)
+}
+
 const STOP_WORD_SET = new Set([
   'i', 'u', 'na', 'za', 'sa', 'od', 'do', 'je', 'su', 'se', 'da', 'ali', 'kao',
   'ne', 'ce', 'će', 'iz', 'po', 'ka', 'pre', 'posle', 'kod', 'bez',
