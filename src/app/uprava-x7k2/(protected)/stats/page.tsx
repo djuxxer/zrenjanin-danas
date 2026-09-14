@@ -36,8 +36,40 @@ export default function AdminStatsPage() {
   const [rangeLoading, setRangeLoading] = useState(false)
   const [rangeError, setRangeError] = useState<string | null>(null)
 
-  async function loadRange() {
-    if (!rangeFrom || !rangeTo) {
+  function toDateInput(d: Date) {
+    return d.toISOString().slice(0, 10)
+  }
+
+  function applyPreset(preset: 'ovaj-mesec' | 'prosli-mesec' | '7-dana' | '30-dana') {
+    const now = new Date()
+    let from: Date
+    let to: Date = now
+
+    if (preset === 'ovaj-mesec') {
+      from = new Date(now.getFullYear(), now.getMonth(), 1)
+    } else if (preset === 'prosli-mesec') {
+      from = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      to = new Date(now.getFullYear(), now.getMonth(), 0) // poslednji dan proslog meseca
+    } else if (preset === '7-dana') {
+      from = new Date(now)
+      from.setDate(from.getDate() - 6)
+    } else {
+      from = new Date(now)
+      from.setDate(from.getDate() - 29)
+    }
+
+    const fromStr = toDateInput(from)
+    const toStr = toDateInput(to)
+    setRangeFrom(fromStr)
+    setRangeTo(toStr)
+    loadRange(fromStr, toStr)
+  }
+
+  async function loadRange(overrideFrom?: string, overrideTo?: string) {
+    const from = overrideFrom ?? rangeFrom
+    const to = overrideTo ?? rangeTo
+
+    if (!from || !to) {
       setRangeError('Izaberi oba datuma (od i do).')
       return
     }
@@ -45,24 +77,45 @@ export default function AdminStatsPage() {
     setRangeLoading(true)
     const supabase = createClient()
 
-    const fromISO = new Date(rangeFrom + 'T00:00:00').toISOString()
-    const toISO = new Date(rangeTo + 'T23:59:59').toISOString()
+    const fromISO = new Date(from + 'T00:00:00').toISOString()
+    const toISO = new Date(to + 'T23:59:59').toISOString()
 
-    const { data, error } = await supabase
-      .from('article_views')
-      .select('article_id')
-      .gte('viewed_at', fromISO)
-      .lte('viewed_at', toISO)
+    // Supabase po defaultu vraća najviše 1000 redova po pozivu — za period sa
+    // vise od 1000 pregleda moramo da povlacimo u stranicama (batch-evima) dok
+    // ne pokupimo bas sve, inace bi ukupan broj tiho bio odsecen na 1000.
+    const allRows: { article_id: string }[] = []
+    const BATCH_SIZE = 1000
+    let offset = 0
+    let hadError = false
+
+    while (true) {
+      const { data, error } = await supabase
+        .from('article_views')
+        .select('article_id')
+        .gte('viewed_at', fromISO)
+        .lte('viewed_at', toISO)
+        .range(offset, offset + BATCH_SIZE - 1)
+
+      if (error) {
+        hadError = true
+        break
+      }
+      if (!data || data.length === 0) break
+
+      allRows.push(...data)
+      if (data.length < BATCH_SIZE) break
+      offset += BATCH_SIZE
+    }
 
     setRangeLoading(false)
 
-    if (error) {
+    if (hadError) {
       setRangeError('Nemaš dozvolu da vidiš ove podatke, ili je došlo do greške.')
       return
     }
 
     const counts: Record<string, number> = {}
-    for (const row of data ?? []) {
+    for (const row of allRows) {
       counts[row.article_id] = (counts[row.article_id] ?? 0) + 1
     }
 
@@ -73,7 +126,7 @@ export default function AdminStatsPage() {
       })
       .sort((a, b) => b.views - a.views)
 
-    setRangeResult({ total: data?.length ?? 0, byArticle })
+    setRangeResult({ total: allRows.length, byArticle })
   }
 
   function exportRangeCsv() {
@@ -209,7 +262,23 @@ export default function AdminStatsPage() {
           <Calendar className="w-4 h-4 text-gray-400" />
           Pregledi za period
         </h2>
-        <p className="text-xs text-gray-500 mb-4">Izvuci ukupan broj pregleda i raspodelu po vestima za bilo koji vremenski period (npr. ceo mesec).</p>
+        <p className="text-xs text-gray-500 mb-3">Izvuci ukupan broj pregleda i raspodelu po vestima za bilo koji vremenski period (npr. ceo mesec).</p>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button onClick={() => applyPreset('ovaj-mesec')} className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
+            Ovaj mesec
+          </button>
+          <button onClick={() => applyPreset('prosli-mesec')} className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
+            Prošli mesec
+          </button>
+          <button onClick={() => applyPreset('7-dana')} className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
+            Poslednjih 7 dana
+          </button>
+          <button onClick={() => applyPreset('30-dana')} className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
+            Poslednjih 30 dana
+          </button>
+        </div>
+
         <div className="flex flex-col sm:flex-row items-end gap-3 mb-4">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Od</label>
@@ -230,7 +299,7 @@ export default function AdminStatsPage() {
             />
           </div>
           <button
-            onClick={loadRange}
+            onClick={() => loadRange()}
             disabled={rangeLoading}
             className="flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60"
           >
