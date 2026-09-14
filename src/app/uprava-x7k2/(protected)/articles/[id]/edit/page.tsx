@@ -397,7 +397,7 @@ export default function EditArticlePage({ params }: Props) {
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
                       Sadržaj vesti *
                     </label>
-                    <RichTextEditor value={form.content} onChange={(html) => set('content', html)} isAdmin={isAdmin} />
+                    <RichTextEditor value={form.content} onChange={(html) => set('content', html)} isAdmin={isAdmin} excludeId={id} />
                     <p className="text-xs text-gray-400 mt-1">Vizuelno = piši/uređuj kao u Word-u. Kod = ručna izmena HTML-a. Lepljenje teksta se automatski deli u pasuse.</p>
                   </div>
                   <div>
