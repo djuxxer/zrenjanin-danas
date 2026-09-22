@@ -28,8 +28,10 @@ const EMPTY_FORM = {
   naslovna_velika: false,
   naslovna_mala: false,
   traka_gore: false,
+  noindex: false,
   scheduled_at: '',
   custom_published_at: '',
+  slug: '',
 }
 
 // Polja koja MORAJU biti popunjena pre nego što se vest može objaviti
@@ -60,6 +62,8 @@ export default function EditArticlePage({ params }: Props) {
   const [notFound, setNotFound] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
   const [originalPublishedAt, setOriginalPublishedAt] = useState<string | null>(null)
+  const [originalSlug, setOriginalSlug] = useState('')
+  const [previousSlugs, setPreviousSlugs] = useState<string[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminOverride, setAdminOverride] = useState(false)
   const [recoverableDraft, setRecoverableDraft] = useState<{ savedAt: string } | null>(null)
@@ -100,9 +104,13 @@ export default function EditArticlePage({ params }: Props) {
         naslovna_velika: data.naslovna_velika ?? false,
         naslovna_mala: data.naslovna_mala ?? false,
         traka_gore: data.traka_gore ?? false,
+        noindex: data.noindex ?? false,
         scheduled_at: data.scheduled_at ?? '',
         custom_published_at: '',
+        slug: data.slug ?? '',
       })
+      setOriginalSlug(data.slug ?? '')
+      setPreviousSlugs(data.previous_slugs ?? [])
       setOriginalPublishedAt(data.published_at ?? null)
       setLoading(false)
 
@@ -185,7 +193,7 @@ export default function EditArticlePage({ params }: Props) {
         return
       }
 
-      if (!/href=["']\/vest\//.test(form.content)) {
+      if (!/href=["'](?:https?:\/\/(?:www\.)?zrenjanindanas\.com)?\/vest\//i.test(form.content)) {
         setPublishError(
           'Vest mora da sadrži bar jedan interni link (ka drugoj vesti na sajtu) da bi mogla da se objavi. Pogledaj predložene linkove iznad teksta.'
         )
@@ -203,6 +211,12 @@ export default function EditArticlePage({ params }: Props) {
       .map((t) => t.trim())
       .filter(Boolean)
 
+    // Normalizuj slug (mala slova, samo slova/brojevi/crtice) i, ako je promenjen,
+    // sačuvaj STARI slug u previous_slugs — da stari linkovi i dalje rade (301 preusmerenje).
+    const cleanSlug = form.slug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+    const slugChanged = isAdmin && cleanSlug && cleanSlug !== originalSlug
+    const newPreviousSlugs = slugChanged ? [...new Set([...previousSlugs, originalSlug])] : previousSlugs
+
     const { error } = await supabase
       .from('articles')
       .update({
@@ -215,6 +229,7 @@ export default function EditArticlePage({ params }: Props) {
         image_alt: form.image_alt,
         image_source: form.image_source || null,
         published: publish,
+        ...(slugChanged ? { slug: cleanSlug, previous_slugs: newPreviousSlugs } : {}),
         // Datum objave se postavlja SAMO prvi put kad vest postane objavljena
         // (ako je ranije bila nacrt bez datuma) — kasnija dorada ne pomera datum.
         ...(form.custom_published_at
@@ -226,6 +241,7 @@ export default function EditArticlePage({ params }: Props) {
         naslovna_velika: form.naslovna_velika,
         naslovna_mala: form.naslovna_mala,
         traka_gore: form.traka_gore,
+        noindex: form.noindex,
         seo_title: form.seo_title || null,
         seo_description: form.seo_description || null,
         focus_keyphrase: form.focus_keyphrase || null,
@@ -358,6 +374,16 @@ export default function EditArticlePage({ params }: Props) {
               rows={2}
               className="w-full font-headline font-bold text-xl border-0 focus:outline-none resize-none bg-transparent placeholder-gray-300 dark:placeholder-gray-600 leading-snug"
             />
+            <label className="flex items-center gap-2 cursor-pointer mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <input
+                type="checkbox"
+                checked={form.noindex}
+                onChange={(e) => set('noindex', e.target.checked)}
+                className="w-4 h-4 accent-brand-red"
+              />
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-200">PRENEŠENA VEST</span>
+              <span className="text-xs text-gray-400">— preneto od drugog izvora, ne prijavljuj Google-u kao naš originalan sadržaj</span>
+            </label>
             <div className="border-t border-gray-100 dark:border-gray-800 pt-3 mt-3">
               <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Podnaslov</label>
               <input
@@ -577,6 +603,29 @@ export default function EditArticlePage({ params }: Props) {
                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <span>Napomena: menjanje naslova ne menja URL (slug) vesti — postojeći linkovi ostaju validni.</span>
                   </div>
+
+                  {isAdmin && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                        URL (slug) — samo Admin
+                      </label>
+                      <div className="flex items-center gap-1 text-sm">
+                        <span className="text-gray-400 flex-shrink-0">/vest/</span>
+                        <input
+                          type="text"
+                          value={form.slug}
+                          onChange={(e) => set('slug', e.target.value)}
+                          className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 focus:outline-none focus:border-brand-red font-mono"
+                        />
+                      </div>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-start gap-1">
+                        <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                        Promeni samo ako je stvarno potrebno (npr. greška u slug-u). Stari link se automatski
+                        preusmerava na novi (301) — postojeći linkovi i deljenja neće se pokvariti, ali retko
+                        koristi ovo bez pravog razloga.
+                      </p>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">

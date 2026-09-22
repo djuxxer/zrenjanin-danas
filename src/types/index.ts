@@ -35,6 +35,7 @@ export interface Article {
   naslovna_velika: boolean
   naslovna_mala: boolean
   traka_gore: boolean
+  noindex: boolean
   views: number
   seo_title?: string
   seo_description?: string

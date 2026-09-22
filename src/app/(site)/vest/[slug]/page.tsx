@@ -1,9 +1,9 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, Eye, Share2, Facebook, Twitter, Linkedin, ChevronRight, Pencil } from 'lucide-react'
-import { getArticleBySlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
+import { getArticleBySlug, findNewSlugForOldSlug, getRelatedArticles, recordArticleView } from '@/lib/articles'
 import { getApprovedComments } from '@/lib/comments'
 import { embedRichContent } from '@/lib/embed-content'
 import { sanitizeArticleContent } from '@/lib/sanitize-content'
@@ -54,13 +54,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [ogImage],
     },
     alternates: { canonical: `${SITE_URL}/vest/${slug}` },
+    // Vesti prenete od drugih izvora (dogovor sa finansijerima) se namerno ne
+    // indeksiraju — ostaju potpuno vidljive na sajtu, samo ih Google ne prikazuje
+    // u pretrazi, čime se izbegava "duplicate content" problem.
+    ...(article.noindex ? { robots: { index: false, follow: true } } : {}),
   }
 }
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
   const article = await getArticleBySlug(slug)
-  if (!article) notFound()
+
+  if (!article) {
+    // Pre nego što pokažemo "nije pronađeno", provera da li je ovo STARI slug
+    // vesti koja je u međuvremenu promenjena — ako jeste, preusmeri na novi.
+    const newSlug = await findNewSlugForOldSlug(slug)
+    if (newSlug) permanentRedirect(`/vest/${newSlug}`)
+    notFound()
+  }
 
   // Beleži pregled pre prikaza (brz upis, ne oslanjamo se na "fire and forget")
   await recordArticleView(article.id)

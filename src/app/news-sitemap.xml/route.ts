@@ -21,7 +21,7 @@ function escapeXml(text: string): string {
  * automatski čita da odluči da li i koliko da prikazuje sadržaj u News.
  */
 export async function GET() {
-  const articles = await getRecentArticlesForNewsSitemap()
+  const articles = (await getRecentArticlesForNewsSitemap()).filter((a) => !a.noindex)
 
   const urls = articles
     .map(

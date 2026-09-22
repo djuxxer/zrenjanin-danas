@@ -28,6 +28,7 @@ const EMPTY_FORM = {
   naslovna_velika: false,
   naslovna_mala: false,
   traka_gore: false,
+  noindex: false,
   published: false,
   scheduled_at: '',
   custom_published_at: '',
@@ -144,7 +145,7 @@ export default function NewArticlePage() {
         return
       }
 
-      if (!/href=["']\/vest\//.test(form.content)) {
+      if (!/href=["'](?:https?:\/\/(?:www\.)?zrenjanindanas\.com)?\/vest\//i.test(form.content)) {
         setPublishError(
           'Vest mora da sadrži bar jedan interni link (ka drugoj vesti na sajtu) da bi mogla da se objavi. Pogledaj predložene linkove iznad teksta.'
         )
@@ -190,6 +191,7 @@ export default function NewArticlePage() {
       naslovna_velika: form.naslovna_velika,
       naslovna_mala: form.naslovna_mala,
       traka_gore: form.traka_gore,
+      noindex: form.noindex,
       seo_title: form.seo_title || null,
       seo_description: form.seo_description || null,
       focus_keyphrase: form.focus_keyphrase || null,
@@ -294,6 +296,16 @@ export default function NewArticlePage() {
               rows={2}
               className="w-full font-headline font-bold text-xl border-0 focus:outline-none resize-none bg-transparent placeholder-gray-300 dark:placeholder-gray-600 leading-snug"
             />
+            <label className="flex items-center gap-2 cursor-pointer mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <input
+                type="checkbox"
+                checked={form.noindex}
+                onChange={(e) => set('noindex', e.target.checked)}
+                className="w-4 h-4 accent-brand-red"
+              />
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-200">PRENEŠENA VEST</span>
+              <span className="text-xs text-gray-400">— preneto od drugog izvora, ne prijavljuj Google-u kao naš originalan sadržaj</span>
+            </label>
             <div className="border-t border-gray-100 dark:border-gray-800 pt-3 mt-3">
               <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Podnaslov</label>
               <input

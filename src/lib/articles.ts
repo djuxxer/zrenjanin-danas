@@ -22,6 +22,7 @@ type ArticleRow = {
   naslovna_velika: boolean
   naslovna_mala: boolean
   traka_gore: boolean
+  noindex: boolean
   views: number
   seo_title: string | null
   seo_description: string | null
@@ -67,6 +68,7 @@ function mapArticle(row: ArticleRow): Article {
     naslovna_velika: row.naslovna_velika,
     naslovna_mala: row.naslovna_mala,
     traka_gore: row.traka_gore,
+    noindex: row.noindex,
     views: row.views,
     seo_title: row.seo_title ?? undefined,
     seo_description: row.seo_description ?? undefined,
@@ -80,7 +82,7 @@ function mapArticle(row: ArticleRow): Article {
 
 const ARTICLE_SELECT = `
   id, slug, title, subtitle, content, excerpt, category, image_url, image_alt, image_source,
-  author_id, published, published_at, scheduled_at, naslovna_velika, naslovna_mala, traka_gore,
+  author_id, published, published_at, scheduled_at, naslovna_velika, naslovna_mala, traka_gore, noindex,
   views, seo_title, seo_description, og_image, tags, related_ids, created_at, updated_at,
   author:profiles!articles_author_id_fkey ( id, full_name, avatar_url, role )
 `
@@ -280,6 +282,26 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
 
   if (error || !data) return undefined
   return mapArticle(data as unknown as ArticleRow)
+}
+
+/**
+ * Ako je slug promenjen (vidi handleSave u admin formi za izmenu vesti), stari
+ * slug se cuva u previous_slugs. Ova funkcija provera da li se traženi slug
+ * poklapa sa NEKIM starim slugom neke vesti — koristi se da bezbedno
+ * preusmerimo posetioca (301) na novi, važeći link, umesto na "nije pronađeno".
+ */
+export async function findNewSlugForOldSlug(oldSlug: string): Promise<string | undefined> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('articles')
+    .select('slug')
+    .contains('previous_slugs', [oldSlug])
+    .eq('published', true)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (error || !data) return undefined
+  return data.slug
 }
 
 /**
