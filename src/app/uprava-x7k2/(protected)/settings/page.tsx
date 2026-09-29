@@ -51,6 +51,7 @@ export default function AdminSettingsPage() {
   const [tagline, setTagline] = useState('')
   const [analyticsId, setAnalyticsId] = useState('')
   const [fbPixel, setFbPixel] = useState('')
+  const [googleAdsId, setGoogleAdsId] = useState('')
   const [facebookUrl, setFacebookUrl] = useState('')
   const [instagramUrl, setInstagramUrl] = useState('')
   const [twitterUrl, setTwitterUrl] = useState('')
@@ -79,6 +80,7 @@ export default function AdminSettingsPage() {
         setTagline(settings.tagline ?? '')
         setAnalyticsId(settings.analytics_id ?? '')
         setFbPixel(settings.fb_pixel ?? '')
+        setGoogleAdsId(settings.google_ads_id ?? '')
         setFacebookUrl(settings.facebook_url ?? '')
         setInstagramUrl(settings.instagram_url ?? '')
         setTwitterUrl(settings.twitter_url ?? '')
@@ -106,6 +108,7 @@ export default function AdminSettingsPage() {
         tagline,
         analytics_id: analyticsId,
         fb_pixel: fbPixel,
+        google_ads_id: googleAdsId,
         facebook_url: facebookUrl,
         instagram_url: instagramUrl,
         twitter_url: twitterUrl,
@@ -214,6 +217,12 @@ export default function AdminSettingsPage() {
         <Field label="Facebook Pixel ID">
           <input type="text" value={fbPixel} onChange={e => setFbPixel(e.target.value)} placeholder="123456789012345" className={inputClass} />
         </Field>
+        <Field label="Google Ads ID (AW-XXXXXXXXX)">
+          <input type="text" value={googleAdsId} onChange={e => setGoogleAdsId(e.target.value)} placeholder="AW-XXXXXXXXX" className={inputClass} />
+        </Field>
+        <p className="text-xs text-gray-400 -mt-2">
+          Google Ads ID pokreće conversion tracking (conversion_event_page_view_1) na svakoj poseti sajtu.
+        </p>
       </Section>
 
       <Section title="Društvene mreže" icon={Globe}>
