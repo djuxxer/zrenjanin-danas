@@ -23,6 +23,7 @@ export function CookieConsentAndAnalytics({ analyticsId, fbPixel, googleAdsId }:
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               gtag('config', '${analyticsId}');
+              ${!googleAdsId ? `gtag('event', 'conversion_event_page_view_1', {});` : ''}
             `}
           </Script>
         </>
