@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Pin, RefreshCw, AlertTriangle } from 'lucide-react'
+import Link from 'next/link'
+import { Pin, RefreshCw, AlertTriangle, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { fetchLiveBundle, type LiveBundle } from '@/lib/live-shared'
+import { fetchLiveBundle, resolveLiveLink, type LiveBundle } from '@/lib/live-shared'
 import { TurnoutChart, ResultsChart } from '@/components/live/charts'
 import { cn } from '@/lib/utils'
 
@@ -75,6 +76,7 @@ export function LiveView({ initial }: { initial: LiveBundle }) {
 
   const { blog, entries, turnout, results } = bundle
   const lastTurnout = turnout[turnout.length - 1]
+  const hasCharts = turnout.length > 0 || results.length > 0
 
   return (
     <div className="space-y-6">
@@ -116,106 +118,153 @@ export function LiveView({ initial }: { initial: LiveBundle }) {
         )}
       </header>
 
-      {/* Grafikoni */}
+      {/* Prečice do grafikona (samo telefon/tablet — na širokom ekranu su grafikoni sa strane) */}
       {(turnout.length > 0 || results.length > 0) && (
-        <div className={cn('grid gap-6', turnout.length > 0 && results.length > 0 ? 'lg:grid-cols-2' : '')}>
+        <nav className="lg:hidden flex gap-2 text-sm font-semibold" aria-label="Prečice">
           {turnout.length > 0 && (
-            <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 sm:p-6">
-              <div className="flex items-baseline justify-between gap-3 mb-3">
-                <h2 className="font-headline font-black text-xl text-gray-900 dark:text-white">
-                  {blog.turnout_title}
-                </h2>
-                {lastTurnout && (
-                  <span className="text-right">
-                    <span className="block text-3xl font-black text-brand-red dark:text-brand-red-accent leading-none">
-                      {String(lastTurnout.percent).replace('.', ',')}%
-                    </span>
-                    <span className="text-xs text-gray-500">u {lastTurnout.label}</span>
-                  </span>
-                )}
-              </div>
-              <TurnoutChart points={turnout} />
-            </section>
+            <a
+              href="#izlaznost"
+              className="flex-1 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-2.5 text-brand-red dark:text-brand-red-accent"
+            >
+              Izlaznost{lastTurnout ? ` ${String(lastTurnout.percent).replace('.', ',')}%` : ''} ↓
+            </a>
           )}
-
           {results.length > 0 && (
-            <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 sm:p-6">
-              <h2 className="font-headline font-black text-xl text-gray-900 dark:text-white">
-                {blog.results_title}
-              </h2>
-              {blog.results_note && (
-                <p className="text-xs text-gray-500 mb-4 mt-0.5">{blog.results_note}</p>
-              )}
-              {!blog.results_note && <div className="mb-4" />}
-              <ResultsChart results={results} />
-            </section>
+            <a
+              href="#rezultati"
+              className="flex-1 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-2.5 text-brand-red dark:text-brand-red-accent"
+            >
+              Rezultati ↓
+            </a>
           )}
-        </div>
+        </nav>
       )}
 
-      {/* Feed */}
-      <section>
-        <h2 className="font-headline font-black text-xl text-gray-900 dark:text-white mb-4">
-          Najnovije informacije
-        </h2>
-        {entries.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 text-center text-gray-500 text-sm">
-            Prve informacije stižu uskoro.
-          </div>
-        ) : (
-          <ol className="space-y-4">
-            {entries.map((e) => (
-              <li
-                key={e.id}
-                id={`objava-${e.id}`}
-                className={cn(
-                  'bg-white dark:bg-gray-900 rounded-2xl border p-5 flex gap-4',
-                  e.kind === 'important'
-                    ? 'border-l-4 border-l-red-600 border-gray-200 dark:border-gray-800'
-                    : 'border-gray-200 dark:border-gray-800',
-                  freshIds.has(e.id) && 'animate-fade-in ring-2 ring-brand-red-accent'
-                )}
-              >
-                <div className="w-14 flex-shrink-0 text-center">
-                  <div className="font-black text-lg text-brand-red dark:text-brand-red-accent tabular-nums leading-none">
-                    {fmtTime(e.created_at)}
-                  </div>
-                  <div className="text-[11px] text-gray-500 mt-1">{fmtDay(e.created_at)}</div>
-                </div>
-                <div className="min-w-0 flex-1">
-                  {(e.pinned || e.kind === 'important') && (
-                    <div className="flex items-center gap-2 mb-1 text-[11px] font-black uppercase tracking-wider">
-                      {e.kind === 'important' && <span className="text-red-600">Važno</span>}
-                      {e.pinned && (
-                        <span className="text-gray-500 flex items-center gap-1">
-                          <Pin className="w-3 h-3" /> Prikačeno
-                        </span>
-                      )}
+      <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
+        {/* Feed — najnovije objave su prve */}
+        <section className={cn(hasCharts ? 'lg:col-span-3' : 'lg:col-span-5')}>
+          <h2 className="font-headline font-black text-xl text-gray-900 dark:text-white mb-4">
+            Najnovije informacije
+          </h2>
+          {entries.length === 0 ? (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 text-center text-gray-500 text-sm">
+              Prve informacije stižu uskoro.
+            </div>
+          ) : (
+            <ol className="space-y-4">
+              {entries.map((e) => (
+                <li
+                  key={e.id}
+                  id={`objava-${e.id}`}
+                  className={cn(
+                    'bg-white dark:bg-gray-900 rounded-2xl border p-5 flex gap-4',
+                    e.kind === 'important'
+                      ? 'border-l-4 border-l-red-600 border-gray-200 dark:border-gray-800'
+                      : 'border-gray-200 dark:border-gray-800',
+                    freshIds.has(e.id) && 'animate-fade-in ring-2 ring-brand-red-accent'
+                  )}
+                >
+                  <div className="w-14 flex-shrink-0 text-center">
+                    <div className="font-black text-lg text-brand-red dark:text-brand-red-accent tabular-nums leading-none">
+                      {fmtTime(e.created_at)}
                     </div>
-                  )}
-                  {e.title && (
-                    <h3 className="font-headline font-bold text-lg text-gray-900 dark:text-white leading-snug mb-1">
-                      {e.title}
-                    </h3>
-                  )}
-                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
-                    {e.body}
-                  </p>
-                  {e.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={e.image_url}
-                      alt={e.title || 'Fotografija uz objavu'}
-                      loading="lazy"
-                      className="mt-3 rounded-xl w-full max-h-[480px] object-cover"
-                    />
+                    <div className="text-[11px] text-gray-500 mt-1">{fmtDay(e.created_at)}</div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    {(e.pinned || e.kind === 'important') && (
+                      <div className="flex items-center gap-2 mb-1 text-[11px] font-black uppercase tracking-wider">
+                        {e.kind === 'important' && <span className="text-red-600">Važno</span>}
+                        {e.pinned && (
+                          <span className="text-gray-500 flex items-center gap-1">
+                            <Pin className="w-3 h-3" /> Prikačeno
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {e.title && (
+                      <h3 className="font-headline font-bold text-lg text-gray-900 dark:text-white leading-snug mb-1">
+                        {e.title}
+                      </h3>
+                    )}
+                    <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
+                      {e.body}
+                    </p>
+                    {e.image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={e.image_url}
+                        alt={e.title || 'Fotografija uz objavu'}
+                        loading="lazy"
+                        className="mt-3 rounded-xl w-full max-h-[480px] object-cover"
+                      />
+                    )}
+                    {(() => {
+                      const link = resolveLiveLink(e.link_url)
+                      if (!link) return null
+                      const label = e.link_label?.trim() || 'Pročitaj više'
+                      const cls =
+                        'inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-brand-red dark:text-brand-red-accent hover:underline'
+                      return link.external ? (
+                        <a href={link.href} target="_blank" rel="noopener noreferrer" className={cls}>
+                          {label} <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : (
+                        <Link href={link.href} className={cls}>
+                          {label} →
+                        </Link>
+                      )
+                    })()}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        {/* Grafikoni — desno na širokom ekranu, ispod feeda na telefonu */}
+        {hasCharts && (
+          <aside className="lg:col-span-2 space-y-6">
+            {turnout.length > 0 && (
+              <section
+                id="izlaznost"
+                className="scroll-mt-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5"
+              >
+                <div className="flex items-baseline justify-between gap-3 mb-3">
+                  <h2 className="font-headline font-black text-xl text-gray-900 dark:text-white">
+                    {blog.turnout_title}
+                  </h2>
+                  {lastTurnout && (
+                    <span className="text-right">
+                      <span className="block text-3xl font-black text-brand-red dark:text-brand-red-accent leading-none">
+                        {String(lastTurnout.percent).replace('.', ',')}%
+                      </span>
+                      <span className="text-xs text-gray-500">u {lastTurnout.label}</span>
+                    </span>
                   )}
                 </div>
-              </li>
-            ))}
-          </ol>
+                <TurnoutChart points={turnout} compact />
+              </section>
+            )}
+
+            {results.length > 0 && (
+              <section
+                id="rezultati"
+                className="scroll-mt-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5"
+              >
+                <h2 className="font-headline font-black text-xl text-gray-900 dark:text-white">
+                  {blog.results_title}
+                </h2>
+                {blog.results_note ? (
+                  <p className="text-xs text-gray-500 mb-4 mt-0.5">{blog.results_note}</p>
+                ) : (
+                  <div className="mb-4" />
+                )}
+                <ResultsChart results={results} />
+              </section>
+            )}
+          </aside>
         )}
-      </section>
+      </div>
     </div>
   )
 }

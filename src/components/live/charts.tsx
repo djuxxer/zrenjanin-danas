@@ -11,9 +11,12 @@ function fmt(n: number): string {
 export function TurnoutChart({
   points,
   compareLabel = 'Prethodni izbori',
+  compact = false,
 }: {
   points: LiveTurnoutPoint[]
   compareLabel?: string
+  /** Uža varijanta (za bočnu kolonu) — krupniji tekst pri manjoj širini */
+  compact?: boolean
 }) {
   if (points.length === 0) {
     return (
@@ -23,8 +26,8 @@ export function TurnoutChart({
     )
   }
 
-  const W = 640
-  const H = 300
+  const W = compact ? 420 : 640
+  const H = compact ? 270 : 300
   const padL = 44
   const padR = 24
   const padT = 28

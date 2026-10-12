@@ -25,6 +25,8 @@ export interface LiveEntry {
   title: string | null
   body: string
   image_url: string | null
+  link_url: string | null
+  link_label: string | null
   pinned: boolean
   created_at: string
   updated_at: string
@@ -120,4 +122,26 @@ export function labelToMinutes(label: string): number | null {
   const min = m[2] ? Number(m[2]) : 0
   if (h > 23 || min > 59) return null
   return h * 60 + min
+}
+
+/**
+ * Proverava link "Pročitaj više". Dozvoljene su samo relativne putanje sajta (/vest/...)
+ * i http(s) adrese — sve ostalo (javascript:, data: itd.) se odbacuje.
+ * Linkovi ka zrenjanindanas.com se tretiraju kao interni.
+ */
+export function resolveLiveLink(
+  raw: string | null | undefined
+): { href: string; external: boolean } | null {
+  const url = (raw ?? '').trim()
+  if (!url || url.includes('\\')) return null
+  if (url.startsWith('/') && !url.startsWith('//')) return { href: url, external: false }
+  try {
+    const u = new URL(url)
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+    const host = u.hostname.replace(/^www\./, '')
+    if (host === 'zrenjanindanas.com') return { href: u.pathname + u.search + u.hash, external: false }
+    return { href: u.toString(), external: true }
+  } catch {
+    return null
+  }
 }

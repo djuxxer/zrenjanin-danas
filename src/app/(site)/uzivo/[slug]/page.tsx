@@ -79,7 +79,7 @@ export default async function LiveBlogPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <div className="container mx-auto px-4 py-6 max-w-5xl">
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
         <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-4" aria-label="Putanja">
           <Link href="/" className="hover:text-brand-red">Početna</Link>
           <ChevronRight className="w-3 h-3" />

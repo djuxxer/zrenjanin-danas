@@ -20,6 +20,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   fetchLiveBundle,
   labelToMinutes,
+  resolveLiveLink,
   type LiveBundle,
   type LiveEntry,
   type LiveResult,
@@ -115,15 +116,48 @@ export default function AdminLiveEditorPage() {
   const [eTitle, setETitle] = useState('')
   const [eBody, setEBody] = useState('')
   const [eImage, setEImage] = useState('')
+  const [eLink, setELink] = useState('')
+  const [eLinkLabel, setELinkLabel] = useState('')
   const [eImportant, setEImportant] = useState(false)
   const [ePinned, setEPinned] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBody, setEditBody] = useState('')
   const [editTitle, setEditTitle] = useState('')
+  const [editLink, setEditLink] = useState('')
+  const [editLinkLabel, setEditLinkLabel] = useState('')
+
+  // Pretraga vesti sa Zrenjanin Danas za link "Pročitaj više"
+  const [articleQuery, setArticleQuery] = useState('')
+  const [articleHits, setArticleHits] = useState<{ title: string; slug: string }[]>([])
+
+  useEffect(() => {
+    const q = articleQuery.trim()
+    if (q.length < 3) {
+      setArticleHits([])
+      return
+    }
+    const timer = setTimeout(async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('articles')
+        .select('title, slug')
+        .eq('published', true)
+        .is('deleted_at', null)
+        .ilike('title', `%${q.replace(/[%,]/g, ' ')}%`)
+        .order('published_at', { ascending: false })
+        .limit(6)
+      setArticleHits((data ?? []) as { title: string; slug: string }[])
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [articleQuery])
 
   async function addEntry() {
     if (!eBody.trim()) {
       setError('Unesi tekst objave.')
+      return
+    }
+    if (eLink.trim() && !resolveLiveLink(eLink)) {
+      setError('Link nije ispravan. Koristi adresu koja počinje sa https:// (ili izaberi vest iz pretrage).')
       return
     }
     setBusy(true)
@@ -138,6 +172,8 @@ export default function AdminLiveEditorPage() {
       title: eTitle.trim() || null,
       body: eBody.trim(),
       image_url: eImage.trim() || null,
+      link_url: eLink.trim() || null,
+      link_label: eLink.trim() ? eLinkLabel.trim() || null : null,
       pinned: ePinned,
       author_id: user?.id ?? null,
     })
@@ -147,6 +183,9 @@ export default function AdminLiveEditorPage() {
       setETitle('')
       setEBody('')
       setEImage('')
+      setELink('')
+      setELinkLabel('')
+      setArticleQuery('')
       setEImportant(false)
       setEPinned(false)
       await touch()
@@ -513,6 +552,59 @@ export default function AdminLiveEditorPage() {
                 )}
               </div>
             </div>
+            <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-3 space-y-3">
+              <p className={labelClass + ' !mb-0'}>Dugme „Pročitaj više“ (opciono)</p>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Nađi vest na Zrenjanin Danas</label>
+                <input
+                  className={inputClass}
+                  value={articleQuery}
+                  onChange={(e) => setArticleQuery(e.target.value)}
+                  placeholder="Počni da kucaš naslov vesti…"
+                />
+                {articleHits.length > 0 && (
+                  <ul className="mt-1 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
+                    {articleHits.map((a) => (
+                      <li key={a.slug}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setELink(`/vest/${a.slug}`)
+                            setArticleQuery('')
+                            setArticleHits([])
+                          }}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          {a.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  ili zalepi adresu (naša vest ili drugi sajt)
+                </label>
+                <input
+                  className={inputClass}
+                  value={eLink}
+                  onChange={(e) => setELink(e.target.value)}
+                  placeholder="https://drugisajt.rs/vest ili /vest/naslov"
+                />
+              </div>
+              {eLink.trim() && (
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Tekst dugmeta (podrazumevano: Pročitaj više)</label>
+                  <input
+                    className={inputClass}
+                    value={eLinkLabel}
+                    onChange={(e) => setELinkLabel(e.target.value)}
+                    placeholder="Pročitaj više"
+                  />
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
@@ -563,11 +655,32 @@ export default function AdminLiveEditorPage() {
                         value={editBody}
                         onChange={(ev) => setEditBody(ev.target.value)}
                       />
+                      <input
+                        className={inputClass}
+                        value={editLink}
+                        onChange={(ev) => setEditLink(ev.target.value)}
+                        placeholder="Link „Pročitaj više“ (https://… ili /vest/…)"
+                      />
+                      {editLink.trim() && (
+                        <input
+                          className={inputClass}
+                          value={editLinkLabel}
+                          onChange={(ev) => setEditLinkLabel(ev.target.value)}
+                          placeholder="Tekst dugmeta (Pročitaj više)"
+                        />
+                      )}
                       <div className="flex gap-2">
                         <button
                           onClick={async () => {
                             if (!editBody.trim()) return setError('Tekst ne sme biti prazan.')
-                            await updateEntry(e, { title: editTitle.trim() || null, body: editBody.trim() })
+                            if (editLink.trim() && !resolveLiveLink(editLink))
+                              return setError('Link nije ispravan. Koristi adresu koja počinje sa https:// ili /vest/…')
+                            await updateEntry(e, {
+                              title: editTitle.trim() || null,
+                              body: editBody.trim(),
+                              link_url: editLink.trim() || null,
+                              link_label: editLink.trim() ? editLinkLabel.trim() || null : null,
+                            })
                             setEditingId(null)
                           }}
                           className="text-xs bg-brand-red text-white px-3 py-1.5 rounded-lg font-semibold"
@@ -597,6 +710,9 @@ export default function AdminLiveEditorPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={e.image_url} alt="" className="mt-2 h-20 rounded object-cover" />
                       )}
+                      {e.link_url && (
+                        <p className="mt-1 text-xs text-brand-red break-all">🔗 {e.link_label || 'Pročitaj više'} → {e.link_url}</p>
+                      )}
                     </>
                   )}
                 </div>
@@ -615,6 +731,8 @@ export default function AdminLiveEditorPage() {
                         setEditingId(e.id)
                         setEditBody(e.body)
                         setEditTitle(e.title ?? '')
+                        setEditLink(e.link_url ?? '')
+                        setEditLinkLabel(e.link_label ?? '')
                       }}
                       className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
