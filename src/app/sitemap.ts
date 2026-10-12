@@ -2,12 +2,20 @@ import { MetadataRoute } from 'next'
 import { getAllArticles } from '@/lib/articles'
 import { CATEGORY_LABELS } from '@/types'
 import { SITE_URL } from '@/lib/utils'
+import { getPublishedLiveBlogs } from '@/lib/live'
 
 export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await getAllArticles()
   const categories = Object.keys(CATEGORY_LABELS)
+  const liveBlogs = await getPublishedLiveBlogs()
+  const liveUrls: MetadataRoute.Sitemap = liveBlogs.map((b) => ({
+    url: `${SITE_URL}/uzivo/${b.slug}`,
+    lastModified: new Date(b.updated_at),
+    changeFrequency: b.status === 'live' ? 'always' : 'monthly',
+    priority: b.status === 'live' ? 0.9 : 0.5,
+  }))
 
   const articleUrls: MetadataRoute.Sitemap = articles
     .filter((article) => !article.noindex)
@@ -37,6 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/privatnost`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/uslovi`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     ...categoryUrls,
+    ...liveUrls,
     ...articleUrls,
   ]
 }

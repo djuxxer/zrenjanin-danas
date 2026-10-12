@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Newspaper,
   UserCircle,
+  Radio,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { label: 'Nova vest', href: '/uprava-x7k2/articles/new', icon: PlusCircle },
   { label: 'Korisnici', href: '/uprava-x7k2/users', icon: Users },
   { label: 'Komentari', href: '/uprava-x7k2/comments', icon: MessageSquare },
+  { label: 'Uživo', href: '/uprava-x7k2/uzivo', icon: Radio },
   { label: 'Pratimo', href: '/uprava-x7k2/pratimo', icon: Newspaper },
   { label: 'Statistika', href: '/uprava-x7k2/stats', icon: BarChart2 },
   { label: 'Podešavanja', href: '/uprava-x7k2/settings', icon: Settings },
