@@ -30,6 +30,9 @@ export function RichTextEditor({ value, onChange, isAdmin = false, excludeId }: 
   const editorRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const initialized = useRef(false)
+  // Poslednja vrednost koju je sam editor poslao roditelju — služi da prepoznamo
+  // promenu spolja (npr. uvoz vesti sa linka, vraćanje nacrta) i osvežimo prikaz.
+  const lastEmitted = useRef<string | null>(null)
 
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false)
   const [linkQuery, setLinkQuery] = useState('')
@@ -43,9 +46,11 @@ export function RichTextEditor({ value, onChange, isAdmin = false, excludeId }: 
   // Postavi sadržaj u vizuelni editor SAMO pri montiranju / promeni režima —
   // ne pri svakom kucanju (contentEditable mora biti "uncontrolled" da kursor ne skače).
   useEffect(() => {
-    if (mode === 'visual' && editorRef.current && !initialized.current) {
+    if (mode !== 'visual' || !editorRef.current) return
+    if (!initialized.current || (lastEmitted.current !== null && value !== lastEmitted.current)) {
       editorRef.current.innerHTML = value
       initialized.current = true
+      lastEmitted.current = value
     }
   }, [mode, value])
 
@@ -55,6 +60,7 @@ export function RichTextEditor({ value, onChange, isAdmin = false, excludeId }: 
     // svaki prazan <p> dobija sopstvenu marginu i pravi utisak "duplog razmaka"
     // koji se ne poklapa sa onim što se vidi kad je vest objavljena.
     const cleaned = editorRef.current.innerHTML.replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '')
+    lastEmitted.current = cleaned
     onChange(cleaned)
   }
 
