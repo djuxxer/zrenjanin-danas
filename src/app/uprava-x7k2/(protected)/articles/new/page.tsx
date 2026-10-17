@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2, ShieldAlert } from 'lucide-react'
+import { Save, Eye, Calendar, Image as ImageIcon, Tag, Search as SearchIcon, ChevronDown, AlertTriangle, CheckCircle2, XCircle, MinusCircle, Loader2, ShieldAlert, Download } from 'lucide-react'
 import { CATEGORY_LABELS, type Category } from '@/types'
 import { cn, createSlug, timeAgo } from '@/lib/utils'
 import { calculateSeoScore, SEO_PUBLISH_THRESHOLD } from '@/lib/seo-score'
@@ -103,6 +103,63 @@ export default function NewArticlePage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminOverride, setAdminOverride] = useState(false)
 
+  // Uvoz vesti sa tuđeg linka
+  const [importUrl, setImportUrl] = useState('')
+  const [importing, setImporting] = useState(false)
+  const [importWarnings, setImportWarnings] = useState<string[]>([])
+  const [importedFrom, setImportedFrom] = useState<string | null>(null)
+
+  async function handleImport() {
+    const url = importUrl.trim()
+    if (!url) {
+      setPublishError('Zalepi link vesti koju želiš da preneseš.')
+      return
+    }
+    if (
+      (form.title.trim() || form.content.trim()) &&
+      !window.confirm('Forma već ima uneseni tekst. Uvoz će ga zameniti. Nastaviti?')
+    ) {
+      return
+    }
+
+    setImporting(true)
+    setPublishError(null)
+    setImportWarnings([])
+    setImportedFrom(null)
+
+    try {
+      const res = await fetch('/api/admin/import-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setPublishError(data.error || 'Uvoz nije uspeo. Pokušaj ponovo ili kopiraj tekst ručno.')
+        return
+      }
+      setForm((prev) => ({
+        ...prev,
+        title: data.title,
+        excerpt: data.excerpt,
+        content: data.content,
+        category: data.category,
+        image_url: data.image_url || '',
+        image_alt: data.image_alt || '',
+        image_source: data.image_source || '',
+        noindex: true, // preneta vest: vidljiva na sajtu, ali se ne prijavljuje Google-u
+      }))
+      setImportWarnings(Array.isArray(data.warnings) ? data.warnings : [])
+      setImportedFrom(data.source_name || 'drugog sajta')
+      setImportUrl('')
+      setActiveTab('content')
+    } catch {
+      setPublishError('Uvoz nije uspeo. Proveri internet vezu i pokušaj ponovo.')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -127,7 +184,10 @@ export default function NewArticlePage() {
     }
 
     if (publish && !overrideActive) {
-      const missing = REQUIRED_FOR_PUBLISH.filter((f) => !String(form[f.key]).trim())
+      // Prenesena vest se ne optimizuje za Google, pa SEO polja nisu obavezna
+      const missing = REQUIRED_FOR_PUBLISH.filter(
+        (f) => !(form.noindex && f.tab === 'seo') && !String(form[f.key]).trim()
+      )
 
       if (missing.length > 0) {
         setPublishError(
@@ -137,7 +197,7 @@ export default function NewArticlePage() {
         return
       }
 
-      if (seo.score < SEO_PUBLISH_THRESHOLD) {
+      if (!form.noindex && seo.score < SEO_PUBLISH_THRESHOLD) {
         setPublishError(
           `SEO ocena je ${seo.score}% — potrebno je najmanje ${SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi. Proveri SEO tab i popravi označene stavke.`
         )
@@ -145,7 +205,7 @@ export default function NewArticlePage() {
         return
       }
 
-      if (!/href=["'](?:https?:\/\/(?:www\.)?zrenjanindanas\.com)?\/vest\//i.test(form.content)) {
+      if (!form.noindex && !/href=["'](?:https?:\/\/(?:www\.)?zrenjanindanas\.com)?\/vest\//i.test(form.content)) {
         setPublishError(
           'Vest mora da sadrži bar jedan interni link (ka drugoj vesti na sajtu) da bi mogla da se objavi. Pogledaj predložene linkove iznad teksta.'
         )
@@ -286,6 +346,56 @@ export default function NewArticlePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Main editor */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Uvoz sa linka */}
+          <div className="bg-blue-50/60 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900 p-5">
+            <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+              Prenosiš vest sa drugog sajta?
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleImport()
+                  }
+                }}
+                placeholder="Zalepi link vesti (https://…)"
+                className="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:border-brand-red"
+              />
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={importing}
+                className="flex items-center justify-center gap-2 bg-brand-red hover:bg-brand-red-dark text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors disabled:opacity-60"
+              >
+                {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {importing ? 'Uvozim…' : 'Uvezi'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Sajt sam izvuče naslov, tekst i sliku, popuni formu i označi vest kao <strong>PRENEŠENA VEST</strong>. Ti samo
+              pregledaš i objaviš.
+            </p>
+            {importedFrom && (
+              <p className="mt-3 text-sm text-green-700 dark:text-green-400 font-semibold">
+                ✓ Uvezeno sa: {importedFrom}. Pregledaj tekst, proveri kategoriju i objavi. Izvor je naveden na dnu teksta.
+              </p>
+            )}
+            {importWarnings.length > 0 && (
+              <ul className="mt-2 space-y-1 text-sm text-amber-700 dark:text-amber-400">
+                {importWarnings.map((w) => (
+                  <li key={w} className="flex gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>{w}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {/* Title */}
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
             <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">Naslov *</label>
@@ -365,6 +475,12 @@ export default function NewArticlePage() {
 
               {activeTab === 'seo' && (
                 <div className="space-y-4">
+                  {form.noindex && (
+                    <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-300">
+                      <strong>PRENEŠENA VEST</strong> — SEO polja i SEO ocena nisu obavezni, a nije potreban ni interni link.
+                      Vest ostaje vidljiva na sajtu, samo se ne prijavljuje Google-u.
+                    </div>
+                  )}
                   {/* SEO score summary */}
                   <div
                     className={cn(

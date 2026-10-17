@@ -175,7 +175,10 @@ export default function EditArticlePage({ params }: Props) {
     }
 
     if (publish && !overrideActive) {
-      const missing = REQUIRED_FOR_PUBLISH.filter((f) => !String(form[f.key]).trim())
+      // Prenesena vest se ne optimizuje za Google, pa SEO polja nisu obavezna
+      const missing = REQUIRED_FOR_PUBLISH.filter(
+        (f) => !(form.noindex && f.tab === 'seo') && !String(form[f.key]).trim()
+      )
 
       if (missing.length > 0) {
         setPublishError(
@@ -185,7 +188,7 @@ export default function EditArticlePage({ params }: Props) {
         return
       }
 
-      if (seo.score < SEO_PUBLISH_THRESHOLD) {
+      if (!form.noindex && seo.score < SEO_PUBLISH_THRESHOLD) {
         setPublishError(
           `SEO ocena je ${seo.score}% — potrebno je najmanje ${SEO_PUBLISH_THRESHOLD}% da bi vest mogla da se objavi. Proveri SEO tab i popravi označene stavke.`
         )
@@ -193,7 +196,7 @@ export default function EditArticlePage({ params }: Props) {
         return
       }
 
-      if (!/href=["'](?:https?:\/\/(?:www\.)?zrenjanindanas\.com)?\/vest\//i.test(form.content)) {
+      if (!form.noindex && !/href=["'](?:https?:\/\/(?:www\.)?zrenjanindanas\.com)?\/vest\//i.test(form.content)) {
         setPublishError(
           'Vest mora da sadrži bar jedan interni link (ka drugoj vesti na sajtu) da bi mogla da se objavi. Pogledaj predložene linkove iznad teksta.'
         )
@@ -443,6 +446,12 @@ export default function EditArticlePage({ params }: Props) {
 
               {activeTab === 'seo' && (
                 <div className="space-y-4">
+                  {form.noindex && (
+                    <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-300">
+                      <strong>PRENEŠENA VEST</strong> — SEO polja i SEO ocena nisu obavezni, a nije potreban ni interni link.
+                      Vest ostaje vidljiva na sajtu, samo se ne prijavljuje Google-u.
+                    </div>
+                  )}
                   {/* SEO score summary */}
                   <div
                     className={cn(
